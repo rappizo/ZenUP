@@ -122,12 +122,6 @@ async function seedSettingsIfEmpty() {
 }
 
 async function seedReviewsIfEmpty() {
-  const reviewCount = await prisma.productReview.count();
-
-  if (reviewCount > 0) {
-    return;
-  }
-
   const products = await prisma.product.findMany({
     select: {
       id: true,
@@ -137,37 +131,33 @@ async function seedReviewsIfEmpty() {
   });
 
   const productIdBySlug = new Map(products.map((product) => [product.slug, product.id]));
-
-  for (const review of sampleReviews) {
-    const productSlug = review.productSlug;
-
-    if (!productSlug) {
-      continue;
+  const sampleReviewIds = sampleReviews.map((review) => review.id);
+  const existingSampleReviews = await prisma.productReview.findMany({
+    where: {
+      id: {
+        in: sampleReviewIds
+      }
+    },
+    select: {
+      id: true
     }
+  });
+  const existingReviewIds = new Set(existingSampleReviews.map((review) => review.id));
+  const missingReviews = sampleReviews
+    .map((review) => {
+      const productSlug = review.productSlug;
 
-    const productId = productIdBySlug.get(productSlug);
+      if (!productSlug || existingReviewIds.has(review.id)) {
+        return null;
+      }
 
-    if (!productId) {
-      continue;
-    }
+      const productId = productIdBySlug.get(productSlug);
 
-    await prisma.productReview.upsert({
-      where: { id: review.id },
-      update: {
-        rating: review.rating,
-        title: review.title,
-        content: review.content,
-        displayName: review.displayName,
-        status: review.status,
-        verifiedPurchase: review.verifiedPurchase,
-        adminNotes: review.adminNotes,
-        source: review.source,
-        productId,
-        customerId: null,
-        orderId: null,
-        publishedAt: review.publishedAt
-      },
-      create: {
+      if (!productId) {
+        return null;
+      }
+
+      return {
         id: review.id,
         rating: review.rating,
         title: review.title,
@@ -181,7 +171,18 @@ async function seedReviewsIfEmpty() {
         customerId: null,
         orderId: null,
         publishedAt: review.publishedAt
-      }
+      };
+    })
+    .filter((review): review is NonNullable<typeof review> => Boolean(review));
+
+  if (missingReviews.length === 0) {
+    return;
+  }
+
+  for (let index = 0; index < missingReviews.length; index += 100) {
+    await prisma.productReview.createMany({
+      data: missingReviews.slice(index, index + 100),
+      skipDuplicates: true
     });
   }
 }

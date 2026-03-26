@@ -31,17 +31,12 @@ function parseGalleryImages(value: string | null | undefined) {
 }
 
 async function withFallback<T>(run: () => Promise<T>, fallback: T): Promise<T> {
-  try {
-    if (!hasValidPostgresDatabaseUrl()) {
-      return fallback;
-    }
-
-    await ensureStoreBootstrap();
-    return await run();
-  } catch (error) {
-    console.error("Query fallback used:", error);
+  if (!hasValidPostgresDatabaseUrl()) {
     return fallback;
   }
+
+  await ensureStoreBootstrap();
+  return await run();
 }
 
 function mapProduct(product: any): ProductRecord {

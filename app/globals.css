@@ -1193,6 +1193,11 @@ main {
   gap: 20px;
 }
 
+.admin-review-groups {
+  display: grid;
+  gap: 24px;
+}
+
 .admin-product-card {
   display: grid;
   overflow: hidden;
@@ -1205,6 +1210,51 @@ main {
 
 .admin-product-card__body {
   padding: 22px;
+}
+
+.admin-review-group {
+  gap: 0;
+}
+
+.admin-review-group__overview {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) 1fr;
+}
+
+.admin-review-group__body {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.admin-review-group__body h2,
+.admin-review-item__header h3 {
+  margin: 0;
+}
+
+.admin-review-group__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-review-group__stat {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(46, 40, 37, 0.08);
+}
+
+.admin-review-group__stat strong {
+  font-size: 1.15rem;
+  color: var(--brand-deep);
+}
+
+.admin-review-group__stat span {
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .admin-product-card__body h3,
@@ -1241,6 +1291,29 @@ main {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(46, 40, 37, 0.08);
+}
+
+.admin-review-list {
+  display: grid;
+  gap: 18px;
+  padding: 0 24px 24px;
+}
+
+.admin-review-item {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-review-item__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.admin-review-item__header p {
+  margin: 8px 0 0;
+  color: var(--muted);
 }
 
 .admin-product-editor__thumb img {
@@ -1381,7 +1454,8 @@ main {
   .cart-layout,
   .custom-slide,
   .social-proof,
-  .admin-product-editor__header {
+  .admin-product-editor__header,
+  .admin-review-group__overview {
     grid-template-columns: 1fr;
   }
 
@@ -1398,7 +1472,8 @@ main {
   .story-sections,
   .admin-product-grid,
   .admin-product-editor__gallery,
-  .review-showcase {
+  .review-showcase,
+  .admin-review-group__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1445,7 +1520,8 @@ main {
   .product-gallery,
   .admin-product-grid,
   .admin-product-editor__gallery,
-  .review-showcase {
+  .review-showcase,
+  .admin-review-group__stats {
     grid-template-columns: 1fr;
   }
 
@@ -1473,6 +1549,15 @@ main {
 
   .cart-line {
     grid-template-columns: 1fr;
+  }
+
+  .admin-review-list {
+    padding: 0 0 22px;
+  }
+
+  .admin-review-item__header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .hero-copy,

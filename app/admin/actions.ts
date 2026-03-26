@@ -40,6 +40,81 @@ function buildProductPriceData(formData: FormData) {
   };
 }
 
+function buildReviewRedirect(status: string, productSlug?: string) {
+  const hash = productSlug ? `#product-${productSlug}` : "";
+  return `/admin/reviews?status=${encodeURIComponent(status)}${hash}`;
+}
+
+function normalizeCsvHeader(value: string) {
+  return value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+}
+
+function parseCsv(text: string) {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const nextChar = text[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        currentCell += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && nextChar === "\n") {
+        index += 1;
+      }
+
+      currentRow.push(currentCell.trim());
+      if (currentRow.some((cell) => cell.length > 0)) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentCell = "";
+      continue;
+    }
+
+    currentCell += char;
+  }
+
+  currentRow.push(currentCell.trim());
+  if (currentRow.some((cell) => cell.length > 0)) {
+    rows.push(currentRow);
+  }
+
+  return rows;
+}
+
+function parseReviewStatus(value: string | undefined): ReviewStatus {
+  const normalized = (value || "").trim().toUpperCase();
+
+  if (normalized === "PENDING" || normalized === "HIDDEN" || normalized === "PUBLISHED") {
+    return normalized;
+  }
+
+  return "PUBLISHED";
+}
+
+function parseCsvBoolean(value: string | undefined) {
+  const normalized = (value || "").trim().toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "y";
+}
+
 export async function loginAction(formData: FormData) {
   const username = toPlainString(formData.get("username"));
   const password = toPlainString(formData.get("password"));
@@ -286,6 +361,14 @@ export async function updateReviewAction(formData: FormData) {
   await requireAdminSession();
 
   const id = toPlainString(formData.get("id"));
+  const productSlug = toPlainString(formData.get("productSlug"));
+  const nextStatus = parseReviewStatus(toPlainString(formData.get("status")));
+  const existingReview = await prisma.productReview.findUnique({
+    where: { id },
+    select: {
+      publishedAt: true
+    }
+  });
 
   await prisma.productReview.update({
     where: { id },
@@ -294,59 +377,97 @@ export async function updateReviewAction(formData: FormData) {
       title: toPlainString(formData.get("title")),
       content: toPlainString(formData.get("content")),
       displayName: toPlainString(formData.get("displayName")),
-      status: (toPlainString(formData.get("status")) || "PUBLISHED") as ReviewStatus,
+      status: nextStatus,
       verifiedPurchase: toBool(formData.get("verifiedPurchase")),
       adminNotes: toPlainString(formData.get("adminNotes")) || null,
       publishedAt:
-        (toPlainString(formData.get("status")) || "PUBLISHED") === "PUBLISHED" ? new Date() : null
+        nextStatus === "PUBLISHED" ? existingReview?.publishedAt ?? new Date() : null
     }
   });
 
   revalidatePath("/admin/reviews");
-  revalidatePath("/shop");
-  redirect("/admin/reviews?status=updated");
+  refreshStorefront(productSlug ? [productSlug] : []);
+  redirect(buildReviewRedirect("updated", productSlug));
 }
 
 export async function deleteReviewAction(formData: FormData) {
   await requireAdminSession();
 
   const id = toPlainString(formData.get("id"));
+  const productSlug = toPlainString(formData.get("productSlug"));
 
   await prisma.productReview.delete({
     where: { id }
   });
 
   revalidatePath("/admin/reviews");
-  revalidatePath("/shop");
-  redirect("/admin/reviews?status=deleted");
+  refreshStorefront(productSlug ? [productSlug] : []);
+  redirect(buildReviewRedirect("deleted", productSlug));
 }
 
 export async function bulkImportReviewsAction(formData: FormData) {
   await requireAdminSession();
 
-  const raw = toPlainString(formData.get("rows"));
+  const productSlug = toPlainString(formData.get("productSlug"));
+  const file = formData.get("csvFile");
+  const raw =
+    file && typeof file === "object" && "text" in file && typeof file.text === "function"
+      ? await file.text()
+      : toPlainString(formData.get("rows"));
 
   if (!raw) {
-    redirect("/admin/reviews?status=empty");
+    redirect(buildReviewRedirect("empty", productSlug));
   }
 
-  const rows = raw
-    .split("\n")
-    .map((row) => row.trim())
-    .filter(Boolean);
+  const rows = parseCsv(raw);
 
-  for (const row of rows) {
-    const [productSlug, displayName, email, rating, title, content, verifiedPurchase, status] =
-      row.split("|").map((item) => item.trim());
+  if (rows.length < 2) {
+    redirect(buildReviewRedirect("invalid-csv", productSlug));
+  }
 
-    const product = await prisma.product.findUnique({
-      where: { slug: productSlug }
-    });
+  const [headerRow, ...dataRows] = rows;
+  const headerMap = new Map(headerRow.map((cell, index) => [normalizeCsvHeader(cell), index]));
+  const productSlugIndex = headerMap.get("productslug");
+  const displayNameIndex = headerMap.get("displayname");
+  const emailIndex = headerMap.get("email");
+  const ratingIndex = headerMap.get("rating");
+  const titleIndex = headerMap.get("title");
+  const contentIndex = headerMap.get("content");
+  const verifiedPurchaseIndex = headerMap.get("verifiedpurchase");
+  const statusIndex = headerMap.get("status");
+
+  if (
+    displayNameIndex === undefined ||
+    ratingIndex === undefined ||
+    titleIndex === undefined ||
+    contentIndex === undefined
+  ) {
+    redirect(buildReviewRedirect("invalid-columns", productSlug));
+  }
+
+  const products = await prisma.product.findMany({
+    where: productSlug
+      ? {
+          slug: productSlug
+        }
+      : undefined,
+    select: {
+      id: true,
+      slug: true
+    }
+  });
+  const productBySlug = new Map(products.map((product) => [product.slug, product]));
+
+  for (const row of dataRows) {
+    const rowProductSlug = productSlug || (productSlugIndex !== undefined ? row[productSlugIndex] : "");
+    const product = rowProductSlug ? productBySlug.get(rowProductSlug) : null;
+    const nextStatus = parseReviewStatus(statusIndex !== undefined ? row[statusIndex] : undefined);
 
     if (!product) {
       continue;
     }
 
+    const email = emailIndex !== undefined ? row[emailIndex] : "";
     const customer = email
       ? await prisma.customer.findUnique({
           where: { email }
@@ -357,21 +478,23 @@ export async function bulkImportReviewsAction(formData: FormData) {
       data: {
         productId: product.id,
         customerId: customer?.id ?? null,
-        rating: Number.parseInt(rating || "5", 10),
-        title,
-        content,
-        displayName,
-        verifiedPurchase: verifiedPurchase === "true",
-        status: (status || "PUBLISHED") as ReviewStatus,
-        publishedAt: (status || "PUBLISHED") === "PUBLISHED" ? new Date() : null,
+        rating: toInt(row[ratingIndex], 5),
+        title: row[titleIndex] || "",
+        content: row[contentIndex] || "",
+        displayName: row[displayNameIndex] || customer?.email || "Verified customer",
+        verifiedPurchase: parseCsvBoolean(
+          verifiedPurchaseIndex !== undefined ? row[verifiedPurchaseIndex] : undefined
+        ),
+        status: nextStatus,
+        publishedAt: nextStatus === "PUBLISHED" ? new Date() : null,
         source: "ADMIN_IMPORT"
       }
     });
   }
 
   revalidatePath("/admin/reviews");
-  revalidatePath("/shop");
-  redirect("/admin/reviews?status=imported");
+  refreshStorefront(productSlug ? [productSlug] : []);
+  redirect(buildReviewRedirect("imported", productSlug));
 }
 
 export async function saveStoreSettingsAction(formData: FormData) {
