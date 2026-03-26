@@ -85,9 +85,15 @@ main {
   font-size: 0.92rem;
 }
 
+.announcement-bar__inner p {
+  margin: 0;
+  line-height: 1.5;
+}
+
 .announcement-bar__inner a {
   color: var(--brand-deep);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .site-header {
@@ -98,11 +104,16 @@ main {
 }
 
 .site-header__inner {
+  display: grid;
+  gap: 16px;
+  padding: 16px 0 18px;
+}
+
+.site-header__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
-  min-height: 82px;
+  gap: 24px;
 }
 
 .brand-logo {
@@ -146,13 +157,28 @@ main {
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-self: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(237, 115, 97, 0.14);
+  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(14px);
 }
 
 .site-nav a,
 .site-header__text-link {
   color: var(--muted);
   font-weight: 600;
+}
+
+.site-nav a {
+  padding: 10px 16px;
+  border-radius: 999px;
+}
+
+.site-nav a:hover {
+  background: rgba(237, 115, 97, 0.1);
 }
 
 .site-nav a:hover,
@@ -167,6 +193,7 @@ main {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .button {
@@ -210,14 +237,14 @@ main {
 }
 
 .section {
-  padding: 82px 0;
+  padding: clamp(58px, 7vw, 80px) 0;
 }
 
 .section-heading {
   display: grid;
-  gap: 12px;
-  max-width: 720px;
-  margin-bottom: 30px;
+  gap: 10px;
+  max-width: 700px;
+  margin-bottom: 26px;
 }
 
 .section-heading--center {
@@ -247,8 +274,8 @@ main {
 .admin-login__panel h1 {
   margin: 0;
   font-family: Baskerville, "Palatino Linotype", serif;
-  font-size: clamp(2.6rem, 5vw, 4.8rem);
-  line-height: 0.95;
+  font-size: clamp(2rem, 4vw, 3.65rem);
+  line-height: 1;
   letter-spacing: -0.03em;
 }
 
@@ -261,8 +288,8 @@ main {
 .empty-state p {
   margin: 0;
   color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.75;
+  font-size: 1rem;
+  line-height: 1.72;
 }
 
 .hero {
@@ -295,7 +322,7 @@ main {
   flex: 0 0 100%;
   display: grid;
   grid-template-columns: 1.05fr 0.75fr 0.75fr;
-  min-height: 620px;
+  min-height: 580px;
 }
 
 .slide-part {
@@ -305,7 +332,7 @@ main {
 .text-part {
   display: flex;
   align-items: center;
-  padding: 42px;
+  padding: 40px;
 }
 
 .text-content {
@@ -317,20 +344,20 @@ main {
 .text-content h3 {
   margin: 0;
   font-family: Baskerville, "Palatino Linotype", serif;
-  font-size: clamp(2.6rem, 5vw, 4.4rem);
-  line-height: 0.95;
+  font-size: clamp(2.1rem, 4vw, 3.55rem);
+  line-height: 1;
   letter-spacing: -0.03em;
 }
 
 .text-content p {
   margin: 0;
   color: var(--muted);
-  font-size: 1.06rem;
-  line-height: 1.85;
+  font-size: 1rem;
+  line-height: 1.75;
 }
 
 .image-part {
-  min-height: 620px;
+  min-height: 580px;
 }
 
 .image-part img {
@@ -507,8 +534,8 @@ main {
 .home-cta {
   display: grid;
   gap: 24px;
-  padding: 30px;
-  border-radius: 34px;
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: 32px;
   border: 1px solid rgba(255, 255, 255, 0.6);
   background: var(--surface);
   backdrop-filter: blur(14px);
@@ -526,12 +553,27 @@ main {
 .ingredient-story__copy,
 .home-cta__copy {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .brand-manifesto__copy .section-heading,
 .ritual-spotlight__content .section-heading {
   margin-bottom: 0;
+}
+
+.brand-manifesto__title {
+  margin: 0;
+  font-family: Baskerville, "Palatino Linotype", serif;
+  font-size: clamp(2.3rem, 4.2vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.brand-manifesto__lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.03rem;
+  line-height: 1.78;
 }
 
 .brand-manifesto__pills {
@@ -548,23 +590,31 @@ main {
 .home-cta__copy p:not(.eyebrow) {
   margin: 0;
   color: var(--muted);
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
 .philosophy-band__intro h2,
-.home-cta__copy h1 {
+.home-cta__copy h1,
+.home-cta__copy h2 {
   margin: 0;
   font-family: Baskerville, "Palatino Linotype", serif;
-  font-size: clamp(2.3rem, 4.2vw, 4rem);
-  line-height: 0.97;
+  font-size: clamp(2rem, 3.8vw, 3.4rem);
+  line-height: 1;
   letter-spacing: -0.03em;
+}
+
+.philosophy-band__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  gap: 22px;
+  align-items: start;
 }
 
 .philosophy-band__grid,
 .editorial-prompt-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 18px;
 }
 
 .philosophy-card {
@@ -586,7 +636,7 @@ main {
 .home-cta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: 22px;
   align-items: start;
 }
 
@@ -620,7 +670,51 @@ main {
 
 .ingredient-story {
   display: grid;
-  gap: 18px;
+  gap: 16px;
+}
+
+.home-image {
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 246, 0.96), rgba(251, 232, 224, 0.96)),
+    rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow);
+}
+
+.home-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-image--square {
+  aspect-ratio: 1 / 1;
+}
+
+.home-image--landscape {
+  aspect-ratio: 16 / 10;
+}
+
+.home-image--hero {
+  align-self: start;
+}
+
+.home-mosaic {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(220px, 0.92fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.home-mosaic__feature {
+  min-height: 100%;
+}
+
+.home-mosaic__stack {
+  display: grid;
+  gap: 14px;
 }
 
 .image-prompt {
@@ -740,7 +834,7 @@ main {
 .post-card__content {
   display: grid;
   gap: 14px;
-  padding: 22px;
+  padding: 20px 22px 22px;
 }
 
 .product-card__meta,
@@ -1050,7 +1144,7 @@ main {
 
 .site-footer {
   margin-top: 88px;
-  padding: 40px 0 22px;
+  padding: 38px 0 22px;
   border-top: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.56);
 }
@@ -1079,6 +1173,10 @@ main {
   gap: 16px;
 }
 
+.site-footer__brand .brand-logo {
+  margin-bottom: 2px;
+}
+
 .site-footer__contact {
   display: grid;
   gap: 6px;
@@ -1095,6 +1193,10 @@ main {
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+.site-footer__bottom p {
+  margin: 0;
 }
 
 .empty-state {
@@ -1645,7 +1747,6 @@ main {
 @media (max-width: 1080px) {
   .hero__grid,
   .product-detail,
-  .site-footer__grid,
   .admin-shell,
   .cart-layout,
   .custom-slide,
@@ -1654,10 +1755,19 @@ main {
   .admin-review-group__overview,
   .admin-review-detail__hero,
   .brand-manifesto,
+  .philosophy-band__layout,
   .ritual-spotlight,
   .ingredient-story-grid,
   .home-cta {
     grid-template-columns: 1fr;
+  }
+
+  .site-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-footer__brand {
+    grid-column: span 2;
   }
 
   .admin-sidebar {
@@ -1690,26 +1800,31 @@ main {
     grid-column: span 1;
   }
 
-  .site-header__inner {
-    flex-wrap: wrap;
+  .site-header__bar {
+    gap: 18px;
+  }
+
+  .site-nav {
+    width: 100%;
     justify-content: center;
-    padding: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .home-mosaic {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 720px) {
   .announcement-bar__inner,
-  .site-header__inner,
   .site-footer__bottom,
   .product-card__bottom {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .site-nav,
-  .site-header__actions {
-    width: 100%;
-    flex-wrap: wrap;
+  .announcement-bar__inner a {
+    white-space: normal;
   }
 
   .stats-grid,
@@ -1727,12 +1842,62 @@ main {
   .admin-review-group__stats,
   .philosophy-band__grid,
   .editorial-prompt-grid,
-  .ritual-spotlight__media {
+  .ritual-spotlight__media,
+  .home-mosaic {
     grid-template-columns: 1fr;
   }
 
+  .site-header__inner {
+    gap: 12px;
+    padding: 14px 0 16px;
+  }
+
+  .site-header__bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .brand-logo {
+    justify-content: center;
+  }
+
+  .site-nav,
+  .site-header__actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .site-nav {
+    justify-content: space-between;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .site-nav a {
+    flex: 1 1 calc(50% - 6px);
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .site-header__actions {
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .site-header__text-link {
+    min-height: 42px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(237, 115, 97, 0.14);
+  }
+
+  .site-header__actions .button {
+    flex: 1 1 100%;
+  }
+
   .text-part {
-    padding: 28px 22px 12px;
+    padding: 28px 22px 16px;
   }
 
   .image-part {
@@ -1743,6 +1908,10 @@ main {
     top: auto;
     bottom: 16px;
     transform: none;
+  }
+
+  .custom-slider-container {
+    border-radius: 26px;
   }
 
   .social-proof {
@@ -1797,5 +1966,45 @@ main {
   .home-cta {
     padding: 22px;
     border-radius: 24px;
+  }
+
+  .brand-manifesto__title,
+  .philosophy-band__intro h2,
+  .home-cta__copy h2 {
+    font-size: clamp(1.85rem, 8vw, 2.45rem);
+  }
+
+  .brand-manifesto__lead {
+    font-size: 0.98rem;
+  }
+
+  .home-image,
+  .product-card,
+  .post-card {
+    border-radius: 24px;
+  }
+
+  .site-footer {
+    margin-top: 64px;
+    padding-top: 32px;
+  }
+
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .site-footer__brand {
+    grid-column: auto;
+  }
+
+  .site-footer__bottom {
+    gap: 10px;
+    margin-top: 22px;
+    text-align: left;
+  }
+
+  .site-footer h3 {
+    margin-bottom: 10px;
   }
 }

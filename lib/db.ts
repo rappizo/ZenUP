@@ -4,7 +4,7 @@ const globalForPrisma = globalThis as {
   prisma?: PrismaClient;
 };
 
-const datasourceUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+const datasourceUrl = process.env.DATABASE_URL;
 
 export const prisma =
   globalForPrisma.prisma ??

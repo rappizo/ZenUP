@@ -60,7 +60,7 @@ export function HomeBannerSlider() {
             className="custom-slider-wrapper"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
-            {slides.map((slide) => (
+            {slides.map((slide, index) => (
               <div key={slide.title} className="custom-slide">
                 <div className="slide-part text-part">
                   <div className="text-content">
@@ -73,10 +73,26 @@ export function HomeBannerSlider() {
                   </div>
                 </div>
                 <div className="slide-part image-part middle-img">
-                  <Image src={slide.middleImage} alt={slide.title} width={560} height={760} />
+                  <Image
+                    src={slide.middleImage}
+                    alt={`${slide.title} campaign visual`}
+                    width={560}
+                    height={760}
+                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 26vw"
+                    quality={82}
+                    priority={index === 0}
+                  />
                 </div>
                 <div className="slide-part image-part right-img">
-                  <Image src={slide.rightImage} alt={`${slide.title} detail`} width={560} height={760} />
+                  <Image
+                    src={slide.rightImage}
+                    alt={`${slide.title} skincare detail`}
+                    width={560}
+                    height={760}
+                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 26vw"
+                    quality={82}
+                    priority={index === 0}
+                  />
                 </div>
               </div>
             ))}

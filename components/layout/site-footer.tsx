@@ -40,14 +40,17 @@ export function SiteFooter() {
         </div>
         <div className="site-footer__note">
           <h3>Brand Promise</h3>
-          <p>Thoughtful formulas, elegant textures, and routines that feel bright, smooth, and comforting every day.</p>
+          <p>
+            Thoughtful formulas, elegant textures, and routines that feel bright, smooth, and
+            comforting every day.
+          </p>
           <Link href="/beauty-tips" className="site-footer__admin-link">
             Explore beauty tips
           </Link>
         </div>
       </div>
       <div className="container site-footer__bottom">
-        <p>© 2026 Neatique Beauty. All rights reserved.</p>
+        <p>(c) 2026 Neatique Beauty. All rights reserved.</p>
         <p>Secure checkout. Ships within the United States.</p>
       </div>
     </footer>

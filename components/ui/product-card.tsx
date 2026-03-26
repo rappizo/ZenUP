@@ -21,6 +21,8 @@ export function ProductCard({ product }: ProductCardProps) {
             width={520}
             height={520}
             className="product-card__image"
+            sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 31vw"
+            quality={82}
           />
         </div>
       </Link>

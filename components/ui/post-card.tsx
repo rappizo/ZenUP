@@ -11,7 +11,15 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <article className="post-card">
       <div className="post-card__image-wrap">
-        <Image src={post.coverImageUrl} alt={post.title} width={640} height={420} className="post-card__image" />
+        <Image
+          src={post.coverImageUrl}
+          alt={post.title}
+          width={640}
+          height={420}
+          className="post-card__image"
+          sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 31vw"
+          quality={82}
+        />
       </div>
       <div className="post-card__content">
         <div className="post-card__meta">

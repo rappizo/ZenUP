@@ -18,7 +18,22 @@ export async function SiteHeader() {
         </div>
       </div>
       <div className="container site-header__inner">
-        <Logo />
+        <div className="site-header__bar">
+          <Logo />
+          <div className="site-header__actions">
+            {customer ? (
+              <Link href="/account" className="site-header__text-link">
+                My Account
+              </Link>
+            ) : null}
+            <Link href="/cart" className="site-header__text-link">
+              Cart{cartCount > 0 ? ` (${cartCount})` : ""}
+            </Link>
+            <ButtonLink href="/shop" variant="primary">
+              Shop Now
+            </ButtonLink>
+          </div>
+        </div>
         <nav className="site-nav" aria-label="Primary navigation">
           {siteConfig.nav.map((item) => (
             <Link key={item.href} href={item.href}>
@@ -26,19 +41,6 @@ export async function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <div className="site-header__actions">
-          {customer ? (
-            <Link href="/account" className="site-header__text-link">
-              My Account
-            </Link>
-          ) : null}
-          <Link href="/cart" className="site-header__text-link">
-            Cart{cartCount > 0 ? ` (${cartCount})` : ""}
-          </Link>
-          <ButtonLink href="/shop" variant="primary">
-            Shop Now
-          </ButtonLink>
-        </div>
       </div>
     </header>
   );

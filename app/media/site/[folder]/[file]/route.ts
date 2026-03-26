@@ -33,7 +33,7 @@ export async function GET(_: Request, { params }: SiteMediaRouteProps) {
     return new NextResponse(file, {
       headers: {
         "Content-Type": contentTypes[extension] || "application/octet-stream",
-        "Cache-Control": "public, max-age=3600"
+        "Cache-Control": "public, max-age=31536000, immutable"
       }
     });
   } catch {
