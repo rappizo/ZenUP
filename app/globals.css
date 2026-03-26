@@ -104,16 +104,11 @@ main {
 }
 
 .site-header__inner {
-  display: grid;
-  gap: 16px;
-  padding: 16px 0 18px;
-}
-
-.site-header__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  min-height: 82px;
 }
 
 .brand-logo {
@@ -157,7 +152,7 @@ main {
 .site-nav {
   display: flex;
   align-items: center;
-  justify-self: center;
+  justify-content: center;
   gap: 8px;
   padding: 8px;
   border-radius: 999px;
@@ -237,7 +232,11 @@ main {
 }
 
 .section {
-  padding: clamp(58px, 7vw, 80px) 0;
+  padding: clamp(42px, 5vw, 56px) 0;
+}
+
+.section + .section {
+  padding-top: 0;
 }
 
 .section-heading {
@@ -298,7 +297,7 @@ main {
 }
 
 .home-banner {
-  padding: 36px 0 24px;
+  padding: 28px 0 12px;
 }
 
 .custom-slider-container {
@@ -1836,14 +1835,9 @@ main {
     grid-column: span 1;
   }
 
-  .site-header__bar {
-    gap: 18px;
-  }
-
   .site-nav {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .home-mosaic {
@@ -1885,13 +1879,11 @@ main {
   }
 
   .site-header__inner {
-    gap: 12px;
-    padding: 14px 0 16px;
-  }
-
-  .site-header__bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+    min-height: auto;
+    padding: 14px 0 16px;
   }
 
   .brand-logo {
