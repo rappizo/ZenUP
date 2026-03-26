@@ -40,9 +40,13 @@ function buildProductPriceData(formData: FormData) {
   };
 }
 
-function buildReviewRedirect(status: string, productSlug?: string) {
-  const hash = productSlug ? `#product-${productSlug}` : "";
-  return `/admin/reviews?status=${encodeURIComponent(status)}${hash}`;
+function buildReviewRedirect(status: string, redirectTo?: string, productSlug?: string) {
+  const basePath = redirectTo || (productSlug ? `/admin/reviews/${productSlug}` : "/admin/reviews");
+  const [pathname, queryString = ""] = basePath.split("?");
+  const params = new URLSearchParams(queryString);
+  params.set("status", status);
+  const nextQuery = params.toString();
+  return nextQuery ? `${pathname}?${nextQuery}` : pathname;
 }
 
 function normalizeCsvHeader(value: string) {
@@ -362,6 +366,7 @@ export async function updateReviewAction(formData: FormData) {
 
   const id = toPlainString(formData.get("id"));
   const productSlug = toPlainString(formData.get("productSlug"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
   const nextStatus = parseReviewStatus(toPlainString(formData.get("status")));
   const existingReview = await prisma.productReview.findUnique({
     where: { id },
@@ -386,8 +391,11 @@ export async function updateReviewAction(formData: FormData) {
   });
 
   revalidatePath("/admin/reviews");
+  if (productSlug) {
+    revalidatePath(`/admin/reviews/${productSlug}`);
+  }
   refreshStorefront(productSlug ? [productSlug] : []);
-  redirect(buildReviewRedirect("updated", productSlug));
+  redirect(buildReviewRedirect("updated", redirectTo, productSlug));
 }
 
 export async function deleteReviewAction(formData: FormData) {
@@ -395,20 +403,25 @@ export async function deleteReviewAction(formData: FormData) {
 
   const id = toPlainString(formData.get("id"));
   const productSlug = toPlainString(formData.get("productSlug"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
 
   await prisma.productReview.delete({
     where: { id }
   });
 
   revalidatePath("/admin/reviews");
+  if (productSlug) {
+    revalidatePath(`/admin/reviews/${productSlug}`);
+  }
   refreshStorefront(productSlug ? [productSlug] : []);
-  redirect(buildReviewRedirect("deleted", productSlug));
+  redirect(buildReviewRedirect("deleted", redirectTo, productSlug));
 }
 
 export async function bulkImportReviewsAction(formData: FormData) {
   await requireAdminSession();
 
   const productSlug = toPlainString(formData.get("productSlug"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
   const file = formData.get("csvFile");
   const raw =
     file && typeof file === "object" && "text" in file && typeof file.text === "function"
@@ -416,13 +429,13 @@ export async function bulkImportReviewsAction(formData: FormData) {
       : toPlainString(formData.get("rows"));
 
   if (!raw) {
-    redirect(buildReviewRedirect("empty", productSlug));
+    redirect(buildReviewRedirect("empty", redirectTo, productSlug));
   }
 
   const rows = parseCsv(raw);
 
   if (rows.length < 2) {
-    redirect(buildReviewRedirect("invalid-csv", productSlug));
+    redirect(buildReviewRedirect("invalid-csv", redirectTo, productSlug));
   }
 
   const [headerRow, ...dataRows] = rows;
@@ -442,7 +455,7 @@ export async function bulkImportReviewsAction(formData: FormData) {
     titleIndex === undefined ||
     contentIndex === undefined
   ) {
-    redirect(buildReviewRedirect("invalid-columns", productSlug));
+    redirect(buildReviewRedirect("invalid-columns", redirectTo, productSlug));
   }
 
   const products = await prisma.product.findMany({
@@ -493,8 +506,11 @@ export async function bulkImportReviewsAction(formData: FormData) {
   }
 
   revalidatePath("/admin/reviews");
+  if (productSlug) {
+    revalidatePath(`/admin/reviews/${productSlug}`);
+  }
   refreshStorefront(productSlug ? [productSlug] : []);
-  redirect(buildReviewRedirect("imported", productSlug));
+  redirect(buildReviewRedirect("imported", redirectTo, productSlug));
 }
 
 export async function saveStoreSettingsAction(formData: FormData) {

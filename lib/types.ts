@@ -133,6 +133,33 @@ export type ProductReviewRecord = {
   updatedAt: Date;
 };
 
+export type AdminReviewProductSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  category: string;
+  status: ProductStatus;
+  shortDescription: string;
+  averageRating: number | null;
+  totalReviewCount: number;
+  publishedReviewCount: number;
+  pendingReviewCount: number;
+  hiddenReviewCount: number;
+};
+
+export type AdminProductReviewPageRecord = {
+  product: ProductRecord;
+  reviews: ProductReviewRecord[];
+  totalReviewCount: number;
+  publishedReviewCount: number;
+  pendingReviewCount: number;
+  hiddenReviewCount: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+};
+
 export type CustomerAccountRecord = {
   customer: CustomerRecord;
   orders: OrderRecord[];

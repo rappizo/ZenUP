@@ -1,4 +1,6 @@
 import type {
+  AdminProductReviewPageRecord,
+  AdminReviewProductSummary,
   BeautyPostRecord,
   CustomerAccountRecord,
   CustomerRecord,
@@ -39,16 +41,7 @@ async function withFallback<T>(run: () => Promise<T>, fallback: T): Promise<T> {
   return await run();
 }
 
-function mapProduct(product: any): ProductRecord {
-  const publishedReviews = Array.isArray(product.reviews)
-    ? product.reviews.filter((review: any) => review.status === "PUBLISHED")
-    : [];
-  const reviewCount = publishedReviews.length;
-  const averageRating =
-    reviewCount > 0
-      ? publishedReviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewCount
-      : null;
-
+function mapProductRecord(product: any, reviewCount: number, averageRating: number | null): ProductRecord {
   return {
     id: product.id,
     name: product.name,
@@ -73,6 +66,62 @@ function mapProduct(product: any): ProductRecord {
     createdAt: new Date(product.createdAt),
     updatedAt: new Date(product.updatedAt)
   };
+}
+
+function buildReviewStatusSummary<T extends { productId: string; status: string }>(
+  reviews: T[]
+) {
+  const summary = new Map<
+    string,
+    {
+      totalReviewCount: number;
+      publishedReviewCount: number;
+      pendingReviewCount: number;
+      hiddenReviewCount: number;
+    }
+  >();
+
+  for (const review of reviews) {
+    const bucket =
+      summary.get(review.productId) ??
+      {
+        totalReviewCount: 0,
+        publishedReviewCount: 0,
+        pendingReviewCount: 0,
+        hiddenReviewCount: 0
+      };
+
+    bucket.totalReviewCount += 1;
+
+    if (review.status === "PUBLISHED") {
+      bucket.publishedReviewCount += 1;
+    }
+
+    if (review.status === "PENDING") {
+      bucket.pendingReviewCount += 1;
+    }
+
+    if (review.status === "HIDDEN") {
+      bucket.hiddenReviewCount += 1;
+    }
+
+    summary.set(review.productId, bucket);
+  }
+
+  return summary;
+}
+
+function mapProduct(product: any): ProductRecord {
+  const publishedReviews = Array.isArray(product.reviews)
+    ? product.reviews.filter((review: any) => review.status === "PUBLISHED")
+    : [];
+  const reviewCount = publishedReviews.length;
+  const averageRating =
+    reviewCount > 0
+      ? publishedReviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviewCount
+      : null;
+
+  return mapProductRecord(product, reviewCount, averageRating);
 }
 
 function mapPost(post: any): BeautyPostRecord {
@@ -396,6 +445,272 @@ export async function getAllReviews() {
         })
       ).map(mapReview),
     fallbackReviews
+  );
+}
+
+export async function getAdminReviewProducts() {
+  const fallback = (() => {
+    const statusSummary = buildReviewStatusSummary(fallbackReviews);
+
+    return fallbackProducts.map<AdminReviewProductSummary>((product) => {
+      const bucket = statusSummary.get(product.id);
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        category: product.category,
+        status: product.status,
+        shortDescription: product.shortDescription,
+        averageRating: product.averageRating ?? null,
+        totalReviewCount: bucket?.totalReviewCount ?? product.reviewCount ?? 0,
+        publishedReviewCount: bucket?.publishedReviewCount ?? product.reviewCount ?? 0,
+        pendingReviewCount: bucket?.pendingReviewCount ?? 0,
+        hiddenReviewCount: bucket?.hiddenReviewCount ?? 0
+      };
+    });
+  })();
+
+  return withFallback(
+    async () => {
+      const [products, statusRows, publishedRows] = await prisma.$transaction([
+        prisma.product.findMany({
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            tagline: true,
+            category: true,
+            shortDescription: true,
+            description: true,
+            details: true,
+            imageUrl: true,
+            galleryImages: true,
+            featured: true,
+            status: true,
+            inventory: true,
+            priceCents: true,
+            compareAtPriceCents: true,
+            currency: true,
+            pointsReward: true,
+            stripePriceId: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          orderBy: [{ featured: "desc" }, { createdAt: "desc" }]
+        }),
+        prisma.productReview.groupBy({
+          by: ["productId", "status"],
+          orderBy: [{ productId: "asc" }, { status: "asc" }],
+          _count: { id: true }
+        }),
+        prisma.productReview.groupBy({
+          by: ["productId"],
+          orderBy: { productId: "asc" },
+          where: { status: "PUBLISHED" },
+          _count: { id: true },
+          _avg: { rating: true }
+        })
+      ]);
+
+      const statusSummary = new Map<
+        string,
+        {
+          totalReviewCount: number;
+          publishedReviewCount: number;
+          pendingReviewCount: number;
+          hiddenReviewCount: number;
+        }
+      >();
+
+      for (const row of statusRows) {
+        const countValue = row._count as { id?: number } | undefined;
+        const count = countValue?.id ?? 0;
+        const bucket =
+          statusSummary.get(row.productId) ??
+          {
+            totalReviewCount: 0,
+            publishedReviewCount: 0,
+            pendingReviewCount: 0,
+            hiddenReviewCount: 0
+          };
+
+        bucket.totalReviewCount += count;
+
+        if (row.status === "PUBLISHED") {
+          bucket.publishedReviewCount = count;
+        }
+
+        if (row.status === "PENDING") {
+          bucket.pendingReviewCount = count;
+        }
+
+        if (row.status === "HIDDEN") {
+          bucket.hiddenReviewCount = count;
+        }
+
+        statusSummary.set(row.productId, bucket);
+      }
+
+      const publishedSummary = new Map(
+        publishedRows.map((row) => [row.productId, row])
+      );
+
+      return products.map<AdminReviewProductSummary>((product) => {
+        const bucket = statusSummary.get(product.id);
+        const published = publishedSummary.get(product.id);
+
+        return {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          imageUrl: product.imageUrl,
+          category: product.category,
+          status: product.status,
+          shortDescription: product.shortDescription,
+          averageRating: published?._avg?.rating ?? null,
+          totalReviewCount: bucket?.totalReviewCount ?? 0,
+          publishedReviewCount: bucket?.publishedReviewCount ?? 0,
+          pendingReviewCount: bucket?.pendingReviewCount ?? 0,
+          hiddenReviewCount: bucket?.hiddenReviewCount ?? 0
+        };
+      });
+    },
+    fallback
+  );
+}
+
+export async function getAdminReviewPageByProductSlug(slug: string, page = 1, pageSize = 50) {
+  const fallback = (() => {
+    const product = fallbackProducts.find((item) => item.slug === slug);
+
+    if (!product) {
+      return null;
+    }
+
+    const productReviews = fallbackReviews
+      .filter((review) => review.productId === product.id)
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime());
+    const counts = buildReviewStatusSummary(productReviews).get(product.id);
+    const totalReviewCount = productReviews.length;
+    const totalPages = Math.max(1, Math.ceil(totalReviewCount / pageSize));
+    const currentPage = Math.min(Math.max(1, page), totalPages);
+    const reviews = productReviews.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+    return {
+      product,
+      reviews,
+      totalReviewCount,
+      publishedReviewCount: counts?.publishedReviewCount ?? product.reviewCount ?? 0,
+      pendingReviewCount: counts?.pendingReviewCount ?? 0,
+      hiddenReviewCount: counts?.hiddenReviewCount ?? 0,
+      currentPage,
+      totalPages,
+      pageSize
+    } satisfies AdminProductReviewPageRecord;
+  })();
+
+  return withFallback(
+    async () => {
+      const product = await prisma.product.findUnique({
+        where: { slug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          tagline: true,
+          category: true,
+          shortDescription: true,
+          description: true,
+          details: true,
+          imageUrl: true,
+          galleryImages: true,
+          featured: true,
+          status: true,
+          inventory: true,
+          priceCents: true,
+          compareAtPriceCents: true,
+          currency: true,
+          pointsReward: true,
+          stripePriceId: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+
+      if (!product) {
+        return null;
+      }
+
+      const [statusRows, publishedAggregate, totalReviewCount] = await prisma.$transaction([
+        prisma.productReview.groupBy({
+          by: ["status"],
+          orderBy: { status: "asc" },
+          where: { productId: product.id },
+          _count: { id: true }
+        }),
+        prisma.productReview.aggregate({
+          where: {
+            productId: product.id,
+            status: "PUBLISHED"
+          },
+          _count: { id: true },
+          _avg: { rating: true }
+        }),
+        prisma.productReview.count({
+          where: { productId: product.id }
+        })
+      ]);
+
+      let publishedReviewCount = 0;
+      let pendingReviewCount = 0;
+      let hiddenReviewCount = 0;
+
+      for (const row of statusRows) {
+        const countValue = row._count as { id?: number } | undefined;
+        const count = countValue?.id ?? 0;
+        if (row.status === "PUBLISHED") {
+          publishedReviewCount = count;
+        }
+
+        if (row.status === "PENDING") {
+          pendingReviewCount = count;
+        }
+
+        if (row.status === "HIDDEN") {
+          hiddenReviewCount = count;
+        }
+      }
+
+      const totalPages = Math.max(1, Math.ceil(totalReviewCount / pageSize));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+      const reviews = (
+        await prisma.productReview.findMany({
+          where: { productId: product.id },
+          include: {
+            product: true,
+            customer: true
+          },
+          orderBy: [{ createdAt: "desc" }],
+          skip: (currentPage - 1) * pageSize,
+          take: pageSize
+        })
+      ).map(mapReview);
+
+      return {
+        product: mapProductRecord(product, publishedReviewCount, publishedAggregate._avg?.rating ?? null),
+        reviews,
+        totalReviewCount,
+        publishedReviewCount,
+        pendingReviewCount,
+        hiddenReviewCount,
+        currentPage,
+        totalPages,
+        pageSize
+      } satisfies AdminProductReviewPageRecord;
+    },
+    fallback
   );
 }
 
