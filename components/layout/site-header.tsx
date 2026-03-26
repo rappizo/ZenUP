@@ -13,8 +13,10 @@ export async function SiteHeader() {
     <header className="site-header">
       <div className="announcement-bar">
         <div className="container announcement-bar__inner">
-          <p>United States shipping only. Thoughtful skincare for smooth, hydrated, glowing skin.</p>
-          <Link href="/contact">Need help choosing your routine?</Link>
+          <div className="announcement-bar__copy">
+            <p>United States shipping only. Thoughtful skincare for smooth, hydrated, glowing skin.</p>
+            <Link href="/contact">Need help choosing your routine?</Link>
+          </div>
         </div>
       </div>
       <div className="container site-header__inner">
