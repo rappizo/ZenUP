@@ -1138,7 +1138,7 @@ main {
 
 .product-detail__media-wrap {
   display: grid;
-  gap: 14px;
+  gap: 8px;
 }
 
 .product-detail__media {
