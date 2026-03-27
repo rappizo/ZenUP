@@ -24,6 +24,7 @@ import {
   getProductBySlug,
   getPublishedReviewsByProductId
 } from "@/lib/queries";
+import { toAbsoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 
 type ProductPageProps = {
@@ -41,28 +42,68 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
+  const absoluteImageUrl = toAbsoluteUrl(product.imageUrl);
+  const title = product.slug === "pdrn-cream" ? pdrnCreamSeo.title : product.name;
+  const description =
+    product.slug === "pdrn-cream" ? pdrnCreamSeo.description : product.shortDescription;
+
   if (product.slug === "pdrn-cream") {
     return {
-      title: pdrnCreamSeo.title,
-      description: pdrnCreamSeo.description,
+      title,
+      description,
       keywords: pdrnCreamSeo.keywords,
       alternates: {
         canonical: `/shop/${product.slug}`
       },
       openGraph: {
-        title: `${pdrnCreamSeo.title} | ${siteConfig.title}`,
-        description: pdrnCreamSeo.description,
+        title: `${title} | ${siteConfig.title}`,
+        description,
         url: `${siteConfig.url}/shop/${product.slug}`,
-        images: [product.imageUrl]
+        images: [
+          {
+            url: absoluteImageUrl,
+            alt: product.name
+          }
+        ]
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | ${siteConfig.title}`,
+        description,
+        images: [absoluteImageUrl]
       }
     };
   }
 
   return {
-    title: product.name,
-    description: product.shortDescription,
+    title,
+    description,
+    keywords: [
+      product.name,
+      `${product.category} skincare`,
+      `${product.name} review`,
+      `buy ${product.name}`,
+      `${siteConfig.name} ${product.category}`
+    ],
     alternates: {
       canonical: `/shop/${product.slug}`
+    },
+    openGraph: {
+      title: `${title} | ${siteConfig.title}`,
+      description,
+      url: `${siteConfig.url}/shop/${product.slug}`,
+      images: [
+        {
+          url: absoluteImageUrl,
+          alt: product.name
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${siteConfig.title}`,
+      description,
+      images: [absoluteImageUrl]
     }
   };
 }

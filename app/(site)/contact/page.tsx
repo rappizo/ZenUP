@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
+import { defaultOgImage } from "@/lib/seo";
 
 type ContactPageProps = {
   searchParams: Promise<{ sent?: string }>;
@@ -7,7 +8,28 @@ type ContactPageProps = {
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact Neatique for customer care, retail support, and partnership questions."
+  description: "Contact Neatique for customer care, retail support, and partnership questions.",
+  alternates: {
+    canonical: "/contact"
+  },
+  keywords: [
+    "contact Neatique",
+    "Neatique customer support",
+    "skincare order support",
+    "Neatique contact page"
+  ],
+  openGraph: {
+    title: `Contact | ${siteConfig.title}`,
+    description: "Contact Neatique for customer care, retail support, and partnership questions.",
+    url: `${siteConfig.url}/contact`,
+    images: [defaultOgImage]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Contact | ${siteConfig.title}`,
+    description: "Contact Neatique for customer care, retail support, and partnership questions.",
+    images: [defaultOgImage.url]
+  }
 };
 
 export default async function ContactPage({ searchParams }: ContactPageProps) {

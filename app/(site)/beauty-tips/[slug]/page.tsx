@@ -3,6 +3,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { getPostBySlug } from "@/lib/queries";
+import { toAbsoluteUrl } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
 
 type PostPageProps = {
   params: Promise<{ slug: string }>;
@@ -18,9 +20,36 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     };
   }
 
+  const title = post.seoTitle || post.title;
+  const description = post.seoDescription || post.excerpt;
+  const absoluteImageUrl = toAbsoluteUrl(post.coverImageUrl);
+
   return {
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt
+    title,
+    description,
+    alternates: {
+      canonical: `/beauty-tips/${post.slug}`
+    },
+    keywords: [post.title, post.category, "skincare tips", "Neatique Beauty Tips"],
+    openGraph: {
+      type: "article",
+      title: `${title} | ${siteConfig.title}`,
+      description,
+      url: `${siteConfig.url}/beauty-tips/${post.slug}`,
+      publishedTime: post.publishedAt?.toISOString(),
+      images: [
+        {
+          url: absoluteImageUrl,
+          alt: post.title
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${siteConfig.title}`,
+      description,
+      images: [absoluteImageUrl]
+    }
   };
 }
 

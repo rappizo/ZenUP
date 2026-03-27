@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 export async function SiteHeader() {
   const [customer, cartItems] = await Promise.all([getCurrentCustomer(), getCartItems()]);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const accountHref = customer ? "/account" : "/account/login";
 
   return (
     <>
@@ -25,22 +26,21 @@ export async function SiteHeader() {
           <Logo />
           <nav className="site-nav" aria-label="Primary navigation">
             {siteConfig.nav.map((item) => (
-              <Link key={item.href} href={item.href}>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={item.href === "/shop" ? "site-nav__link site-nav__link--featured" : "site-nav__link"}
+              >
                 {item.label}
               </Link>
             ))}
           </nav>
           <div className="site-header__actions">
-            {customer ? (
-              <Link href="/account" className="site-header__text-link">
-                My Account
-              </Link>
-            ) : null}
-            <Link href="/cart" className="site-header__text-link">
-              Cart{cartCount > 0 ? ` (${cartCount})` : ""}
+            <Link href={accountHref} className="site-header__text-link">
+              My Account
             </Link>
-            <ButtonLink href="/shop" variant="primary">
-              Shop Now
+            <ButtonLink href="/cart" variant="primary">
+              Cart{cartCount > 0 ? ` (${cartCount})` : ""}
             </ButtonLink>
           </div>
         </div>

@@ -2,10 +2,35 @@ import type { Metadata } from "next";
 import { ProductCard } from "@/components/ui/product-card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getActiveProducts } from "@/lib/queries";
+import { defaultOgImage } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "Browse the full Neatique collection of bright, modern skincare essentials."
+  description: "Browse the full Neatique collection of bright, modern skincare essentials.",
+  alternates: {
+    canonical: "/shop"
+  },
+  keywords: [
+    "Neatique shop",
+    "buy PDRN cream",
+    "buy PDRN serum",
+    "buy snail mucin cream",
+    "buy snail mucin serum",
+    "professional skincare shop"
+  ],
+  openGraph: {
+    title: `Shop | ${siteConfig.title}`,
+    description: "Browse the full Neatique collection of bright, modern skincare essentials.",
+    url: `${siteConfig.url}/shop`,
+    images: [defaultOgImage]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Shop | ${siteConfig.title}`,
+    description: "Browse the full Neatique collection of bright, modern skincare essentials.",
+    images: [defaultOgImage.url]
+  }
 };
 
 export default async function ShopPage() {

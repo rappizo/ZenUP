@@ -2,10 +2,37 @@ import type { Metadata } from "next";
 import { PostCard } from "@/components/ui/post-card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getPublishedPosts } from "@/lib/queries";
+import { defaultOgImage } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Beauty Tips",
-  description: "Read Neatique Beauty Tips for simple skincare guidance, routine ideas, and ingredient stories."
+  description:
+    "Read Neatique Beauty Tips for simple skincare guidance, routine ideas, and ingredient stories.",
+  alternates: {
+    canonical: "/beauty-tips"
+  },
+  keywords: [
+    "Neatique Beauty Tips",
+    "skincare routine tips",
+    "PDRN skincare guide",
+    "snail mucin routine",
+    "ingredient stories"
+  ],
+  openGraph: {
+    title: `Beauty Tips | ${siteConfig.title}`,
+    description:
+      "Read Neatique Beauty Tips for simple skincare guidance, routine ideas, and ingredient stories.",
+    url: `${siteConfig.url}/beauty-tips`,
+    images: [defaultOgImage]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Beauty Tips | ${siteConfig.title}`,
+    description:
+      "Read Neatique Beauty Tips for simple skincare guidance, routine ideas, and ingredient stories.",
+    images: [defaultOgImage.url]
+  }
 };
 
 export default async function BeautyTipsPage() {
