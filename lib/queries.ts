@@ -2,11 +2,14 @@ import { Prisma } from "@prisma/client";
 import type {
   AdminProductReviewPageRecord,
   AdminReviewProductSummary,
+  AdminFormSubmissionPageRecord,
   BeautyPostRecord,
   CouponRecord,
   CustomerAccountRecord,
   CustomerRecord,
   DashboardSummary,
+  FormSubmissionRecord,
+  FormSubmissionSummaryRecord,
   OrderRecord,
   ProductRecord,
   ProductReviewRecord,
@@ -17,6 +20,11 @@ import { unstable_cache } from "next/cache";
 import { parseStoredCouponProductCodes } from "@/lib/coupons";
 import { hasValidPostgresDatabaseUrl } from "@/lib/database-config";
 import { prisma } from "@/lib/db";
+import {
+  ensureLegacyContactFormBackfill,
+  FORM_DEFINITIONS,
+  getFormDefinition
+} from "@/lib/form-submissions";
 import {
   fallbackCustomers,
   fallbackDashboardSummary,
@@ -299,6 +307,25 @@ function mapReview(review: any): ProductReviewRecord {
   };
 }
 
+function mapFormSubmission(submission: any): FormSubmissionRecord {
+  return {
+    id: submission.id,
+    formKey: submission.formKey,
+    formLabel: submission.formLabel,
+    email: submission.email,
+    name: submission.name ?? null,
+    subject: submission.subject ?? null,
+    summary: submission.summary ?? null,
+    message: submission.message ?? null,
+    payload: submission.payload ?? null,
+    handled: submission.handled,
+    handledAt: submission.handledAt ? new Date(submission.handledAt) : null,
+    legacyContactSubmissionId: submission.legacyContactSubmissionId ?? null,
+    createdAt: new Date(submission.createdAt),
+    updatedAt: new Date(submission.updatedAt)
+  };
+}
+
 const getFeaturedProductsFromDatabase = unstable_cache(
   async (limit: number) =>
     (
@@ -527,6 +554,164 @@ export async function getCouponById(id: string) {
       });
 
       return coupon ? mapCoupon(coupon) : null;
+    },
+    null
+  );
+}
+
+export async function getFormSubmissionSummaries() {
+  return withFallback(
+    async () => {
+      await ensureLegacyContactFormBackfill();
+      const groupedRows = await prisma.formSubmission.groupBy({
+        by: ["formKey", "formLabel", "handled"],
+        _count: { id: true },
+        _max: { createdAt: true }
+      });
+
+      const summaryMap = new Map<string, FormSubmissionSummaryRecord>();
+
+      for (const definition of FORM_DEFINITIONS) {
+        summaryMap.set(definition.key, {
+          formKey: definition.key,
+          formLabel: definition.label,
+          description: definition.description,
+          totalCount: 0,
+          unhandledCount: 0,
+          latestSubmittedAt: null
+        });
+      }
+
+      for (const row of groupedRows) {
+        const definition = getFormDefinition(row.formKey);
+        const existing =
+          summaryMap.get(row.formKey) ??
+          ({
+            formKey: row.formKey,
+            formLabel: row.formLabel,
+            description: definition?.description || "Form submissions captured on the storefront.",
+            totalCount: 0,
+            unhandledCount: 0,
+            latestSubmittedAt: null
+          } satisfies FormSubmissionSummaryRecord);
+
+        existing.totalCount += row._count.id;
+
+        if (!row.handled) {
+          existing.unhandledCount += row._count.id;
+        }
+
+        if (!existing.latestSubmittedAt || (row._max.createdAt && row._max.createdAt > existing.latestSubmittedAt)) {
+          existing.latestSubmittedAt = row._max.createdAt ? new Date(row._max.createdAt) : existing.latestSubmittedAt;
+        }
+
+        summaryMap.set(row.formKey, existing);
+      }
+
+      return Array.from(summaryMap.values()).sort((left, right) =>
+        left.formLabel.localeCompare(right.formLabel)
+      );
+    },
+    FORM_DEFINITIONS.map((definition) => ({
+      formKey: definition.key,
+      formLabel: definition.label,
+      description: definition.description,
+      totalCount: 0,
+      unhandledCount: 0,
+      latestSubmittedAt: null
+    }))
+  );
+}
+
+export async function getFormSubmissionPage(formKey: string, page = 1, pageSize = 50, searchEmail = "") {
+  const definition = getFormDefinition(formKey);
+
+  if (!definition) {
+    return null;
+  }
+
+  const normalizedSearchEmail = searchEmail.trim().toLowerCase();
+
+  return withFallback(
+    async () => {
+      await ensureLegacyContactFormBackfill();
+      const where = {
+        formKey,
+        ...(normalizedSearchEmail
+          ? {
+              email: {
+                contains: normalizedSearchEmail,
+                mode: "insensitive" as const
+              }
+            }
+          : {})
+      };
+
+      const [totalCount, unhandledCount] = await prisma.$transaction([
+        prisma.formSubmission.count({ where }),
+        prisma.formSubmission.count({
+          where: {
+            ...where,
+            handled: false
+          }
+        })
+      ]);
+
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+      const rows = await prisma.formSubmission.findMany({
+        where,
+        orderBy: [{ createdAt: "desc" }],
+        skip: Math.max(0, currentPage - 1) * pageSize,
+        take: pageSize
+      });
+
+      return {
+        formKey: definition.key,
+        formLabel: definition.label,
+        description: definition.description,
+        submissions: rows.map(mapFormSubmission),
+        totalCount,
+        unhandledCount,
+        currentPage,
+        totalPages,
+        pageSize,
+        searchEmail: normalizedSearchEmail
+      } satisfies AdminFormSubmissionPageRecord;
+    },
+    {
+      formKey: definition.key,
+      formLabel: definition.label,
+      description: definition.description,
+      submissions: [],
+      totalCount: 0,
+      unhandledCount: 0,
+      currentPage: 1,
+      totalPages: 1,
+      pageSize,
+      searchEmail: normalizedSearchEmail
+    } satisfies AdminFormSubmissionPageRecord
+  );
+}
+
+export async function getFormSubmissionById(formKey: string, id: string) {
+  const definition = getFormDefinition(formKey);
+
+  if (!definition) {
+    return null;
+  }
+
+  return withFallback(
+    async () => {
+      await ensureLegacyContactFormBackfill();
+      const submission = await prisma.formSubmission.findFirst({
+        where: {
+          id,
+          formKey
+        }
+      });
+
+      return submission ? mapFormSubmission(submission) : null;
     },
     null
   );

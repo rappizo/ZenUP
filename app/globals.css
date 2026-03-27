@@ -546,7 +546,8 @@ main {
 
 .brand-manifesto,
 .philosophy-band,
-.home-cta {
+.home-cta,
+.subscribe-panel {
   display: grid;
   gap: 24px;
   padding: clamp(22px, 3vw, 30px);
@@ -566,7 +567,9 @@ main {
 .philosophy-band__intro,
 .ritual-spotlight__content,
 .ingredient-story__copy,
-.home-cta__copy {
+.home-cta__copy,
+.subscribe-panel__copy,
+.subscribe-panel__form {
   display: grid;
   gap: 16px;
 }
@@ -606,7 +609,8 @@ main {
 .ingredient-story__copy p:not(.eyebrow),
 .ritual-step p,
 .image-prompt__body,
-.home-cta__copy p:not(.eyebrow) {
+.home-cta__copy p:not(.eyebrow),
+.subscribe-panel__copy p:not(.eyebrow) {
   margin: 0;
   color: var(--muted);
   line-height: 1.75;
@@ -614,12 +618,65 @@ main {
 
 .philosophy-band__intro h2,
 .home-cta__copy h1,
-.home-cta__copy h2 {
+.home-cta__copy h2,
+.subscribe-panel__copy h2 {
   margin: 0;
   font-family: Baskerville, "Palatino Linotype", serif;
   font-size: clamp(2rem, 3.8vw, 3.4rem);
   line-height: 1;
   letter-spacing: -0.03em;
+}
+
+.subscribe-panel {
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  align-items: center;
+}
+
+.subscribe-panel__form {
+  align-self: stretch;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(46, 40, 37, 0.08);
+}
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.success-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(46, 40, 37, 0.48);
+  backdrop-filter: blur(8px);
+}
+
+.success-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  display: grid;
+  gap: 16px;
+  padding: clamp(24px, 4vw, 32px);
+  border-radius: 28px;
+  background: #fffaf7;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 22px 60px rgba(46, 40, 37, 0.18);
+}
+
+.success-modal__panel h2,
+.success-modal__panel p {
+  margin: 0;
+}
+
+.success-modal__panel p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.75;
 }
 
 .philosophy-band__hero,
@@ -1823,7 +1880,8 @@ main {
   .philosophy-band__hero,
   .ritual-spotlight__hero,
   .ingredient-story-grid,
-  .home-cta {
+  .home-cta,
+  .subscribe-panel {
     grid-template-columns: 1fr;
   }
 
@@ -2059,14 +2117,16 @@ main {
 
   .brand-manifesto,
   .philosophy-band,
-  .home-cta {
+  .home-cta,
+  .subscribe-panel {
     padding: 22px;
     border-radius: 24px;
   }
 
   .brand-manifesto__title,
   .philosophy-band__intro h2,
-  .home-cta__copy h2 {
+  .home-cta__copy h2,
+  .subscribe-panel__copy h2 {
     font-size: clamp(1.85rem, 8vw, 2.45rem);
   }
 

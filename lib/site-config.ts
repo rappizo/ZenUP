@@ -17,6 +17,7 @@ export const siteConfig = {
     { href: "/admin", label: "Dashboard" },
     { href: "/admin/products", label: "Products" },
     { href: "/admin/coupons", label: "Coupons" },
+    { href: "/admin/forms", label: "Forms" },
     { href: "/admin/orders", label: "Orders" },
     { href: "/admin/customers", label: "Users" },
     { href: "/admin/rewards", label: "Points" },

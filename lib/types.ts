@@ -204,3 +204,42 @@ export type DashboardSummary = {
 };
 
 export type StoreSettingsRecord = Record<string, string>;
+
+export type FormSubmissionRecord = {
+  id: string;
+  formKey: string;
+  formLabel: string;
+  email: string;
+  name: string | null;
+  subject: string | null;
+  summary: string | null;
+  message: string | null;
+  payload: string | null;
+  handled: boolean;
+  handledAt: Date | null;
+  legacyContactSubmissionId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type FormSubmissionSummaryRecord = {
+  formKey: string;
+  formLabel: string;
+  description: string;
+  totalCount: number;
+  unhandledCount: number;
+  latestSubmittedAt: Date | null;
+};
+
+export type AdminFormSubmissionPageRecord = {
+  formKey: string;
+  formLabel: string;
+  description: string;
+  submissions: FormSubmissionRecord[];
+  totalCount: number;
+  unhandledCount: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  searchEmail: string;
+};

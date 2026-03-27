@@ -1,0 +1,91 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { toggleFormSubmissionHandledAction } from "@/app/admin/actions";
+import { formatDate } from "@/lib/format";
+import { getFormSubmissionById, getFormSubmissionPage } from "@/lib/queries";
+
+type AdminFormSubmissionDetailPageProps = {
+  params: Promise<{ formKey: string; id: string }>;
+  searchParams: Promise<{ status?: string }>;
+};
+
+export default async function AdminFormSubmissionDetailPage({
+  params,
+  searchParams
+}: AdminFormSubmissionDetailPageProps) {
+  const [{ formKey, id }, query] = await Promise.all([params, searchParams]);
+  const [submission, submissionPage] = await Promise.all([
+    getFormSubmissionById(formKey, id),
+    getFormSubmissionPage(formKey, 1, 50)
+  ]);
+
+  if (!submission || !submissionPage) {
+    notFound();
+  }
+
+  const redirectTo = `/admin/forms/${formKey}/${submission.id}`;
+
+  return (
+    <div className="admin-page">
+      <div className="stack-row">
+        <Link href={`/admin/forms/${formKey}`} className="button button--secondary">
+          Back to {submissionPage.formLabel}
+        </Link>
+        <form action={toggleFormSubmissionHandledAction}>
+          <input type="hidden" name="id" value={submission.id} />
+          <input type="hidden" name="formKey" value={formKey} />
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+          <input type="hidden" name="nextHandled" value={submission.handled ? "false" : "true"} />
+          <button type="submit" className="button button--ghost">
+            {submission.handled ? "Mark new" : "Mark handled"}
+          </button>
+        </form>
+      </div>
+
+      {query.status ? <p className="notice">Submission action completed: {query.status}.</p> : null}
+
+      <section className="admin-form">
+        <div className="admin-page__header">
+          <p className="eyebrow">
+            {submission.formLabel} / {submission.email}
+          </p>
+          <h1>{submission.summary || submission.subject || "Submission details"}</h1>
+          <p>
+            Submitted {formatDate(submission.createdAt)}. Current status:{" "}
+            {submission.handled ? "Handled" : "New"}.
+          </p>
+        </div>
+
+        <div className="cards-2">
+          <section className="admin-card">
+            <h3>Submission summary</h3>
+            <ul className="admin-list">
+              <li>Email: {submission.email}</li>
+              <li>Name: {submission.name || "Not provided"}</li>
+              <li>Subject: {submission.subject || "Not provided"}</li>
+              <li>Handled: {submission.handled ? "Yes" : "No"}</li>
+              <li>Handled at: {submission.handledAt ? formatDate(submission.handledAt) : "Not handled yet"}</li>
+              <li>Updated: {formatDate(submission.updatedAt)}</li>
+            </ul>
+          </section>
+
+          <section className="admin-card">
+            <h3>Submitted content</h3>
+            <ul className="detail-list">
+              {submission.message ? (
+                <li>{submission.message}</li>
+              ) : (
+                <li>No dedicated message body was provided for this form.</li>
+              )}
+            </ul>
+          </section>
+        </div>
+
+        <div className="field">
+          <label>Raw payload</label>
+          <textarea value={submission.payload || "No raw payload stored."} readOnly rows={12} />
+        </div>
+      </section>
+    </div>
+  );
+}

@@ -65,6 +65,20 @@ function buildCouponRedirect(status: string, couponId?: string) {
   return `${basePath}${separator}status=${status}`;
 }
 
+function buildFormSubmissionRedirect(status: string, redirectTo?: string, formKey?: string, submissionId?: string) {
+  const fallbackPath = submissionId && formKey
+    ? `/admin/forms/${formKey}/${submissionId}`
+    : formKey
+      ? `/admin/forms/${formKey}`
+      : "/admin/forms";
+  const basePath = redirectTo || fallbackPath;
+  const [pathname, queryString = ""] = basePath.split("?");
+  const params = new URLSearchParams(queryString);
+  params.set("status", status);
+  const nextQuery = params.toString();
+  return nextQuery ? `${pathname}?${nextQuery}` : pathname;
+}
+
 function parseCouponDiscountType(value: string | undefined): CouponDiscountType {
   return value === "FIXED_AMOUNT" ? "FIXED_AMOUNT" : "PERCENT";
 }
@@ -404,6 +418,33 @@ export async function toggleCouponStatusAction(formData: FormData) {
   revalidatePath("/admin/coupons");
   revalidatePath(`/admin/coupons/${id}`);
   redirect(buildCouponRedirect(nextActive ? "activated" : "deactivated", id));
+}
+
+export async function toggleFormSubmissionHandledAction(formData: FormData) {
+  await requireAdminSession();
+
+  const id = toPlainString(formData.get("id"));
+  const formKey = toPlainString(formData.get("formKey"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
+  const nextHandled = toPlainString(formData.get("nextHandled")) === "true";
+
+  await prisma.formSubmission.update({
+    where: { id },
+    data: {
+      handled: nextHandled,
+      handledAt: nextHandled ? new Date() : null
+    }
+  });
+
+  revalidatePath("/admin/forms");
+  if (formKey) {
+    revalidatePath(`/admin/forms/${formKey}`);
+    revalidatePath(`/admin/forms/${formKey}/${id}`);
+  }
+
+  redirect(
+    buildFormSubmissionRedirect(nextHandled ? "handled" : "reopened", redirectTo, formKey, id)
+  );
 }
 
 export async function createPostAction(formData: FormData) {

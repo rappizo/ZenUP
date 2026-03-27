@@ -1,5 +1,10 @@
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/db";
+import {
+  getSubscribeCouponDescription,
+  SUBSCRIBE_COUPON_CODE,
+  SUBSCRIBE_COUPON_PERCENT_OFF
+} from "@/lib/subscribe-offer";
 
 type EmailSettings = {
   enabled: boolean;
@@ -179,4 +184,23 @@ export async function sendContactSubmissionEmails(input: {
   });
 
   return { delivered: true };
+}
+
+export async function sendSubscriptionCouponEmail(input: {
+  email: string;
+}) {
+  return sendEmail({
+    to: input.email,
+    subject: `${SUBSCRIBE_COUPON_PERCENT_OFF}% off your first Neatique purchase`,
+    text: `Welcome to Neatique. Your subscriber offer is ${SUBSCRIBE_COUPON_CODE}. Apply it at checkout for ${getSubscribeCouponDescription()}. If you do not see this email in your inbox, please check your spam or promotions folder.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.7;color:#2e2825">
+        <h2 style="font-family:Georgia,serif;color:#ed7361">Welcome to Neatique</h2>
+        <p>Thank you for subscribing. Your welcome offer is ready.</p>
+        <p><strong>Coupon code:</strong> ${SUBSCRIBE_COUPON_CODE}</p>
+        <p><strong>Offer:</strong> ${getSubscribeCouponDescription()}</p>
+        <p>Enter the code at checkout on your first order. If you do not see this email in your inbox, please check your spam or promotions folder.</p>
+      </div>
+    `
+  });
 }

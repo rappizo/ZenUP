@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendContactSubmissionEmails } from "@/lib/email";
+import { createFormSubmission } from "@/lib/form-submissions";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -9,13 +10,29 @@ export async function POST(request: Request) {
   const subject = String(formData.get("subject") || "");
   const message = String(formData.get("message") || "");
 
-  await prisma.contactSubmission.create({
+  const contactSubmission = await prisma.contactSubmission.create({
     data: {
       name,
       email,
       subject,
       message
     }
+  });
+
+  await createFormSubmission({
+    formKey: "contact",
+    email,
+    name,
+    subject,
+    summary: subject,
+    message,
+    payload: {
+      name,
+      email,
+      subject,
+      message
+    },
+    legacyContactSubmissionId: contactSubmission.id
   });
 
   try {

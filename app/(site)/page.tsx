@@ -9,6 +9,11 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { getFeaturedProducts, getPublishedPosts } from "@/lib/queries";
 import { siteConfig } from "@/lib/site-config";
 import { buildSiteImageUrl } from "@/lib/site-media";
+import {
+  getSubscribeCouponDescription,
+  SUBSCRIBE_COUPON_CODE,
+  SUBSCRIBE_COUPON_PERCENT_OFF
+} from "@/lib/subscribe-offer";
 
 const homePageTitle = "Professional Skincare for Smooth, Hydrated, Radiant Skin";
 const homePageDescription =
@@ -169,8 +174,16 @@ export const metadata: Metadata = {
   }
 };
 
-export default async function HomePage() {
-  const [products, posts] = await Promise.all([getFeaturedProducts(4), getPublishedPosts(2)]);
+type HomePageProps = {
+  searchParams: Promise<{ subscribed?: string; subscribe_error?: string }>;
+};
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const [products, posts, params] = await Promise.all([
+    getFeaturedProducts(4),
+    getPublishedPosts(2),
+    searchParams
+  ]);
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -490,6 +503,80 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="section">
+        <div className="container">
+          <div className="subscribe-panel">
+            <div className="subscribe-panel__copy">
+              <p className="eyebrow">Subscriber Welcome Offer</p>
+              <h2>Subscribe and get {SUBSCRIBE_COUPON_PERCENT_OFF}% off your first purchase.</h2>
+              <p>
+                Join the Neatique list for skincare notes, product updates, and a welcome coupon
+                delivered straight to your inbox.
+              </p>
+              <div className="page-hero__stats">
+                <span className="pill">{SUBSCRIBE_COUPON_CODE}</span>
+                <span className="pill">{getSubscribeCouponDescription()}</span>
+                <span className="pill">Sent by email instantly</span>
+              </div>
+            </div>
+
+            <form action="/api/subscribe" method="post" className="subscribe-panel__form">
+              <div className="field">
+                <label htmlFor="subscribe-email">Email address</label>
+                <input
+                  id="subscribe-email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <button type="submit" className="button button--primary">
+                Send my {SUBSCRIBE_COUPON_PERCENT_OFF}% offer
+              </button>
+              <p className="form-note">
+                We will email your code so you can keep it for checkout. Please check spam or
+                promotions if it does not arrive right away.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {params.subscribe_error === "email" ? (
+        <div className="success-modal" role="dialog" aria-modal="true" aria-labelledby="subscribe-error-title">
+          <div className="success-modal__backdrop" />
+          <div className="success-modal__panel">
+            <p className="eyebrow">Subscription saved</p>
+            <h2 id="subscribe-error-title">We saved your signup, but the email has not gone out yet.</h2>
+            <p>
+              Your subscription was recorded, but the coupon email could not be delivered right
+              now. Please try again shortly or contact the team if you keep seeing this.
+            </p>
+            <Link href="/" className="button button--primary">
+              Close
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      {params.subscribed === "1" ? (
+        <div className="success-modal" role="dialog" aria-modal="true" aria-labelledby="subscribe-success-title">
+          <div className="success-modal__backdrop" />
+          <div className="success-modal__panel">
+            <p className="eyebrow">Check your inbox</p>
+            <h2 id="subscribe-success-title">Your welcome offer is on the way.</h2>
+            <p>
+              We just sent {SUBSCRIBE_COUPON_CODE} to your email. Please check your inbox, and if
+              you do not see it in a minute or two, take a quick look in spam or promotions.
+            </p>
+            <Link href="/" className="button button--primary">
+              Continue browsing
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
