@@ -3,6 +3,7 @@ import type {
   AdminProductReviewPageRecord,
   AdminReviewProductSummary,
   BeautyPostRecord,
+  CouponRecord,
   CustomerAccountRecord,
   CustomerRecord,
   DashboardSummary,
@@ -13,6 +14,7 @@ import type {
   StoreSettingsRecord
 } from "@/lib/types";
 import { unstable_cache } from "next/cache";
+import { parseStoredCouponProductCodes } from "@/lib/coupons";
 import { hasValidPostgresDatabaseUrl } from "@/lib/database-config";
 import { prisma } from "@/lib/db";
 import {
@@ -81,6 +83,7 @@ async function withFallback<T>(
 function mapProductRecord(product: any, reviewCount: number, averageRating: number | null): ProductRecord {
   return {
     id: product.id,
+    productCode: product.productCode ?? "",
     name: product.name,
     slug: product.slug,
     tagline: product.tagline,
@@ -208,10 +211,13 @@ function mapOrder(order: any): OrderRecord {
     fulfillmentStatus: order.fulfillmentStatus,
     currency: order.currency,
     subtotalCents: order.subtotalCents,
+    discountCents: order.discountCents ?? 0,
     shippingCents: order.shippingCents,
     taxCents: order.taxCents,
     totalCents: order.totalCents,
     pointsEarned: order.pointsEarned,
+    couponCode: order.couponCode ?? null,
+    couponId: order.couponId ?? null,
     shippingName: order.shippingName ?? null,
     shippingAddress1: order.shippingAddress1 ?? null,
     shippingAddress2: order.shippingAddress2 ?? null,
@@ -234,6 +240,25 @@ function mapOrder(order: any): OrderRecord {
       lineTotalCents: item.lineTotalCents,
       imageUrl: item.imageUrl
     }))
+  };
+}
+
+function mapCoupon(coupon: any): CouponRecord {
+  return {
+    id: coupon.id,
+    code: coupon.code,
+    content: coupon.content,
+    active: coupon.active,
+    appliesToAll: coupon.appliesToAll,
+    productCodes: parseStoredCouponProductCodes(coupon.productCodes),
+    discountType: coupon.discountType,
+    percentOff: coupon.percentOff ?? null,
+    amountOffCents: coupon.amountOffCents ?? null,
+    usageMode: coupon.usageMode,
+    usageCount: coupon.usageCount,
+    orderCount: coupon._count?.orders,
+    createdAt: new Date(coupon.createdAt),
+    updatedAt: new Date(coupon.updatedAt)
   };
 }
 
@@ -467,6 +492,45 @@ export async function getOrders() {
   );
 }
 
+export async function getCoupons() {
+  return withFallback(
+    async () =>
+      (
+        await prisma.coupon.findMany({
+          include: {
+            _count: {
+              select: {
+                orders: true
+              }
+            }
+          },
+          orderBy: [{ active: "desc" }, { updatedAt: "desc" }]
+        })
+      ).map(mapCoupon),
+    []
+  );
+}
+
+export async function getCouponById(id: string) {
+  return withFallback(
+    async () => {
+      const coupon = await prisma.coupon.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              orders: true
+            }
+          }
+        }
+      });
+
+      return coupon ? mapCoupon(coupon) : null;
+    },
+    null
+  );
+}
+
 export async function getRewards() {
   return withFallback(
     async () =>
@@ -551,6 +615,7 @@ export async function getAdminReviewProducts() {
         prisma.product.findMany({
           select: {
             id: true,
+            productCode: true,
             name: true,
             slug: true,
             tagline: true,
@@ -690,6 +755,7 @@ export async function getAdminReviewPageByProductSlug(slug: string, page = 1, pa
         where: { slug },
         select: {
           id: true,
+          productCode: true,
           name: true,
           slug: true,
           tagline: true,

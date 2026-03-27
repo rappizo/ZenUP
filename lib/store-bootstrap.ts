@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { hasValidPostgresDatabaseUrl } from "@/lib/database-config";
+import { ensureProductCodes } from "@/lib/product-codes";
 import { samplePosts, sampleProducts, sampleReviews, sampleStoreSettings } from "@/lib/sample-store-data";
 
 let bootstrapState: "idle" | "running" | "ready" = "idle";
@@ -24,6 +25,7 @@ async function seedProductsIfEmpty() {
     await prisma.product.upsert({
       where: { slug: product.slug },
       update: {
+        productCode: product.productCode,
         name: product.name,
         tagline: product.tagline,
         category: product.category,
@@ -43,6 +45,7 @@ async function seedProductsIfEmpty() {
       },
       create: {
         id: product.id,
+        productCode: product.productCode,
         name: product.name,
         slug: product.slug,
         tagline: product.tagline,
@@ -194,6 +197,7 @@ async function runBootstrap() {
   }
 
   await seedProductsIfEmpty();
+  await ensureProductCodes();
   await seedPostsIfEmpty();
   await seedSettingsIfEmpty();
   await seedReviewsIfEmpty();

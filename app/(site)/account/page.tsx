@@ -93,7 +93,14 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               <tbody>
                 {account.orders.map((order) => (
                   <tr key={order.id}>
-                    <td>{order.orderNumber}</td>
+                    <td>
+                      <div>{order.orderNumber}</div>
+                      {order.couponCode ? (
+                        <small>
+                          {order.couponCode} saved {formatCurrency(order.discountCents)}
+                        </small>
+                      ) : null}
+                    </td>
                     <td>{formatDate(order.createdAt)}</td>
                     <td>{order.status}</td>
                     <td>{formatCurrency(order.totalCents)}</td>

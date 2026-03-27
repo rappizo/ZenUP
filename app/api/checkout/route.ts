@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCartDetails } from "@/lib/cart";
+import {
+  buildDiscountedStripeLineItems,
+  normalizeCouponCode,
+  parseStoredCouponProductCodes
+} from "@/lib/coupons";
 import { createCustomerSession } from "@/lib/customer-auth";
 import { prisma } from "@/lib/db";
 import { sendCustomerWelcomeEmail } from "@/lib/email";
@@ -16,6 +21,7 @@ export async function POST(request: Request) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const firstName = String(formData.get("firstName") || "").trim() || null;
   const lastName = String(formData.get("lastName") || "").trim() || null;
+  const rawCouponCode = normalizeCouponCode(String(formData.get("couponCode") || ""));
   const baseUrl = getBaseUrl();
   let { lines } = await getCartDetails();
 
@@ -35,6 +41,44 @@ export async function POST(request: Request) {
 
   if (lines.length === 0 || !email) {
     return NextResponse.redirect(new URL("/cart?error=empty-cart", baseUrl), 303);
+  }
+
+  const coupon = rawCouponCode
+    ? await prisma.coupon.findUnique({
+        where: { code: rawCouponCode }
+      })
+    : null;
+
+  if (rawCouponCode && (!coupon || !coupon.active)) {
+    return NextResponse.redirect(new URL("/cart?error=coupon-invalid", baseUrl), 303);
+  }
+
+  const resolvedCoupon = coupon
+    ? {
+        id: coupon.id,
+        code: coupon.code,
+        content: coupon.content,
+        active: coupon.active,
+        appliesToAll: coupon.appliesToAll,
+        productCodes: parseStoredCouponProductCodes(coupon.productCodes),
+        discountType: coupon.discountType,
+        percentOff: coupon.percentOff,
+        amountOffCents: coupon.amountOffCents,
+        usageMode: coupon.usageMode,
+        usageCount: coupon.usageCount,
+        createdAt: coupon.createdAt,
+        updatedAt: coupon.updatedAt
+      }
+    : null;
+
+  if (resolvedCoupon?.usageMode === "SINGLE_USE" && resolvedCoupon.usageCount > 0) {
+    return NextResponse.redirect(new URL("/cart?error=coupon-used", baseUrl), 303);
+  }
+
+  const { discountCents, lineItems } = buildDiscountedStripeLineItems(lines, resolvedCoupon);
+
+  if (rawCouponCode && discountCents <= 0) {
+    return NextResponse.redirect(new URL("/cart?error=coupon-not-eligible", baseUrl), 303);
   }
 
   let customer = await prisma.customer.findUnique({
@@ -86,29 +130,21 @@ export async function POST(request: Request) {
   }
 
   const cartMetadata = lines.map((line) => `${line.product.id}:${line.quantity}`).join(",");
-  const lineItems = lines.map((line) => ({
-    quantity: line.quantity,
-    price_data: {
-      currency: line.product.currency.toLowerCase(),
-      unit_amount: line.product.priceCents,
-      product_data: {
-        name: line.product.name,
-        description: line.product.shortDescription
-      }
-    }
-  }));
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     billing_address_collection: "required",
     customer_creation: "always",
-    allow_promotion_codes: true,
+    allow_promotion_codes: false,
     shipping_address_collection: {
       allowed_countries: ["US"]
     },
     metadata: {
       customerId: customer.id,
-      cartItems: cartMetadata
+      cartItems: cartMetadata,
+      couponId: resolvedCoupon?.id ?? "",
+      couponCode: resolvedCoupon?.code ?? "",
+      discountCents: String(discountCents)
     },
     customer_email: email,
     line_items: lineItems,

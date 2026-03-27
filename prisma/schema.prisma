@@ -41,8 +41,19 @@ enum ReviewStatus {
   HIDDEN
 }
 
+enum CouponDiscountType {
+  PERCENT
+  FIXED_AMOUNT
+}
+
+enum CouponUsageMode {
+  SINGLE_USE
+  UNLIMITED
+}
+
 model Product {
   id                  String        @id @default(cuid())
+  productCode         String?       @unique
   name                String
   slug                String        @unique
   tagline             String
@@ -110,10 +121,13 @@ model Order {
   fulfillmentStatus     FulfillmentStatus @default(UNFULFILLED)
   currency              String            @default("USD")
   subtotalCents         Int
+  discountCents         Int               @default(0)
   shippingCents         Int               @default(0)
   taxCents              Int               @default(0)
   totalCents            Int
   pointsEarned          Int               @default(0)
+  couponCode            String?
+  couponId              String?
   stripeCheckoutId      String?
   stripePaymentIntentId String?
   shippingName          String?
@@ -126,6 +140,7 @@ model Order {
   notes                 String?
   customerId            String?
   customer              Customer?         @relation(fields: [customerId], references: [id])
+  coupon                Coupon?           @relation(fields: [couponId], references: [id], onDelete: SetNull)
   items                 OrderItem[]
   rewards               RewardEntry[]
   reviews               ProductReview[]
@@ -204,4 +219,21 @@ model ContactSubmission {
   subject   String
   message   String
   createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id             String             @id @default(cuid())
+  code           String             @unique
+  content        String
+  active         Boolean            @default(true)
+  appliesToAll   Boolean            @default(false)
+  productCodes   String?
+  discountType   CouponDiscountType
+  percentOff     Int?
+  amountOffCents Int?
+  usageMode      CouponUsageMode    @default(UNLIMITED)
+  usageCount     Int                @default(0)
+  orders         Order[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 }

@@ -33,6 +33,12 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
   }
 
   const metadataCustomerId = session.metadata?.customerId;
+  const metadataCouponId = session.metadata?.couponId || null;
+  const metadataCouponCode = session.metadata?.couponCode || null;
+  const metadataDiscountCents = Math.max(
+    0,
+    Number.parseInt(session.metadata?.discountCents || "0", 10) || 0
+  );
   const cartItems = (session.metadata?.cartItems || "")
     .split(",")
     .map((item) => item.trim())
@@ -89,9 +95,10 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
   const customerName = session.customer_details?.name || shippingDetails?.name;
   const nameParts = splitCustomerName(customerName);
   const address = session.customer_details?.address || shippingDetails?.address;
-  const fallbackSubtotal = resolvedLines.reduce((sum, line) => sum + line.lineTotalCents, 0);
-  const totalCents = session.amount_total ?? fallbackSubtotal;
-  const subtotalCents = session.amount_subtotal ?? fallbackSubtotal;
+  const originalSubtotalCents = resolvedLines.reduce((sum, line) => sum + line.lineTotalCents, 0);
+  const totalCents =
+    session.amount_total ?? Math.max(0, originalSubtotalCents - metadataDiscountCents);
+  const subtotalCents = originalSubtotalCents;
   const shippingCents = 0;
   const taxCents = session.total_details?.amount_tax ?? 0;
   const pointsEarned = resolvedLines.reduce(
@@ -132,6 +139,13 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
         }
       });
 
+  const appliedCoupon = metadataCouponId
+    ? await prisma.coupon.findUnique({
+        where: { id: metadataCouponId },
+        select: { id: true }
+      })
+    : null;
+
   const order = await prisma.order.create({
     data: {
       orderNumber: createOrderNumber(),
@@ -140,10 +154,13 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
       fulfillmentStatus: "UNFULFILLED",
       currency: (session.currency || "usd").toUpperCase(),
       subtotalCents,
+      discountCents: metadataDiscountCents,
       shippingCents,
       taxCents,
       totalCents,
       pointsEarned,
+      couponCode: metadataCouponCode,
+      couponId: appliedCoupon?.id ?? null,
       stripeCheckoutId: checkoutId,
       stripePaymentIntentId:
         typeof session.payment_intent === "string" ? session.payment_intent : null,
@@ -178,6 +195,19 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
         points: pointsEarned,
         note: `Paid order ${order.orderNumber}`
       }
+    });
+  }
+
+  if (appliedCoupon?.id) {
+    await prisma.coupon.update({
+      where: { id: appliedCoupon.id },
+      data: {
+        usageCount: {
+          increment: 1
+        }
+      }
+    }).catch((error) => {
+      console.error("Coupon usage update skipped:", error);
     });
   }
 }

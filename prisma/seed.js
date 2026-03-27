@@ -70,6 +70,7 @@ function buildDisplayName(index) {
 const products = [
   {
     id: "prod_pdrn_cream",
+    productCode: "0001",
     name: "PDRN Cream",
     slug: "pdrn-cream",
     tagline: "Daily repair cream for calm, comforted, resilient-looking skin.",
@@ -91,6 +92,7 @@ const products = [
   },
   {
     id: "prod_pdrn_serum",
+    productCode: "0002",
     name: "PDRN Serum",
     slug: "pdrn-serum",
     tagline: "A silky Salmon PDRN serum that supports smoothness, bounce, and glow.",
@@ -112,6 +114,7 @@ const products = [
   },
   {
     id: "prod_snail_cream",
+    productCode: "0003",
     name: "Snail Mucin Cream",
     slug: "snail-mucin-cream",
     tagline: "Velvety moisture care that helps skin feel soothed and replenished.",
@@ -133,6 +136,7 @@ const products = [
   },
   {
     id: "prod_snail_serum",
+    productCode: "0004",
     name: "Snail Mucin Serum",
     slug: "snail-mucin-serum",
     tagline: "Daily hydration serum for soft-looking skin and lasting comfort.",
@@ -322,6 +326,7 @@ async function main() {
     await prisma.product.upsert({
       where: { slug: product.slug },
       update: {
+        productCode: product.productCode,
         name: product.name,
         tagline: product.tagline,
         category: product.category,

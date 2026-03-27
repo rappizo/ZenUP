@@ -31,6 +31,11 @@ export default async function AdminOrdersPage({ searchParams }: AdminOrdersPageP
             <p>
               {order.email} · {formatDate(order.createdAt)}
             </p>
+            {order.couponCode ? (
+              <p>
+                Coupon {order.couponCode} · Saved {formatCurrency(order.discountCents)}
+              </p>
+            ) : null}
             <ul className="admin-list">
               {order.items.map((item) => (
                 <li key={item.id}>

@@ -3,9 +3,12 @@ export type OrderStatus = "PENDING" | "PAID" | "FULFILLED" | "CANCELLED" | "REFU
 export type FulfillmentStatus = "UNFULFILLED" | "PROCESSING" | "SHIPPED" | "DELIVERED";
 export type RewardType = "EARNED" | "REDEEMED" | "ADJUSTMENT";
 export type ReviewStatus = "PENDING" | "PUBLISHED" | "HIDDEN";
+export type CouponDiscountType = "PERCENT" | "FIXED_AMOUNT";
+export type CouponUsageMode = "SINGLE_USE" | "UNLIMITED";
 
 export type ProductRecord = {
   id: string;
+  productCode: string;
   name: string;
   slug: string;
   tagline: string;
@@ -81,10 +84,13 @@ export type OrderRecord = {
   fulfillmentStatus: FulfillmentStatus;
   currency: string;
   subtotalCents: number;
+  discountCents: number;
   shippingCents: number;
   taxCents: number;
   totalCents: number;
   pointsEarned: number;
+  couponCode: string | null;
+  couponId: string | null;
   shippingName: string | null;
   shippingAddress1: string | null;
   shippingAddress2: string | null;
@@ -99,6 +105,23 @@ export type OrderRecord = {
   createdAt: Date;
   updatedAt: Date;
   items: OrderItemRecord[];
+};
+
+export type CouponRecord = {
+  id: string;
+  code: string;
+  content: string;
+  active: boolean;
+  appliesToAll: boolean;
+  productCodes: string[];
+  discountType: CouponDiscountType;
+  percentOff: number | null;
+  amountOffCents: number | null;
+  usageMode: CouponUsageMode;
+  usageCount: number;
+  orderCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type RewardEntryRecord = {

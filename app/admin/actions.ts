@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -9,7 +10,16 @@ import {
   setAdminSession,
   validateAdminCredentials
 } from "@/lib/admin-auth";
-import type { FulfillmentStatus, OrderStatus, ProductStatus, ReviewStatus } from "@/lib/types";
+import { normalizeCouponCode, parseCouponScopeInput, serializeCouponScope } from "@/lib/coupons";
+import { ensureProductCodes, getNextProductCode } from "@/lib/product-codes";
+import type {
+  CouponDiscountType,
+  CouponUsageMode,
+  FulfillmentStatus,
+  OrderStatus,
+  ProductStatus,
+  ReviewStatus
+} from "@/lib/types";
 import { normalizeMultilineValue, toBool, toInt, toPlainString, toPriceCents } from "@/lib/utils";
 
 function buildPublishedDate(formData: FormData, published: boolean) {
@@ -47,6 +57,89 @@ function buildReviewRedirect(status: string, redirectTo?: string, productSlug?: 
   params.set("status", status);
   const nextQuery = params.toString();
   return nextQuery ? `${pathname}?${nextQuery}` : pathname;
+}
+
+function buildCouponRedirect(status: string, couponId?: string) {
+  const basePath = couponId ? `/admin/coupons/${couponId}` : "/admin/coupons";
+  const separator = basePath.includes("?") ? "&" : "?";
+  return `${basePath}${separator}status=${status}`;
+}
+
+function parseCouponDiscountType(value: string | undefined): CouponDiscountType {
+  return value === "FIXED_AMOUNT" ? "FIXED_AMOUNT" : "PERCENT";
+}
+
+function parseCouponUsageMode(value: string | undefined): CouponUsageMode {
+  return value === "SINGLE_USE" ? "SINGLE_USE" : "UNLIMITED";
+}
+
+type CouponPayloadResult =
+  | {
+      error: "missing-fields" | "missing-scope" | "invalid-discount";
+    }
+  | {
+      data: {
+        code: string;
+        content: string;
+        active: boolean;
+        appliesToAll: boolean;
+        productCodes: string | null;
+        discountType: CouponDiscountType;
+        percentOff: number | null;
+        amountOffCents: number | null;
+        usageMode: CouponUsageMode;
+      };
+    };
+
+function buildCouponPayload(formData: FormData): CouponPayloadResult {
+  const code = normalizeCouponCode(toPlainString(formData.get("code")));
+  const content = toPlainString(formData.get("content"));
+  const active = toBool(formData.get("active"));
+  const discountType = parseCouponDiscountType(toPlainString(formData.get("discountType")));
+  const usageMode = parseCouponUsageMode(toPlainString(formData.get("usageMode")));
+  const scope = parseCouponScopeInput(toPlainString(formData.get("scope")));
+  const percentOff =
+    discountType === "PERCENT" ? Math.max(0, Math.min(100, toInt(formData.get("percentOff")))) : null;
+  const amountOffCents =
+    discountType === "FIXED_AMOUNT" ? Math.max(0, toPriceCents(formData.get("amountOffCents"))) : null;
+
+  if (!code || !content) {
+    return {
+      error: "missing-fields" as const
+    };
+  }
+
+  if (!scope.appliesToAll && scope.codes.length === 0) {
+    return {
+      error: "missing-scope" as const
+    };
+  }
+
+  if (discountType === "PERCENT" && !percentOff) {
+    return {
+      error: "invalid-discount" as const
+    };
+  }
+
+  if (discountType === "FIXED_AMOUNT" && !amountOffCents) {
+    return {
+      error: "invalid-discount" as const
+    };
+  }
+
+  return {
+    data: {
+      code,
+      content,
+      active,
+      appliesToAll: scope.appliesToAll,
+      productCodes: scope.appliesToAll ? null : serializeCouponScope(scope.codes),
+      discountType,
+      percentOff,
+      amountOffCents,
+      usageMode
+    }
+  };
 }
 
 function normalizeCsvHeader(value: string) {
@@ -139,10 +232,13 @@ export async function logoutAction() {
 export async function createProductAction(formData: FormData) {
   await requireAdminSession();
 
+  await ensureProductCodes();
   const prices = buildProductPriceData(formData);
+  const productCode = await getNextProductCode();
 
   const product = await prisma.product.create({
     data: {
+      productCode,
       name: toPlainString(formData.get("name")),
       slug: toPlainString(formData.get("slug")),
       tagline: toPlainString(formData.get("tagline")),
@@ -225,6 +321,86 @@ export async function deleteProductAction(formData: FormData) {
   refreshStorefront(product?.slug ? [product.slug] : []);
   revalidatePath("/admin/products");
   redirect("/admin/products?status=deleted");
+}
+
+export async function createCouponAction(formData: FormData) {
+  await requireAdminSession();
+
+  const payload = buildCouponPayload(formData);
+
+  if ("error" in payload) {
+    redirect(buildCouponRedirect(payload.error));
+  }
+
+  try {
+    const coupon = await prisma.coupon.create({
+      data: payload.data
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/coupons");
+    redirect(buildCouponRedirect("created", coupon.id));
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      redirect(buildCouponRedirect("duplicate-code"));
+    }
+
+    throw error;
+  }
+}
+
+export async function updateCouponAction(formData: FormData) {
+  await requireAdminSession();
+
+  const id = toPlainString(formData.get("id"));
+  const payload = buildCouponPayload(formData);
+
+  if ("error" in payload) {
+    redirect(buildCouponRedirect(payload.error, id));
+  }
+
+  try {
+    await prisma.coupon.update({
+      where: { id },
+      data: payload.data
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/coupons");
+    revalidatePath(`/admin/coupons/${id}`);
+    redirect(buildCouponRedirect("updated", id));
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      redirect(buildCouponRedirect("duplicate-code", id));
+    }
+
+    throw error;
+  }
+}
+
+export async function toggleCouponStatusAction(formData: FormData) {
+  await requireAdminSession();
+
+  const id = toPlainString(formData.get("id"));
+  const nextActive = toPlainString(formData.get("nextActive")) === "true";
+
+  await prisma.coupon.update({
+    where: { id },
+    data: {
+      active: nextActive
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/coupons");
+  revalidatePath(`/admin/coupons/${id}`);
+  redirect(buildCouponRedirect(nextActive ? "activated" : "deactivated", id));
 }
 
 export async function createPostAction(formData: FormData) {

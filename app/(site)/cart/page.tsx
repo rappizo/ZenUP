@@ -46,6 +46,15 @@ export default async function CartPage({ searchParams }: CartPageProps) {
 
         {params.status === "added" ? <p className="notice">Item added to your cart.</p> : null}
         {params.error === "empty-cart" ? <p className="notice">Your cart is empty.</p> : null}
+        {params.error === "coupon-invalid" ? (
+          <p className="notice">That coupon code is not active or could not be found.</p>
+        ) : null}
+        {params.error === "coupon-not-eligible" ? (
+          <p className="notice">That coupon does not apply to the product IDs currently in your cart.</p>
+        ) : null}
+        {params.error === "coupon-used" ? (
+          <p className="notice">That coupon has already been used and can no longer be applied.</p>
+        ) : null}
         {params.error === "account" ? (
           <p className="notice">Please sign in with the password for that email, or continue and we will send account access to your inbox.</p>
         ) : null}
@@ -153,6 +162,18 @@ export default async function CartPage({ searchParams }: CartPageProps) {
                       defaultValue={currentCustomer?.lastName ?? ""}
                     />
                   </div>
+                </div>
+                <div className="field">
+                  <label htmlFor="checkout-coupon">Coupon code</label>
+                  <input
+                    id="checkout-coupon"
+                    name="couponCode"
+                    placeholder="Enter your code if you have one"
+                  />
+                  <p className="form-note">
+                    Product-specific coupons match against Product IDs. Use ALL-order coupons the
+                    same way.
+                  </p>
                 </div>
                 <button type="submit" className="button button--primary">
                   Proceed to checkout

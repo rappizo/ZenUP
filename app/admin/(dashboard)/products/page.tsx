@@ -39,6 +39,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
               <div className="product-card__meta">
                 <span>{product.category}</span>
                 <span>{product.status}</span>
+                <span>ID {product.productCode || "Pending"}</span>
               </div>
               <h3>{product.name}</h3>
               <p>{product.shortDescription}</p>

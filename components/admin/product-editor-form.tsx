@@ -32,6 +32,7 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
             </div>
             <div className="admin-product-card__body">
               <p className="eyebrow">{product.category}</p>
+              <p className="form-note">Product ID {product.productCode || "Pending assignment"}</p>
               <h3>{product.name}</h3>
               <p>{product.shortDescription}</p>
               <div className="product-price-stack">
@@ -58,6 +59,15 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
         {product ? <input type="hidden" name="id" value={product.id} /> : null}
 
         <div className="admin-form__grid">
+          <div className="field">
+            <label htmlFor="productCode">Product ID</label>
+            <input
+              id="productCode"
+              value={product?.productCode || "Auto-generated after creation"}
+              readOnly
+              disabled
+            />
+          </div>
           <div className="field">
             <label htmlFor="name">Product name</label>
             <input id="name" name="name" defaultValue={product?.name ?? ""} required />
