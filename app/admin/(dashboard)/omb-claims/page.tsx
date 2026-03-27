@@ -18,9 +18,9 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
         <p className="eyebrow">OMB Claim</p>
         <h1>Review every OMB claim from order verification through screenshot and gift handling.</h1>
         <p>
-          This workspace combines the `/om` and `/om2` submissions into one operations view so the
-          team can check platform, rating, address, screenshot, gift status, and internal notes in
-          a single place.
+          This workspace combines the `/om`, `/om2`, and `/om3` steps into one operations view so
+          the team can check platform, rating, address, screenshot, gift status, and internal notes
+          in a single place.
         </p>
       </div>
 
@@ -67,12 +67,22 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
                     </h3>
                     <p>
                       {claim.email} / {formatDate(claim.createdAt)} /{" "}
-                      {claim.completedAt ? "Step 2 completed" : "Waiting for step 2"}
+                      {claim.completedAt
+                        ? "Completed"
+                        : claim.reviewRating && claim.reviewRating >= 4
+                          ? "Waiting for last step"
+                          : "Waiting for step 2"}
                     </p>
                   </div>
                   <div className="stack-row">
                     <span className="pill">{claim.platformLabel}</span>
-                    {claim.completedAt ? <span className="pill">Completed</span> : <span className="pill">Step 1 only</span>}
+                    {claim.completedAt ? (
+                      <span className="pill">Completed</span>
+                    ) : claim.reviewRating && claim.reviewRating >= 4 ? (
+                      <span className="pill">Step 2 saved</span>
+                    ) : (
+                      <span className="pill">Step 1 only</span>
+                    )}
                     {claim.giftSent ? <span className="pill">Gift sent</span> : <span className="pill">Gift pending</span>}
                   </div>
                 </div>

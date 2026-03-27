@@ -1,11 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  getOrderMatchPlatform,
-  isHighRating,
-  OMB_MIN_COMMENT_LENGTH
-} from "@/lib/order-match";
+import { useState } from "react";
 
 type OmbSelectableProduct = {
   id: string;
@@ -36,54 +31,16 @@ export function OmbClaimStepTwoForm({
   productOptions
 }: OmbClaimStepTwoFormProps) {
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
-  const [selectedProductShortName, setSelectedProductShortName] = useState("");
-  const [selectedFileName, setSelectedFileName] = useState("");
-  const platform = useMemo(() => getOrderMatchPlatform(platformKey), [platformKey]);
-  const shouldShowClaimFields = isHighRating(rating);
-  const selectedProduct = useMemo(
-    () => productOptions.find((product) => product.shortName === selectedProductShortName) ?? null,
-    [productOptions, selectedProductShortName]
-  );
-  const destinationUrl = useMemo(() => {
-    if (platform.key === "amazon") {
-      return selectedProduct?.amazonAsin
-        ? `https://www.amazon.com/review/create-review/?asin=${encodeURIComponent(selectedProduct.amazonAsin)}`
-        : null;
-    }
-
-    return platform.outboundUrl;
-  }, [platform, selectedProduct]);
-  const canUseOutboundButton =
-    comment.trim().length >= OMB_MIN_COMMENT_LENGTH && Boolean(destinationUrl);
-
-  async function handleCopyAndGo() {
-    if (!canUseOutboundButton) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(comment.trim());
-      setCopyState("copied");
-    } catch (error) {
-      console.error("Could not copy review text:", error);
-    }
-
-    if (destinationUrl) {
-      window.open(destinationUrl, "_blank", "noopener,noreferrer");
-    }
-  }
 
   return (
     <section className="om-shell">
       <div className="om-shell__header">
         <div className="section-heading">
           <p className="section-heading__eyebrow">OMB Process / Step 2</p>
-          <h1>Finish your OMB claim with product feedback and delivery details.</h1>
+          <h1>Tell us what you purchased and how the product felt on your skin.</h1>
           <p className="section-heading__description">
-            Your order verification was carried over from step 1. Complete the product feedback
-            form below to finish the OMB process.
+            Your order verification from step 1 has already been carried over. Share the product,
+            your rating, and your comments here before we send you to the final step.
           </p>
         </div>
         <div className="page-hero__stats">
@@ -93,7 +50,7 @@ export function OmbClaimStepTwoForm({
       </div>
 
       <div className="om-shell__body">
-        <form action="/api/om2" method="post" encType="multipart/form-data" className="contact-form">
+        <form action="/api/om2" method="post" className="contact-form">
           <input type="hidden" name="claimId" value={claimId} />
           <input type="hidden" name="platform" value={platformKey} />
           <input type="hidden" name="orderId" value={orderId} />
@@ -106,13 +63,7 @@ export function OmbClaimStepTwoForm({
             <label htmlFor="purchased-product">
               What did you purchase from us? <span className="field__required">(Required)</span>
             </label>
-            <select
-              id="purchased-product"
-              name="purchasedProduct"
-              required
-              defaultValue=""
-              onChange={(event) => setSelectedProductShortName(event.target.value)}
-            >
+            <select id="purchased-product" name="purchasedProduct" required defaultValue="">
               <option value="" disabled>
                 Select a product
               </option>
@@ -142,7 +93,7 @@ export function OmbClaimStepTwoForm({
                     aria-label={`${value} star${value === 1 ? "" : "s"}`}
                     aria-pressed={rating === value}
                   >
-                    ★
+                    {"\u2605"}
                   </button>
                 );
               })}
@@ -153,69 +104,12 @@ export function OmbClaimStepTwoForm({
             <label htmlFor="omb-comment">
               Comments about our product. <span className="field__required">(Required)</span>
             </label>
-            <textarea
-              id="omb-comment"
-              name="commentText"
-              minLength={OMB_MIN_COMMENT_LENGTH}
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-              required
-            />
-            <p className="form-note">Please write at least {OMB_MIN_COMMENT_LENGTH} characters.</p>
+            <textarea id="omb-comment" name="commentText" minLength={10} required />
+            <p className="form-note">Please write at least 10 characters.</p>
           </div>
 
-          {shouldShowClaimFields ? (
-            <>
-              <div className="omb-cta-card omb-cta-card--highlight">
-                <div className="stack-row">
-                  <button
-                    type="button"
-                    className="button button--primary"
-                    onClick={handleCopyAndGo}
-                    disabled={!canUseOutboundButton}
-                  >
-                    {platform.outboundButtonLabel}
-                  </button>
-                  {copyState === "copied" ? <span className="pill">Text copied</span> : null}
-                </div>
-              </div>
-
-              {platform.key !== "amazon" ? (
-                <div className="field">
-                  <label htmlFor="omb-screenshot">
-                    Please upload the screenshot of your comment on the platform{" "}
-                    <span className="field__required">(Required)</span>
-                  </label>
-                  <input
-                    id="omb-screenshot"
-                    name="screenshot"
-                    type="file"
-                    accept="image/*"
-                    required
-                    className="omb-file-input"
-                    onChange={(event) => setSelectedFileName(event.target.files?.[0]?.name || "")}
-                  />
-                  <label htmlFor="omb-screenshot" className="omb-file-trigger">
-                    <span className="button button--secondary">Choose File</span>
-                    <span className="omb-file-trigger__name">
-                      {selectedFileName || "No file selected"}
-                    </span>
-                  </label>
-                </div>
-              ) : null}
-
-              <div className="field">
-                <label htmlFor="omb-address">
-                  Leave the address for an extra bottle{" "}
-                  <span className="field__required">(Required)</span>
-                </label>
-                <textarea id="omb-address" name="extraBottleAddress" required />
-              </div>
-            </>
-          ) : null}
-
           <button type="submit" className="button button--primary om-shell__submit">
-            Submit OMB Claim
+            Continue
           </button>
         </form>
       </div>

@@ -5,9 +5,6 @@ import {
   isHighRating,
   OMB_MIN_COMMENT_LENGTH
 } from "@/lib/order-match";
-import { compressOmbScreenshot } from "@/lib/omb-screenshot";
-
-export const runtime = "nodejs";
 
 function redirectWithError(request: Request, claimId: string, platformKey: string, error: string) {
   return NextResponse.redirect(
@@ -22,8 +19,6 @@ export async function POST(request: Request) {
   const purchasedProduct = String(formData.get("purchasedProduct") || "").trim();
   const rating = Number.parseInt(String(formData.get("rating") || "").trim(), 10);
   const commentText = String(formData.get("commentText") || "").trim();
-  const extraBottleAddress = String(formData.get("extraBottleAddress") || "").trim();
-  const screenshot = formData.get("screenshot");
 
   const claim = claimId
     ? await prisma.ombClaim.findUnique({
@@ -58,40 +53,14 @@ export async function POST(request: Request) {
     return redirectWithError(request, claim.id, platform.key, "comment");
   }
 
-  let screenshotPayload:
-    | {
-        name: string;
-        mimeType: string;
-        base64: string;
-        bytes: number;
-      }
-    | undefined;
-
-  if (isHighRating(rating)) {
-    if (platform.key !== "amazon" && (!(screenshot instanceof File) || screenshot.size <= 0)) {
-      return redirectWithError(request, claim.id, platform.key, "image-required");
-    }
-
-    if (!extraBottleAddress) {
-      return redirectWithError(request, claim.id, platform.key, "address");
-    }
-
-    if (platform.key !== "amazon") {
-      try {
-        screenshotPayload = await compressOmbScreenshot(screenshot as File);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "image-type";
-        return redirectWithError(request, claim.id, platform.key, message);
-      }
-    }
-  }
-
   const reviewDestinationUrl =
     platform.key === "amazon"
       ? product.amazonAsin
         ? `https://www.amazon.com/review/create-review/?asin=${encodeURIComponent(product.amazonAsin)}`
         : null
       : platform.outboundUrl;
+
+  const highRating = isHighRating(rating);
 
   await prisma.ombClaim.update({
     where: { id: claim.id },
@@ -100,17 +69,18 @@ export async function POST(request: Request) {
       reviewRating: rating,
       commentText,
       reviewDestinationUrl,
-      screenshotName: screenshotPayload?.name ?? null,
-      screenshotMimeType: screenshotPayload?.mimeType ?? null,
-      screenshotBase64: screenshotPayload?.base64 ?? null,
-      screenshotBytes: screenshotPayload?.bytes ?? null,
-      extraBottleAddress: isHighRating(rating) ? extraBottleAddress : null,
-      completedAt: new Date()
+      screenshotName: null,
+      screenshotMimeType: null,
+      screenshotBase64: null,
+      screenshotBytes: null,
+      extraBottleAddress: null,
+      completedAt: highRating ? null : new Date()
     }
   });
 
-  return NextResponse.redirect(
-    new URL(`/om2/thank-you?claim=${claim.id}`, request.url),
-    303
-  );
+  if (highRating) {
+    return NextResponse.redirect(new URL(`/om3?claim=${claim.id}`, request.url), 303);
+  }
+
+  return NextResponse.redirect(new URL(`/om2/thank-you?claim=${claim.id}`, request.url), 303);
 }
