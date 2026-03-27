@@ -1218,6 +1218,12 @@ main {
   font-weight: 700;
 }
 
+.field__required {
+  color: var(--brand-deep);
+  font-style: italic;
+  font-weight: 600;
+}
+
 .field input,
 .field select,
 .field textarea {
@@ -1531,6 +1537,75 @@ main {
   grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
   gap: 24px;
   align-items: start;
+}
+
+.om-section {
+  padding-top: 18px;
+}
+
+.om-shell {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  border-radius: 30px;
+}
+
+.om-shell__header {
+  padding: 28px 28px 18px;
+}
+
+.om-shell__header .section-heading {
+  margin-bottom: 0;
+  max-width: none;
+}
+
+.om-shell__header h1 {
+  font-size: clamp(2rem, 3.8vw, 3rem);
+}
+
+.om-shell__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 28px 22px;
+  border-top: 1px solid rgba(46, 40, 37, 0.06);
+  border-bottom: 1px solid rgba(46, 40, 37, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.8));
+}
+
+.om-shell__tab {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(237, 115, 97, 0.24);
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--brand-deep);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.om-shell__tab:hover,
+.om-shell__tab:focus-visible {
+  transform: translateY(-1px);
+}
+
+.om-shell__tab--active {
+  color: white;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand) 0%, #f08f7f 100%);
+  box-shadow: 0 12px 26px rgba(237, 115, 97, 0.22);
+}
+
+.om-shell__body {
+  padding: 28px;
+}
+
+.om-shell__submit {
+  width: fit-content;
+  min-width: 132px;
 }
 
 .om-platforms {
@@ -2344,6 +2419,34 @@ main {
 
   .social-proof__embed iframe {
     min-height: 460px;
+  }
+
+  .om-shell__header,
+  .om-shell__tabs,
+  .om-shell__body {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .om-shell__header {
+    padding-top: 22px;
+    padding-bottom: 14px;
+  }
+
+  .om-shell__tabs {
+    gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 16px;
+  }
+
+  .om-shell__tab {
+    min-height: 44px;
+    padding: 0 18px;
+  }
+
+  .om-shell__body {
+    padding-top: 22px;
+    padding-bottom: 22px;
   }
 
   .product-page-stack {

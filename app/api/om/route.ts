@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   const platform = getOrderMatchPlatform(requestedPlatform);
 
-  if (!orderId || !name || !email || !phone) {
+  if (!orderId || !name || !email) {
     return NextResponse.redirect(new URL(`/om?platform=${platform.key}&error=missing`, request.url), 303);
   }
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       orderId,
       name,
       email,
-      phone
+      phone: phone || null
     }
   });
 
