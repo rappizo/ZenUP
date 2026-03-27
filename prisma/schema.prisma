@@ -199,6 +199,7 @@ model ProductReview {
   title            String
   content          String
   displayName      String
+  reviewDate       DateTime     @default(now())
   status           ReviewStatus @default(PENDING)
   verifiedPurchase Boolean      @default(false)
   adminNotes       String?

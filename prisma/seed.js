@@ -279,44 +279,135 @@ const reviewPlans = {
   }
 };
 
-function buildReviewBody(product, plan, index) {
-  const texture = plan.texturePhrases[index % plan.texturePhrases.length];
-  const finish = plan.finishPhrases[(index * 2) % plan.finishPhrases.length];
-  const timing = plan.timingPhrases[(index * 3) % plan.timingPhrases.length];
-  const result = plan.resultPhrases[(index * 5) % plan.resultPhrases.length];
+const reviewContextHooks = [
+  "during travel weeks",
+  "while working long office days",
+  "after late nights",
+  "during colder weather",
+  "in humid mornings",
+  "for quick weekday routines"
+];
 
-  const shortBody = `${product.name} feels ${texture} and leaves my skin looking ${finish}. It fits into my routine very easily.`;
-  const mediumBody = `I have been using ${product.name} ${timing}, and the ${texture} texture makes it so easy to stay consistent with. My skin looks ${finish} and feels ${result}.`;
-  const longBody = `I started using ${product.name} ${timing}, and it immediately felt like one of the easiest products in my routine to keep coming back to. The texture is ${texture}, so it layers well without making everything feel too heavy. After a little consistent use, my skin looks ${finish} and feels ${result}, which is exactly what I was hoping for.`;
+const reviewResultHooks = [
+  "my skin tone looks more even",
+  "dry areas feel softer",
+  "makeup sits cleaner on top",
+  "my face feels less tight by evening",
+  "my routine feels more balanced",
+  "the finish looks smoother in daylight"
+];
 
-  if (index % 5 === 0) {
-    return longBody;
+const reviewClosingHooks = [
+  "I already ordered another one.",
+  "This is in my weekly rotation now.",
+  "I keep reaching for it over other options.",
+  "It feels like a dependable staple.",
+  "I would buy this again.",
+  "It made my routine easier to stick to."
+];
+
+function seededFloat(seed) {
+  const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+function pickVariant(values, seed) {
+  return values[Math.floor(seededFloat(seed) * values.length) % values.length];
+}
+
+function buildReviewDate(productSlug, index) {
+  const now = new Date();
+  const seed = productSlug.length * 97 + index * 131 + 17;
+  const minutesBack = Math.floor(seededFloat(seed + 1) * 180 * 24 * 60);
+  const date = new Date(now.getTime() - minutesBack * 60 * 1000);
+  const roundedMinutes = Math.floor(date.getUTCMinutes() / 5) * 5;
+  date.setUTCMinutes(roundedMinutes, 0, 0);
+  return date;
+}
+
+function buildUniqueReviewCopy(product, plan, index, seen) {
+  const baseSeed = product.slug.length * 1000 + index * 17 + 9;
+  const title = pickVariant(plan.titlePhrases, baseSeed + 3);
+  const texture = pickVariant(plan.texturePhrases, baseSeed + 7);
+  const finish = pickVariant(plan.finishPhrases, baseSeed + 11);
+  const timing = pickVariant(plan.timingPhrases, baseSeed + 13);
+  const result = pickVariant(plan.resultPhrases, baseSeed + 19);
+  const context = pickVariant(reviewContextHooks, baseSeed + 23);
+  const extraResult = pickVariant(reviewResultHooks, baseSeed + 29);
+  const closing = pickVariant(reviewClosingHooks, baseSeed + 31);
+
+  const variants = [
+    {
+      title: title,
+      content: `I have been using ${product.name} ${timing}, mostly ${context}. The texture feels ${texture}, the finish looks ${finish}, and ${result}. ${closing}`
+    },
+    {
+      title: `${title} - ${context}`,
+      content: `Quick note after repeated use: ${product.name} is ${texture} and leaves my skin ${finish}. I noticed ${result}, and ${extraResult}. ${closing}`
+    },
+    {
+      title: `${product.name}: ${title.toLowerCase()}`,
+      content: `What I like most is how easy this is to layer. I apply ${product.name} ${timing}; it feels ${texture} and looks ${finish}. Within a few days, ${result}.`
+    },
+    {
+      title: `Real routine feedback - ${title}`,
+      content: `My skin can be inconsistent, but this one worked well for me. ${product.name} feels ${texture}, wears ${finish}, and ${extraResult}. ${closing}`
+    }
+  ];
+
+  for (let attempt = 0; attempt < variants.length + 4; attempt += 1) {
+    const variant = variants[attempt % variants.length];
+    const nextTitle =
+      attempt < variants.length
+        ? variant.title
+        : `${variant.title} (${index + 1}-${attempt - variants.length + 1})`;
+    const nextContent =
+      attempt < variants.length
+        ? variant.content
+        : `${variant.content} I use it ${timing} and still get a ${finish} look.`;
+    const signature = `${nextTitle}\n${nextContent}`;
+
+    if (!seen.has(signature)) {
+      seen.add(signature);
+      return {
+        title: nextTitle,
+        content: nextContent
+      };
+    }
   }
 
-  if (index % 2 === 0) {
-    return mediumBody;
-  }
+  const fallbackTitle = `${title} #${index + 1}`;
+  const fallbackContent = `${product.name} feels ${texture}, looks ${finish}, and ${result}. ${closing}`;
+  seen.add(`${fallbackTitle}\n${fallbackContent}`);
 
-  return shortBody;
+  return {
+    title: fallbackTitle,
+    content: fallbackContent
+  };
 }
 
 function buildSampleReviews(product) {
   const plan = reviewPlans[product.slug];
+  const seen = new Set();
 
   return Array.from({ length: plan.count }, (_, index) => {
-    const publishedAt = new Date(Date.UTC(2026, index % 6, ((index * 3) % 27) + 1, 9, 0, 0));
+    const reviewDate = buildReviewDate(product.slug, index);
+    const copy = buildUniqueReviewCopy(product, plan, index, seen);
 
     return {
       id: `sample-review-${product.slug}-${index + 1}`,
       productId: product.id,
       rating: plan.ratings[index % plan.ratings.length],
-      title: plan.titlePhrases[index % plan.titlePhrases.length],
-      content: buildReviewBody(product, plan, index),
+      title: copy.title,
+      content: copy.content,
       displayName: buildDisplayName(index + product.slug.length),
+      reviewDate,
       verifiedPurchase: index % 4 !== 0,
       status: "PUBLISHED",
       source: "ADMIN_IMPORT",
-      publishedAt
+      publishedAt: reviewDate,
+      createdAt: reviewDate,
+      updatedAt: reviewDate
     };
   });
 }
@@ -401,15 +492,13 @@ async function main() {
 
     await prisma.productReview.deleteMany({
       where: {
-        id: {
-          in: sampleReviews.map((review) => review.id)
-        }
+        productId: product.id
       }
     });
 
-    for (const review of sampleReviews) {
-      await prisma.productReview.create({
-        data: review
+    for (let index = 0; index < sampleReviews.length; index += 100) {
+      await prisma.productReview.createMany({
+        data: sampleReviews.slice(index, index + 100)
       });
     }
   }

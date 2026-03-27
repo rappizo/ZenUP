@@ -295,12 +295,15 @@ function mapReward(reward: any): RewardEntryRecord {
 }
 
 function mapReview(review: any): ProductReviewRecord {
+  const reviewDateSource = review.reviewDate ?? review.publishedAt ?? review.createdAt;
+
   return {
     id: review.id,
     rating: review.rating,
     title: review.title,
     content: review.content,
     displayName: review.displayName,
+    reviewDate: new Date(reviewDateSource),
     status: review.status,
     verifiedPurchase: review.verifiedPurchase,
     adminNotes: review.adminNotes ?? null,
@@ -838,12 +841,12 @@ export async function getPublishedReviewsByProductId(productId: string) {
             product: true,
             customer: true
           },
-          orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }]
+          orderBy: [{ reviewDate: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }]
         })
       ).map(mapReview),
-    fallbackReviews.filter(
-      (review) => review.productId === productId && review.status === "PUBLISHED"
-    ),
+    fallbackReviews
+      .filter((review) => review.productId === productId && review.status === "PUBLISHED")
+      .sort((left, right) => right.reviewDate.getTime() - left.reviewDate.getTime()),
     { allowFallbackOnDatabaseError: true }
   );
 }
@@ -857,10 +860,10 @@ export async function getAllReviews() {
             product: true,
             customer: true
           },
-          orderBy: [{ createdAt: "desc" }]
+          orderBy: [{ reviewDate: "desc" }, { createdAt: "desc" }]
         })
       ).map(mapReview),
-    fallbackReviews
+    [...fallbackReviews].sort((left, right) => right.reviewDate.getTime() - left.reviewDate.getTime())
   );
 }
 
@@ -1008,7 +1011,7 @@ export async function getAdminReviewPageByProductSlug(slug: string, page = 1, pa
 
     const productReviews = fallbackReviews
       .filter((review) => review.productId === product.id)
-      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime());
+      .sort((left, right) => right.reviewDate.getTime() - left.reviewDate.getTime());
     const counts = buildReviewStatusSummary(productReviews).get(product.id);
     const totalReviewCount = productReviews.length;
     const totalPages = Math.max(1, Math.ceil(totalReviewCount / pageSize));
@@ -1110,7 +1113,7 @@ export async function getAdminReviewPageByProductSlug(slug: string, page = 1, pa
             product: true,
             customer: true
           },
-          orderBy: [{ createdAt: "desc" }],
+          orderBy: [{ reviewDate: "desc" }, { createdAt: "desc" }],
           skip: (currentPage - 1) * pageSize,
           take: pageSize
         })
@@ -1181,7 +1184,7 @@ export async function getCustomerAccountById(customerId: string) {
               product: true
             },
             orderBy: {
-              createdAt: "desc"
+              reviewDate: "desc"
             }
           }
         }

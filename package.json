@@ -11,6 +11,7 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:seed": "node prisma/seed.js",
+    "db:reviews:reset": "node prisma/reset-reviews.js",
     "db:studio": "prisma studio",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
     "postinstall": "prisma generate"

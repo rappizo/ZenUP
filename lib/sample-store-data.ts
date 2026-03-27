@@ -7,11 +7,14 @@ type BaseProduct = Omit<ProductRecord, "reviewCount" | "averageRating">;
 type ReviewPlan = {
   count: number;
   ratings: number[];
+  titleHooks: string[];
+  toneHooks: string[];
   texturePhrases: string[];
-  finishPhrases: string[];
-  timingPhrases: string[];
+  routinePhrases: string[];
   resultPhrases: string[];
-  titlePhrases: string[];
+  comparisonPhrases: string[];
+  closingPhrases: string[];
+  variationTags: string[];
 };
 
 const firstNames = [
@@ -189,108 +192,294 @@ const reviewPlans: Record<string, ReviewPlan> = {
   "pdrn-cream": {
     count: 68,
     ratings: [5, 5, 4, 5, 5, 4, 5, 5, 4, 5],
-    texturePhrases: ["rich yet smooth", "plush and comfortable", "nourishing but refined"],
-    finishPhrases: ["soft and cushioned", "healthy-looking and calm", "velvety and comforted"],
-    timingPhrases: ["as the last step of my night routine", "after serum in the evening", "before SPF in the morning"],
-    resultPhrases: ["less tight by the end of the day", "much more comfortable overnight", "more rested and balanced overall"],
-    titlePhrases: [
-      "Comforting without feeling heavy",
-      "My skin feels softer by morning",
-      "Such a pretty cream texture",
-      "A really lovely finish",
-      "Looks smoother and calmer",
-      "Great final step for dry days"
-    ]
+    titleHooks: [
+      "Softer mornings with this cream",
+      "Comfort that still looks polished",
+      "This finished my routine perfectly",
+      "The texture surprised me in a good way",
+      "A calm glow without heavy residue",
+      "Much easier to wear than rich creams"
+    ],
+    toneHooks: [
+      "I bought this during a week my skin barrier felt stressed.",
+      "I was looking for a cream that felt luxurious but not greasy.",
+      "My skin gets tight quickly when weather changes.",
+      "I wanted something that looked elegant under makeup on workdays."
+    ],
+    texturePhrases: [
+      "creamy at first and then smooth once it settles",
+      "plush while applying, then light after two minutes",
+      "silky with a dense feel that never turns waxy",
+      "rich enough for dry patches but still refined"
+    ],
+    routinePhrases: [
+      "as the final step at night",
+      "after PDRN serum in the evening",
+      "before sunscreen when my skin feels dry",
+      "in a simple three-step routine"
+    ],
+    resultPhrases: [
+      "my cheeks look calmer when I wake up",
+      "the rough texture near my jaw looks smoother",
+      "my skin keeps that rested look into the afternoon",
+      "I feel less dryness around my nose and mouth"
+    ],
+    comparisonPhrases: [
+      "It performs better than most thick creams I used last year.",
+      "Compared with my previous moisturizer, this one sits cleaner on skin.",
+      "It gives comfort without the shiny layer I usually dislike.",
+      "It feels more premium than many creams in this price range."
+    ],
+    closingPhrases: [
+      "I keep this on my vanity because it is reliable.",
+      "I would repurchase for the finish alone.",
+      "This made my routine feel upgraded without adding steps.",
+      "For dry evenings, this is the jar I reach for."
+    ],
+    variationTags: ["night routine", "barrier comfort", "daily finish", "soft glow"]
   },
   "pdrn-serum": {
     count: 94,
     ratings: [5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5],
-    texturePhrases: ["silky and lightweight", "smooth with a polished slip", "light but still hydrating"],
-    finishPhrases: ["fresh and glowy", "smooth and radiant", "bright and refined"],
-    timingPhrases: ["right after cleansing", "before cream in the morning", "morning and night under moisturizer"],
-    resultPhrases: ["more luminous after a week", "more even and polished", "refreshed without any stickiness"],
-    titlePhrases: [
-      "This is the one I keep reaching for",
-      "Glowy but still elegant",
-      "Makes my routine feel expensive",
-      "Beautiful under the rest of my skincare",
-      "Gives me that smooth finish",
-      "Exactly the texture I wanted"
-    ]
+    titleHooks: [
+      "This became my main daytime serum",
+      "A cleaner glow than other brightening serums",
+      "Layers beautifully under cream and SPF",
+      "Silky texture with a refined finish",
+      "My skin looks brighter without stickiness",
+      "Easy serum to stay consistent with"
+    ],
+    toneHooks: [
+      "I tested this in the morning before commuting.",
+      "I wanted something light enough for humid days.",
+      "My old serum pilled under sunscreen so I switched.",
+      "I looked for a formula that felt polished, not syrupy."
+    ],
+    texturePhrases: [
+      "fluid and silky with almost no tack",
+      "lightweight but still hydrating enough for my dry zones",
+      "quick-absorbing with a polished slip",
+      "fresh on contact and easy to spread"
+    ],
+    routinePhrases: [
+      "right after cleansing",
+      "before moisturizer in both AM and PM",
+      "as my first treatment layer",
+      "under sunscreen every weekday"
+    ],
+    resultPhrases: [
+      "my skin tone looks more even in photos",
+      "my face looks fresher at the end of the day",
+      "I notice a smoother reflection on the high points",
+      "my complexion appears less dull by afternoon"
+    ],
+    comparisonPhrases: [
+      "It gives better glow than my old niacinamide blend.",
+      "Compared with heavier serums, this one wears more elegantly.",
+      "It is one of the few glow serums that does not pill for me.",
+      "I get brightness without that sticky film."
+    ],
+    closingPhrases: [
+      "This one is staying in my routine.",
+      "I plan to keep using it through summer.",
+      "Very easy to recommend if you like lightweight textures.",
+      "It is now my default serum step."
+    ],
+    variationTags: ["daytime use", "under SPF", "light texture", "glow step"]
   },
   "snail-mucin-cream": {
     count: 83,
     ratings: [5, 5, 4, 5, 4, 5, 5, 5, 4, 5, 5],
-    texturePhrases: ["cushiony and comforting", "soft and plush", "rich with a dewy touch"],
-    finishPhrases: ["dewy and supple", "comfortable and smooth", "plump and well-moisturized"],
-    timingPhrases: ["to seal everything in at night", "after serum whenever my skin feels dry", "as my comfort cream in the evening"],
-    resultPhrases: ["much more replenished the next morning", "less flaky around dry areas", "soft and calm for hours"],
-    titlePhrases: [
-      "So comforting at night",
-      "Dewy without looking greasy",
-      "A great comfort cream",
-      "Makes dry skin feel much happier",
-      "Softens everything right away",
-      "Really nice for overnight use"
-    ]
+    titleHooks: [
+      "A dependable comfort cream for dry nights",
+      "Dewy but still neat on my skin",
+      "This helped my flaky areas quickly",
+      "The overnight feel is excellent",
+      "Comforting texture without heaviness",
+      "A better night cream than expected"
+    ],
+    toneHooks: [
+      "I used this during a week of indoor heating and dry air.",
+      "My skin tends to look flat at night, so I wanted more cushion.",
+      "I needed a comfort cream after over-exfoliating.",
+      "I looked for a formula that felt rich but not suffocating."
+    ],
+    texturePhrases: [
+      "soft and cushiony with a dewy touch",
+      "richer than a gel cream but still smooth",
+      "nourishing while staying clean on the surface",
+      "velvety and easy to spread over serum"
+    ],
+    routinePhrases: [
+      "before bed as the final layer",
+      "after snail serum when my skin feels tight",
+      "in my evening routine on colder days",
+      "as a comfort step after showering"
+    ],
+    resultPhrases: [
+      "my skin looks less flaky by morning",
+      "dry patches around my chin stay softer",
+      "I wake up with a fuller and calmer finish",
+      "my face feels more comfortable overnight"
+    ],
+    comparisonPhrases: [
+      "It works better than the thicker jar cream I used before.",
+      "Compared with my old night cream, this feels less greasy.",
+      "It gives me dew without turning oily.",
+      "This one keeps moisture longer than lighter creams."
+    ],
+    closingPhrases: [
+      "I now keep this for every dry evening.",
+      "The comfort level is the big win for me.",
+      "I would buy this again for winter routines.",
+      "This made my evening routine feel complete."
+    ],
+    variationTags: ["overnight", "dry skin", "comfort layer", "dewy finish"]
   },
   "snail-mucin-serum": {
     count: 57,
     ratings: [5, 4, 5, 4, 5, 5, 4, 5, 4, 5],
-    texturePhrases: ["light, bouncy, and easy to spread", "fluid and fresh", "smooth and watery-light"],
-    finishPhrases: ["hydrated and calm", "soft and refreshed", "dewy in a very easy way"],
-    timingPhrases: ["under moisturizer in the morning", "after cleansing when my skin feels dry", "as my first hydrating layer"],
-    resultPhrases: ["more comfortable through the day", "smoother under the rest of my routine", "less dull by the afternoon"],
-    titlePhrases: [
-      "Easy to use every day",
-      "A very nice light serum",
-      "Hydrating but not sticky",
-      "Simple and really reliable",
-      "Great under moisturizer",
-      "Keeps my skin feeling fresh"
-    ]
+    titleHooks: [
+      "Simple hydration that works every day",
+      "A light serum that still feels effective",
+      "Fresh, bouncy, and easy to layer",
+      "Hydration without the sticky finish",
+      "Great first step after cleansing",
+      "This keeps my skin comfortable all day"
+    ],
+    toneHooks: [
+      "I wanted a daily serum that would not feel heavy.",
+      "My skin gets dehydrated fast in air conditioning.",
+      "I switched to this because my old serum felt tacky.",
+      "I needed a quick morning step before moisturizer."
+    ],
+    texturePhrases: [
+      "watery-light and very easy to spread",
+      "bouncy at first and smooth afterward",
+      "fresh with almost no residue",
+      "fluid enough to layer without pilling"
+    ],
+    routinePhrases: [
+      "right after cleansing",
+      "before moisturizer every morning",
+      "as the first hydrating layer",
+      "under both cream and sunscreen"
+    ],
+    resultPhrases: [
+      "my skin feels less tight during long workdays",
+      "the rest of my routine sits more smoothly",
+      "my face looks fresher by mid-day",
+      "I notice a cleaner, calmer hydration finish"
+    ],
+    comparisonPhrases: [
+      "It feels lighter than most hydrating serums I have tried.",
+      "Compared with thicker formulas, this one layers much better.",
+      "I get comfort without the sticky feeling.",
+      "It is easier to use daily than my previous serum."
+    ],
+    closingPhrases: [
+      "A very practical serum for everyday routines.",
+      "This has become my baseline hydration step.",
+      "I like how low-effort and reliable it feels.",
+      "I would recommend it for simple routines."
+    ],
+    variationTags: ["morning layer", "fresh texture", "daily hydration", "easy routine"]
   }
 };
 
-function buildReviewTitle(productSlug: string, index: number) {
-  const plan = reviewPlans[productSlug];
-  return plan.titlePhrases[index % plan.titlePhrases.length];
+function seededFloat(seed: number) {
+  const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return value - Math.floor(value);
 }
 
-function buildReviewBody(product: BaseProduct, plan: ReviewPlan, index: number) {
-  const texture = plan.texturePhrases[index % plan.texturePhrases.length];
-  const finish = plan.finishPhrases[(index * 2) % plan.finishPhrases.length];
-  const timing = plan.timingPhrases[(index * 3) % plan.timingPhrases.length];
-  const result = plan.resultPhrases[(index * 5) % plan.resultPhrases.length];
+function pickVariant(values: string[], seed: number) {
+  return values[Math.floor(seededFloat(seed) * values.length) % values.length];
+}
 
-  const shortBody = `${product.name} feels ${texture} and leaves my skin looking ${finish}. It fits into my routine very easily.`;
-  const mediumBody = `I have been using ${product.name} ${timing}, and the ${texture} texture makes it so easy to stay consistent with. My skin looks ${finish} and feels ${result}.`;
-  const longBody = `I started using ${product.name} ${timing}, and it immediately felt like one of the easiest products in my routine to keep coming back to. The texture is ${texture}, so it layers well without making everything feel too heavy. After a little consistent use, my skin looks ${finish} and feels ${result}, which is exactly what I was hoping for.`;
+function buildReviewDate(productSlug: string, index: number) {
+  const now = new Date();
+  const seed = productSlug.length * 97 + index * 131 + 17;
+  const minutesBack = Math.floor(seededFloat(seed + 1) * 180 * 24 * 60);
+  const date = new Date(now.getTime() - minutesBack * 60 * 1000);
 
-  if (index % 5 === 0) {
-    return longBody;
+  const roundedMinutes = Math.floor(date.getUTCMinutes() / 5) * 5;
+  date.setUTCMinutes(roundedMinutes, 0, 0);
+  return date;
+}
+
+function buildUniqueReviewCopy(product: BaseProduct, plan: ReviewPlan, index: number, seen: Set<string>) {
+  const baseSeed = product.slug.length * 1000 + index * 17 + 9;
+  const titleHook = pickVariant(plan.titleHooks, baseSeed + 3);
+  const tone = pickVariant(plan.toneHooks, baseSeed + 7);
+  const texture = pickVariant(plan.texturePhrases, baseSeed + 11);
+  const routine = pickVariant(plan.routinePhrases, baseSeed + 13);
+  const result = pickVariant(plan.resultPhrases, baseSeed + 19);
+  const comparison = pickVariant(plan.comparisonPhrases, baseSeed + 23);
+  const closing = pickVariant(plan.closingPhrases, baseSeed + 29);
+  const variation = pickVariant(plan.variationTags, baseSeed + 31);
+  const modes = [
+    {
+      title: `${titleHook}`,
+      content: `${tone} I use ${product.name} ${routine}. The texture feels ${texture}, and lately ${result}. ${comparison} ${closing}`
+    },
+    {
+      title: `${titleHook} for ${variation}`,
+      content: `After trying a few options, ${product.name} is the one I kept. ${tone} It feels ${texture}, layers easily, and ${result}. ${closing}`
+    },
+    {
+      title: `${product.name}: ${titleHook.toLowerCase()}`,
+      content: `Quick feedback from daily use: ${tone} ${product.name} feels ${texture} when applied ${routine}. The change I notice most is that ${result}. ${comparison}`
+    },
+    {
+      title: `Real routine note - ${titleHook}`,
+      content: `I wanted a formula that felt polished but still comfortable. ${tone} Using ${product.name} ${routine}, the finish stays ${texture} and ${result}. ${closing}`
+    }
+  ];
+
+  for (let attempt = 0; attempt < modes.length + 4; attempt += 1) {
+    const mode = modes[attempt % modes.length];
+    const nextTitle = attempt < modes.length ? mode.title : `${mode.title} (${variation} ${attempt - modes.length + 1})`;
+    const nextContent =
+      attempt < modes.length
+        ? mode.content
+        : `${mode.content} I also like it for ${variation} days because it keeps my routine consistent.`;
+    const signature = `${nextTitle}\n${nextContent}`;
+
+    if (!seen.has(signature)) {
+      seen.add(signature);
+      return {
+        title: nextTitle,
+        content: nextContent
+      };
+    }
   }
 
-  if (index % 2 === 0) {
-    return mediumBody;
-  }
+  const fallbackTitle = `${titleHook} ${index + 1}`;
+  const fallbackContent = `${tone} ${product.name} feels ${texture}. ${result}. ${closing}`;
+  seen.add(`${fallbackTitle}\n${fallbackContent}`);
 
-  return shortBody;
+  return {
+    title: fallbackTitle,
+    content: fallbackContent
+  };
 }
 
 function buildProductReviews(product: BaseProduct): ProductReviewRecord[] {
   const plan = reviewPlans[product.slug];
+  const seen = new Set<string>();
 
   return Array.from({ length: plan.count }, (_, index) => {
     const rating = plan.ratings[index % plan.ratings.length];
-    const publishedAt = new Date(Date.UTC(2026, (index % 6), ((index * 3) % 27) + 1, 9, 0, 0));
+    const reviewDate = buildReviewDate(product.slug, index);
+    const reviewCopy = buildUniqueReviewCopy(product, plan, index, seen);
 
     return {
       id: `sample-review-${product.slug}-${index + 1}`,
       rating,
-      title: buildReviewTitle(product.slug, index),
-      content: buildReviewBody(product, plan, index),
+      title: reviewCopy.title,
+      content: reviewCopy.content,
       displayName: buildDisplayName(index + product.slug.length),
+      reviewDate,
       status: "PUBLISHED",
       verifiedPurchase: index % 4 !== 0,
       adminNotes: null,
@@ -301,9 +490,9 @@ function buildProductReviews(product: BaseProduct): ProductReviewRecord[] {
       customerId: null,
       customerEmail: null,
       orderId: null,
-      publishedAt,
-      createdAt: publishedAt,
-      updatedAt: publishedAt
+      publishedAt: reviewDate,
+      createdAt: reviewDate,
+      updatedAt: reviewDate
     };
   });
 }

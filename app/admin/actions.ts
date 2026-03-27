@@ -238,6 +238,17 @@ function parseCsvBoolean(value: string | undefined) {
   return normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "y";
 }
 
+function parseReviewDateInput(value: string | undefined | null) {
+  const raw = (value || "").trim();
+  if (!raw) {
+    return null;
+  }
+
+  const normalized = raw.length === 10 ? `${raw}T12:00:00.000Z` : raw;
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export async function loginAction(formData: FormData) {
   const username = toPlainString(formData.get("username"));
   const password = toPlainString(formData.get("password"));
@@ -622,9 +633,11 @@ export async function updateReviewAction(formData: FormData) {
   const productSlug = toPlainString(formData.get("productSlug"));
   const redirectTo = toPlainString(formData.get("redirectTo"));
   const nextStatus = parseReviewStatus(toPlainString(formData.get("status")));
+  const nextReviewDate = parseReviewDateInput(toPlainString(formData.get("reviewDate")));
   const existingReview = await prisma.productReview.findUnique({
     where: { id },
     select: {
+      reviewDate: true,
       publishedAt: true
     }
   });
@@ -636,11 +649,14 @@ export async function updateReviewAction(formData: FormData) {
       title: toPlainString(formData.get("title")),
       content: toPlainString(formData.get("content")),
       displayName: toPlainString(formData.get("displayName")),
+      reviewDate: nextReviewDate ?? existingReview?.reviewDate ?? new Date(),
       status: nextStatus,
       verifiedPurchase: toBool(formData.get("verifiedPurchase")),
       adminNotes: toPlainString(formData.get("adminNotes")) || null,
       publishedAt:
-        nextStatus === "PUBLISHED" ? existingReview?.publishedAt ?? new Date() : null
+        nextStatus === "PUBLISHED"
+          ? existingReview?.publishedAt ?? nextReviewDate ?? new Date()
+          : null
     }
   });
 
@@ -702,6 +718,7 @@ export async function bulkImportReviewsAction(formData: FormData) {
   const contentIndex = headerMap.get("content");
   const verifiedPurchaseIndex = headerMap.get("verifiedpurchase");
   const statusIndex = headerMap.get("status");
+  const reviewDateIndex = headerMap.get("reviewdate");
 
   if (
     displayNameIndex === undefined ||
@@ -729,6 +746,9 @@ export async function bulkImportReviewsAction(formData: FormData) {
     const rowProductSlug = productSlug || (productSlugIndex !== undefined ? row[productSlugIndex] : "");
     const product = rowProductSlug ? productBySlug.get(rowProductSlug) : null;
     const nextStatus = parseReviewStatus(statusIndex !== undefined ? row[statusIndex] : undefined);
+    const parsedReviewDate = parseReviewDateInput(
+      reviewDateIndex !== undefined ? row[reviewDateIndex] : undefined
+    );
 
     if (!product) {
       continue;
@@ -752,8 +772,9 @@ export async function bulkImportReviewsAction(formData: FormData) {
         verifiedPurchase: parseCsvBoolean(
           verifiedPurchaseIndex !== undefined ? row[verifiedPurchaseIndex] : undefined
         ),
+        reviewDate: parsedReviewDate ?? new Date(),
         status: nextStatus,
-        publishedAt: nextStatus === "PUBLISHED" ? new Date() : null,
+        publishedAt: nextStatus === "PUBLISHED" ? parsedReviewDate ?? new Date() : null,
         source: "ADMIN_IMPORT"
       }
     });

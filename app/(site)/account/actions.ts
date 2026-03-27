@@ -162,6 +162,7 @@ export async function submitProductReviewAction(formData: FormData) {
     title,
     content,
     displayName: makeReviewDisplayName(customer),
+    reviewDate: new Date(),
     status: "PENDING" as const,
     verifiedPurchase: true,
     orderId: purchase.id,

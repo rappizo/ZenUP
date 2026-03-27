@@ -177,6 +177,7 @@ async function seedReviewsIfEmpty() {
         productId,
         customerId: null,
         orderId: null,
+        reviewDate: review.reviewDate,
         publishedAt: review.publishedAt
       };
     })

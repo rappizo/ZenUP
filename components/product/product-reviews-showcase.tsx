@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { RatingStars } from "@/components/ui/rating-stars";
+import { formatDate } from "@/lib/format";
 import type { ProductReviewRecord } from "@/lib/types";
 
 type ProductReviewsShowcaseProps = {
@@ -47,6 +48,7 @@ export function ProductReviewsShowcase({
             <div className="review-card__meta">
               <strong>{review.displayName}</strong>
               {review.verifiedPurchase ? <span>Verified purchase</span> : null}
+              <time dateTime={new Date(review.reviewDate).toISOString()}>{formatDate(review.reviewDate)}</time>
             </div>
             <RatingStars rating={review.rating} size="sm" />
             <h4>{review.title}</h4>

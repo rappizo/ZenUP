@@ -151,6 +151,7 @@ export type ProductReviewRecord = {
   title: string;
   content: string;
   displayName: string;
+  reviewDate: Date;
   status: ReviewStatus;
   verifiedPurchase: boolean;
   adminNotes: string | null;

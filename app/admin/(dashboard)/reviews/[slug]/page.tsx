@@ -16,10 +16,14 @@ type AdminProductReviewsPageProps = {
 };
 
 const pageSize = 50;
-const csvColumns = "displayName,email,rating,title,content,verifiedPurchase,status";
+const csvColumns = "displayName,email,rating,title,content,reviewDate,verifiedPurchase,status";
 
 function buildPageHref(slug: string, page: number) {
   return `/admin/reviews/${slug}?page=${page}`;
+}
+
+function toDateInputValue(value: Date) {
+  return new Date(value).toISOString().slice(0, 10);
 }
 
 export default async function AdminProductReviewsPage({
@@ -180,7 +184,7 @@ export default async function AdminProductReviewsPage({
           <table>
             <thead>
               <tr>
-                <th>Created</th>
+                <th>Review Date</th>
                 <th>Display Name</th>
                 <th>Rating</th>
                 <th>Status</th>
@@ -200,8 +204,15 @@ export default async function AdminProductReviewsPage({
                   <tr key={review.id}>
                     <td>
                       <div className="admin-table__cell-stack">
-                        <strong>{formatDate(review.createdAt)}</strong>
+                        <strong>{formatDate(review.reviewDate)}</strong>
                         <span className="form-note">{review.customerEmail || "No customer record"}</span>
+                        <input
+                          className="admin-table__input"
+                          name="reviewDate"
+                          type="date"
+                          defaultValue={toDateInputValue(review.reviewDate)}
+                          form={updateFormId}
+                        />
                       </div>
                     </td>
                     <td>

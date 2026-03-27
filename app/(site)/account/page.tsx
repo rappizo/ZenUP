@@ -143,7 +143,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 <th>Product</th>
                 <th>Rating</th>
                 <th>Status</th>
-                <th>Updated</th>
+                <th>Review date</th>
               </tr>
             </thead>
             <tbody>
@@ -159,7 +159,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                     </td>
                     <td>{review.rating}/5</td>
                     <td>{review.status}</td>
-                    <td>{formatDate(review.updatedAt)}</td>
+                    <td>{formatDate(review.reviewDate)}</td>
                   </tr>
                 ))
               ) : (
