@@ -145,7 +145,13 @@ export async function POST(request: Request) {
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const deleted = await tx.productReview.deleteMany({});
+    const deleted = await tx.productReview.deleteMany({
+      where: {
+        productId: {
+          in: products.map((product) => product.id)
+        }
+      }
+    });
     let inserted = 0;
 
     for (let index = 0; index < rows.length; index += 100) {

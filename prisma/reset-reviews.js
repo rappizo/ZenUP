@@ -177,6 +177,35 @@ const reviewClosingHooks = [
   "It made my routine easier to stick to."
 ];
 
+const reviewLifestyleHooks = [
+  "on rushed weekdays",
+  "during dry weather",
+  "after late nights",
+  "under makeup",
+  "after showering",
+  "while traveling",
+  "on minimal-routine days",
+  "when my skin looks tired"
+];
+
+const reviewFinishHooks = [
+  "The finish stays neat instead of greasy.",
+  "It gives a soft glow without looking shiny.",
+  "It sits comfortably under the rest of my routine.",
+  "It looks polished rather than heavy.",
+  "It keeps my skin looking fresh for longer.",
+  "It wears more elegantly than I expected."
+];
+
+const reviewOpinionHooks = [
+  "My honest take: this was easier to like than I expected.",
+  "This ended up feeling more polished than the price suggests.",
+  "I notice it most when my skin is having an off day.",
+  "It made my routine feel more consistent overall.",
+  "This is the kind of formula I keep close by.",
+  "I like that it feels effective without being fussy."
+];
+
 function buildDisplayName(index) {
   const firstName = firstNames[index % firstNames.length];
   const lastInitial = lastInitials[(index * 7 + 3) % lastInitials.length];
@@ -212,28 +241,80 @@ function buildUniqueReviewCopy(product, plan, index, seen) {
   const context = pickVariant(reviewContextHooks, baseSeed + 23);
   const extraResult = pickVariant(reviewResultHooks, baseSeed + 29);
   const closing = pickVariant(reviewClosingHooks, baseSeed + 31);
+  const lifestyle = pickVariant(reviewLifestyleHooks, baseSeed + 37);
+  const extraFinish = pickVariant(reviewFinishHooks, baseSeed + 41);
+  const opinion = pickVariant(reviewOpinionHooks, baseSeed + 43);
 
   const variants = [
     {
       title: title,
-      content: `I have been using ${product.name} ${timing}, mostly ${context}. The texture feels ${texture}, the finish looks ${finish}, and ${result}. ${closing}`
+      content: `First impression: ${product.name} felt ${texture}. ${context} was exactly when I noticed it most. Using it ${timing}, ${result}. ${closing}`
     },
     {
       title: `${title} - ${context}`,
-      content: `Quick note after repeated use: ${product.name} is ${texture} and leaves my skin ${finish}. I noticed ${result}, and ${extraResult}. ${closing}`
+      content: `Two weeks in, the main thing I notice is this: ${result}. ${product.name} feels ${texture}, the finish looks ${finish}, and ${closing}`
     },
     {
       title: `${product.name}: ${title.toLowerCase()}`,
-      content: `What I like most is how easy this is to layer. I apply ${product.name} ${timing}; it feels ${texture} and looks ${finish}. Within a few days, ${result}.`
+      content: `Short version: ${product.name} is ${texture}. I reach for it ${timing}, especially ${lifestyle}. ${closing}`
     },
     {
-      title: `Real routine feedback - ${title}`,
-      content: `My skin can be inconsistent, but this one worked well for me. ${product.name} feels ${texture}, wears ${finish}, and ${extraResult}. ${closing}`
+      title: `Why I kept ${product.name}`,
+      content: `I tried ${product.name} because I wanted something that felt more refined. What stood out quickly was how ${texture} it feels and how ${result}. ${extraFinish}`
+    },
+    {
+      title: `${product.name} surprised me`,
+      content: `My skin usually tells me right away when something is too much, but this one landed nicely. ${product.name} feels ${texture}, and ${result}. ${extraFinish} ${closing}`
+    },
+    {
+      title: `Worth it for the texture`,
+      content: `The texture sold me first. ${product.name} is ${texture}, sits well ${timing}, and ${result}.`
+    },
+    {
+      title: `Better than expected`,
+      content: `Honestly, I expected this to be just okay. Instead, ${product.name} feels ${texture}, looks more refined on skin, and ${result}. ${closing}`
+    },
+    {
+      title: `${product.name} on busy mornings`,
+      content: `On busy mornings, I want something that behaves well without extra work. ${product.name} feels ${texture}, layers nicely ${timing}, and ${result}. The finish looks ${finish}.`
+    },
+    {
+      title: `A calm finish without heaviness`,
+      content: `At night, comfort matters more to me than anything else. ${product.name} feels ${texture}, and ${result}. ${closing}`
+    },
+    {
+      title: `${product.name} after a few weeks`,
+      content: `After a few weeks, the consistency is what kept me using ${product.name}. The finish looks ${finish}, ${extraResult}, and ${closing}`
+    },
+    {
+      title: `If you care about texture`,
+      content: `If you care about texture, this one is easy to appreciate. ${product.name} feels ${texture}. ${extraFinish} ${closing}`
+    },
+    {
+      title: `${title} - honest review`,
+      content: `${opinion} ${product.name} feels ${texture}, looks ${finish}, and ${result}.`
+    },
+    {
+      title: `The difference showed up later`,
+      content: `The difference showed up most in how my skin looked later in the day. ${product.name} feels ${texture}, and ${result}. ${extraResult}.`
+    },
+    {
+      title: `${product.name} kept earning a spot`,
+      content: `I kept rotating this with other products and still came back to it. ${product.name} feels ${texture}, and ${result}. ${closing}`
+    },
+    {
+      title: `Routine note on ${product.name}`,
+      content: `Routine note: I use ${product.name} ${timing}. The texture feels ${texture}, the finish looks ${finish}, and ${result}. ${extraFinish}`
+    },
+    {
+      title: `${title} for real life`,
+      content: `For real life, this just works. ${product.name} feels ${texture}, looks elegant on skin, and ${result}. ${closing}`
     }
   ];
+  const startIndex = Math.floor(seededFloat(baseSeed + 53) * variants.length) % variants.length;
 
   for (let attempt = 0; attempt < variants.length + 4; attempt += 1) {
-    const variant = variants[attempt % variants.length];
+    const variant = variants[(startIndex + attempt) % variants.length];
     const nextTitle =
       attempt < variants.length
         ? variant.title
@@ -310,7 +391,13 @@ async function main() {
   const rows = products.flatMap((product) => buildProductReviews(product, reviewPlans[product.slug]));
 
   const result = await prisma.$transaction(async (tx) => {
-    const deleted = await tx.productReview.deleteMany({});
+    const deleted = await tx.productReview.deleteMany({
+      where: {
+        productId: {
+          in: products.map((product) => product.id)
+        }
+      }
+    });
     let inserted = 0;
 
     for (let index = 0; index < rows.length; index += 100) {

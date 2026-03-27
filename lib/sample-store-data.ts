@@ -387,6 +387,35 @@ const reviewPlans: Record<string, ReviewPlan> = {
   }
 };
 
+const reviewLifestyleHooks = [
+  "on rushed weekdays",
+  "during dry weather",
+  "after late nights",
+  "under makeup",
+  "after showering",
+  "while traveling",
+  "on minimal-routine days",
+  "when my skin looks tired"
+];
+
+const reviewFinishHooks = [
+  "The finish stays neat instead of greasy.",
+  "It gives a soft glow without looking shiny.",
+  "It sits comfortably under the rest of my routine.",
+  "It looks polished rather than heavy.",
+  "It keeps my skin looking fresh for longer.",
+  "It wears more elegantly than I expected."
+];
+
+const reviewOpinionHooks = [
+  "My honest take: this was easier to like than I expected.",
+  "This ended up feeling more polished than the price suggests.",
+  "I notice it most when my skin is having an off day.",
+  "It made my routine feel more consistent overall.",
+  "This is the kind of formula I keep close by.",
+  "I like that it feels effective without being fussy."
+];
+
 function seededFloat(seed: number) {
   const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
   return value - Math.floor(value);
@@ -417,28 +446,82 @@ function buildUniqueReviewCopy(product: BaseProduct, plan: ReviewPlan, index: nu
   const comparison = pickVariant(plan.comparisonPhrases, baseSeed + 23);
   const closing = pickVariant(plan.closingPhrases, baseSeed + 29);
   const variation = pickVariant(plan.variationTags, baseSeed + 31);
+  const lifestyle = pickVariant(reviewLifestyleHooks, baseSeed + 37);
+  const extraFinish = pickVariant(reviewFinishHooks, baseSeed + 41);
+  const opinion = pickVariant(reviewOpinionHooks, baseSeed + 43);
+  const extraResult = pickVariant(plan.resultPhrases, baseSeed + 47);
   const modes = [
     {
       title: `${titleHook}`,
-      content: `${tone} I use ${product.name} ${routine}. The texture feels ${texture}, and lately ${result}. ${comparison} ${closing}`
+      content: `First impression: ${product.name} felt ${texture}. ${tone} Using it ${routine}, ${result}. ${closing}`
     },
     {
       title: `${titleHook} for ${variation}`,
-      content: `After trying a few options, ${product.name} is the one I kept. ${tone} It feels ${texture}, layers easily, and ${result}. ${closing}`
+      content: `Two weeks in, the main thing I notice is this: ${result}. ${tone} ${comparison} ${closing}`
     },
     {
       title: `${product.name}: ${titleHook.toLowerCase()}`,
-      content: `Quick feedback from daily use: ${tone} ${product.name} feels ${texture} when applied ${routine}. The change I notice most is that ${result}. ${comparison}`
+      content: `Short version: ${product.name} is ${texture}. I reach for it ${routine}, especially ${lifestyle}. ${closing}`
     },
     {
-      title: `Real routine note - ${titleHook}`,
-      content: `I wanted a formula that felt polished but still comfortable. ${tone} Using ${product.name} ${routine}, the finish stays ${texture} and ${result}. ${closing}`
+      title: `Why I kept ${product.name}`,
+      content: `${tone} That is what made me try ${product.name}. What stood out quickly was how ${texture} it feels and how ${result}. ${comparison}`
+    },
+    {
+      title: `${product.name} surprised me`,
+      content: `My skin usually tells me right away when something is too much, but this one landed nicely. ${product.name} feels ${texture}, and ${result}. ${extraFinish} ${closing}`
+    },
+    {
+      title: `Worth it for the texture`,
+      content: `The texture sold me first. ${product.name} is ${texture}, sits well ${routine}, and ${result}.`
+    },
+    {
+      title: `Better than expected`,
+      content: `Honestly, I expected this to be just okay. Instead, ${product.name} feels ${texture}, looks more refined on skin, and ${result}. ${closing}`
+    },
+    {
+      title: `${product.name} on busy mornings`,
+      content: `On busy mornings, I want something that behaves well without extra work. ${product.name} feels ${texture}, wears nicely ${routine}, and ${result}. ${comparison}`
+    },
+    {
+      title: `A calm finish without heaviness`,
+      content: `At night, comfort matters more to me than anything else. ${tone} ${product.name} feels ${texture}, and ${result}. ${closing}`
+    },
+    {
+      title: `${product.name} after a few weeks`,
+      content: `After a few weeks, the consistency is what kept me using ${product.name}. ${comparison} ${result}. ${closing}`
+    },
+    {
+      title: `If you care about texture`,
+      content: `If you care about texture, this one is easy to appreciate. ${product.name} feels ${texture}. ${extraFinish} ${closing}`
+    },
+    {
+      title: `${titleHook} - honest review`,
+      content: `${opinion} ${tone} ${product.name} feels ${texture}, and ${result}. ${comparison}`
+    },
+    {
+      title: `The difference showed up later`,
+      content: `The difference showed up most in how my skin looked later in the day. ${tone} ${product.name} feels ${texture}, and ${result}. ${extraResult}.`
+    },
+    {
+      title: `${product.name} kept earning a spot`,
+      content: `I kept rotating this with other products and still came back to it. ${tone} ${product.name} feels ${texture}, and ${result}. ${closing}`
+    },
+    {
+      title: `Routine note on ${product.name}`,
+      content: `Routine note: I use ${product.name} ${routine}. ${tone} The texture feels ${texture}, and ${result}. ${extraFinish}`
+    },
+    {
+      title: `${titleHook} for real life`,
+      content: `For real life, this just works. ${tone} ${product.name} feels ${texture}, looks elegant on skin, and ${result}. ${closing}`
     }
   ];
+  const startIndex = Math.floor(seededFloat(baseSeed + 53) * modes.length) % modes.length;
 
   for (let attempt = 0; attempt < modes.length + 4; attempt += 1) {
-    const mode = modes[attempt % modes.length];
-    const nextTitle = attempt < modes.length ? mode.title : `${mode.title} (${variation} ${attempt - modes.length + 1})`;
+    const mode = modes[(startIndex + attempt) % modes.length];
+    const nextTitle =
+      attempt < modes.length ? mode.title : `${mode.title} (${variation} ${attempt - modes.length + 1})`;
     const nextContent =
       attempt < modes.length
         ? mode.content
