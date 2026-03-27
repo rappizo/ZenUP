@@ -1526,6 +1526,56 @@ main {
   margin-top: 28px;
 }
 
+.om-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.om-platforms {
+  display: grid;
+  gap: 16px;
+}
+
+.om-platform-card,
+.om-form-card {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  border-radius: 28px;
+}
+
+.om-platform-card {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.om-platform-card--active {
+  border-color: rgba(237, 115, 97, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(247, 199, 188, 0.34), transparent 32%),
+    var(--surface);
+}
+
+.om-platform-card h3 {
+  margin: 0;
+  font-family: Baskerville, "Palatino Linotype", serif;
+  font-size: 1.55rem;
+}
+
+.om-platform-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.om-form-card {
+  padding: 28px;
+}
+
 .cart-lines {
   display: grid;
   gap: 18px;
@@ -2076,6 +2126,7 @@ main {
   .product-detail,
   .admin-shell,
   .cart-layout,
+  .om-layout,
   .custom-slide,
   .social-proof,
   .admin-product-editor__header,
@@ -2338,6 +2389,8 @@ main {
   .product-card,
   .post-card,
   .contact-card,
+  .om-platform-card,
+  .om-form-card,
   .admin-card,
   .admin-table,
   .admin-form,
