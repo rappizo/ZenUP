@@ -21,6 +21,21 @@ function splitCustomerName(name: string | null | undefined) {
   };
 }
 
+function readAddressFromMetadata(
+  metadata: Stripe.Metadata | null | undefined,
+  prefix: "shipping" | "billing"
+) {
+  return {
+    name: metadata?.[`${prefix}Name`] || null,
+    line1: metadata?.[`${prefix}Address1`] || null,
+    line2: metadata?.[`${prefix}Address2`] || null,
+    city: metadata?.[`${prefix}City`] || null,
+    state: metadata?.[`${prefix}State`] || null,
+    postalCode: metadata?.[`${prefix}PostalCode`] || null,
+    country: metadata?.[`${prefix}Country`] || null
+  };
+}
+
 async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
   const checkoutId = session.id;
 
@@ -97,10 +112,10 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
     return;
   }
 
-  const shippingDetails = session.collected_information?.shipping_details;
-  const customerName = session.customer_details?.name || shippingDetails?.name;
+  const shippingAddress = readAddressFromMetadata(session.metadata, "shipping");
+  const billingAddress = readAddressFromMetadata(session.metadata, "billing");
+  const customerName = shippingAddress.name || session.customer_details?.name;
   const nameParts = splitCustomerName(customerName);
-  const address = session.customer_details?.address || shippingDetails?.address;
   const originalSubtotalCents = resolvedLines.reduce((sum, line) => sum + line.lineTotalCents, 0);
   const totalCents =
     session.amount_total ?? Math.max(0, originalSubtotalCents - metadataDiscountCents);
@@ -177,12 +192,19 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
       stripePaymentIntentId:
         typeof session.payment_intent === "string" ? session.payment_intent : null,
       shippingName: customerName || null,
-      shippingAddress1: address?.line1 || null,
-      shippingAddress2: address?.line2 || null,
-      shippingCity: address?.city || null,
-      shippingState: address?.state || null,
-      shippingPostalCode: address?.postal_code || null,
-      shippingCountry: address?.country || null,
+      shippingAddress1: shippingAddress.line1,
+      shippingAddress2: shippingAddress.line2,
+      shippingCity: shippingAddress.city,
+      shippingState: shippingAddress.state,
+      shippingPostalCode: shippingAddress.postalCode,
+      shippingCountry: shippingAddress.country,
+      billingName: billingAddress.name,
+      billingAddress1: billingAddress.line1,
+      billingAddress2: billingAddress.line2,
+      billingCity: billingAddress.city,
+      billingState: billingAddress.state,
+      billingPostalCode: billingAddress.postalCode,
+      billingCountry: billingAddress.country,
       customerId: customer.id,
       items: {
         create: resolvedLines.map((line) => ({

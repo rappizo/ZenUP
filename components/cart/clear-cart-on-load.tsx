@@ -4,9 +4,14 @@ import { useEffect } from "react";
 
 export function ClearCartOnLoad() {
   useEffect(() => {
-    void fetch("/api/cart/clear", {
-      method: "POST"
-    });
+    void Promise.allSettled([
+      fetch("/api/cart/clear", {
+        method: "POST"
+      }),
+      fetch("/api/checkout/clear", {
+        method: "POST"
+      })
+    ]);
   }, []);
 
   return null;

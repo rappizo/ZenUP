@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
+  beginCheckoutConfirmationAction,
   clearCartAction,
   removeCartItemAction,
   updateCartCouponsAction,
@@ -69,6 +70,11 @@ export default async function CartPage({ searchParams }: CartPageProps) {
         ) : null}
         {params.error === "account" ? (
           <p className="notice">Please sign in with the password for that email, or continue and we will send account access to your inbox.</p>
+        ) : null}
+        {params.error === "contact" ? (
+          <p className="notice">
+            Please enter a valid email address plus both first and last name before continuing.
+          </p>
         ) : null}
         {params.error === "stripe-config" ? (
           <p className="notice">
@@ -191,7 +197,7 @@ export default async function CartPage({ searchParams }: CartPageProps) {
             </section>
 
             <aside className="admin-form cart-summary">
-              <h2>Checkout</h2>
+              <h2>Contact and next step</h2>
               <p>Subtotal</p>
               <div className="product-detail__price">
                 {discountCents > 0 ? (
@@ -211,14 +217,14 @@ export default async function CartPage({ searchParams }: CartPageProps) {
               <p>Shipping and taxes are calculated during secure checkout.</p>
               {!currentCustomer ? (
                 <p>
-                  Returning customer? <Link href="/account/login" className="link-inline">Sign in</Link>. New here? You can continue with your email and we will help set up your account after checkout.
+                  Returning customer? <Link href="/account/login" className="link-inline">Sign in</Link>. New here? Enter your contact details below and continue to the full order confirmation step.
                 </p>
               ) : (
                 <p>
                   Signed in as <strong>{currentCustomer.email}</strong>.
                 </p>
               )}
-              <form action="/api/checkout" method="post" className="checkout-form">
+              <form action={beginCheckoutConfirmationAction} className="checkout-form">
                 <div className="field">
                   <label htmlFor="checkout-email">Email</label>
                   <input
@@ -236,6 +242,7 @@ export default async function CartPage({ searchParams }: CartPageProps) {
                       id="checkout-first-name"
                       name="firstName"
                       defaultValue={currentCustomer?.firstName ?? ""}
+                      required
                     />
                   </div>
                   <div className="field">
@@ -243,12 +250,13 @@ export default async function CartPage({ searchParams }: CartPageProps) {
                     <input
                       id="checkout-last-name"
                       name="lastName"
-                    defaultValue={currentCustomer?.lastName ?? ""}
-                  />
+                      defaultValue={currentCustomer?.lastName ?? ""}
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
                 <button type="submit" className="button button--primary">
-                  Proceed to checkout
+                  Continue to order confirmation
                 </button>
               </form>
             </aside>

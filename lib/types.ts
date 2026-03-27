@@ -100,6 +100,13 @@ export type OrderRecord = {
   shippingState: string | null;
   shippingPostalCode: string | null;
   shippingCountry: string | null;
+  billingName: string | null;
+  billingAddress1: string | null;
+  billingAddress2: string | null;
+  billingCity: string | null;
+  billingState: string | null;
+  billingPostalCode: string | null;
+  billingCountry: string | null;
   notes: string | null;
   stripeCheckoutId: string | null;
   stripePaymentIntentId: string | null;

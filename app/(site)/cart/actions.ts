@@ -6,11 +6,14 @@ import {
   addCartItem,
   clearCartCoupons,
   clearCartItems,
+  getCartDetails,
   previewCartCouponCodes,
   removeCartItem,
   setCartCouponCodes,
   updateCartItem
 } from "@/lib/cart";
+import { getCurrentCustomer } from "@/lib/customer-auth";
+import { setCheckoutDraft } from "@/lib/checkout-draft";
 import { parseCouponCodesInput } from "@/lib/coupons";
 import { toInt, toPlainString } from "@/lib/utils";
 
@@ -65,4 +68,35 @@ export async function updateCartCouponsAction(formData: FormData) {
   await setCartCouponCodes(rawCouponCodes);
   revalidatePath("/cart");
   redirect("/cart?status=coupon-updated");
+}
+
+export async function beginCheckoutConfirmationAction(formData: FormData) {
+  const [{ itemCount }, currentCustomer] = await Promise.all([getCartDetails(), getCurrentCustomer()]);
+  const email = toPlainString(formData.get("email")).toLowerCase();
+  const firstName = toPlainString(formData.get("firstName"));
+  const lastName = toPlainString(formData.get("lastName"));
+
+  if (itemCount <= 0) {
+    redirect("/cart?error=empty-cart");
+  }
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !firstName || !lastName) {
+    redirect("/cart?error=contact");
+  }
+
+  await setCheckoutDraft({
+    email,
+    firstName,
+    lastName,
+    shippingAddress: null,
+    billingAddress: null,
+    billingSameAsShipping: true
+  });
+
+  if (currentCustomer?.id) {
+    revalidatePath("/account");
+  }
+
+  revalidatePath("/cart");
+  redirect("/checkout/confirmation");
 }

@@ -139,6 +139,13 @@ model Order {
   shippingState         String?
   shippingPostalCode    String?
   shippingCountry       String?
+  billingName           String?
+  billingAddress1       String?
+  billingAddress2       String?
+  billingCity           String?
+  billingState          String?
+  billingPostalCode     String?
+  billingCountry        String?
   notes                 String?
   customerId            String?
   customer              Customer?         @relation(fields: [customerId], references: [id])
