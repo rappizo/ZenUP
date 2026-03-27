@@ -20,7 +20,7 @@ export const orderMatchPlatforms: OrderMatchPlatformConfig[] = [
     description:
       "Use the Amazon form when the customer order was placed through Amazon and you want to verify the order before the next step.",
     orderIdLabel: "Amazon Order ID",
-    orderIdPlaceholder: "114-6436158-9879408",
+    orderIdPlaceholder: "1xx-...",
     validationHint:
       "Amazon order IDs must follow 1xx-xxxxxxx-xxxxxxx and start with 1."
   },
@@ -32,7 +32,7 @@ export const orderMatchPlatforms: OrderMatchPlatformConfig[] = [
     description:
       "Use the TikTok form for TikTok Shop orders. The order ID must be an 18-digit number and follow the TikTok format.",
     orderIdLabel: "TikTok Order ID",
-    orderIdPlaceholder: "5xxxxxxxxxxxxxxxxx",
+    orderIdPlaceholder: "5xxx...",
     validationHint:
       "TikTok order IDs must be 18 digits and start with 5."
   },
@@ -44,7 +44,7 @@ export const orderMatchPlatforms: OrderMatchPlatformConfig[] = [
     description:
       "Use the Walmart form when the order came from Walmart. Walmart order IDs can include symbols in the middle but must still match the store format.",
     orderIdLabel: "Walmart Order ID",
-    orderIdPlaceholder: "200XXXXXXXXXXXX",
+    orderIdPlaceholder: "200...",
     validationHint:
       "Walmart order IDs must start with 200 and be 15 or 16 characters long."
   }
