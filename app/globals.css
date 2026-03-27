@@ -868,16 +868,27 @@ main {
 }
 
 .product-card__image-wrap,
+.post-card__image-wrap,
 .admin-product-card__media {
   aspect-ratio: 1 / 1;
   overflow: hidden;
 }
 
 .product-card__image,
+.post-card__image,
 .admin-product-card__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.post-card__image-wrap {
+  aspect-ratio: 16 / 10;
+}
+
+.post-card__image {
+  display: block;
+  object-position: center;
 }
 
 .product-card__content,
