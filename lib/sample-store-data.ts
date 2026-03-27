@@ -278,6 +278,153 @@ const baseProducts: BaseProduct[] = [
 ];
 
 const reviewPlans: Record<string, ReviewPlan> = {
+  "at13-arbutin-tranexamic-cream": {
+    count: 61,
+    ratings: [5, 5, 4, 5, 4, 5, 5, 4, 5, 5, 4],
+    titleHooks: [
+      "This cream fits perfectly after serum",
+      "My skin looks smoother around old marks",
+      "Soft finish with a more even look",
+      "Much easier to wear than heavier tone creams",
+      "Clean under sunscreen and makeup",
+      "One of the nicest daily creams I have tried"
+    ],
+    toneHooks: [
+      "I wanted a cream that could sit comfortably over active serums.",
+      "My skin can look uneven when I am not consistent with routine.",
+      "I bought this for daytime use because I dislike heavy jars.",
+      "I was trying to simplify my routine without losing that polished finish."
+    ],
+    texturePhrases: [
+      "smooth and airy for a cream",
+      "cushioned without turning greasy",
+      "soft on contact and neat once it settles",
+      "creamy enough for comfort but still elegant on skin"
+    ],
+    routinePhrases: [
+      "after serum before SPF",
+      "as the last step in my morning routine",
+      "over hydrating layers on workdays",
+      "morning and night when my skin looks uneven"
+    ],
+    resultPhrases: [
+      "older post-blemish marks look less obvious in daylight",
+      "my skin tone looks more even around the cheeks",
+      "makeup sits cleaner over areas that usually look patchy",
+      "the finish looks more settled by midday"
+    ],
+    comparisonPhrases: [
+      "It feels more elegant than the tone creams I used before.",
+      "Compared with gel creams, this gives more comfort without extra shine.",
+      "It gives me a smoother finish than most daytime moisturizers.",
+      "This one looks refined on skin instead of pasty."
+    ],
+    closingPhrases: [
+      "I keep reaching for it because it makes mornings easier.",
+      "This is the cream I would reorder for daily use.",
+      "It made my routine feel more put together without extra steps.",
+      "I like having this as my dependable final layer."
+    ],
+    variationTags: ["morning routine", "daily tone care", "under makeup", "easy layering"]
+  },
+  "nt16-niacinamide-tranexamic-serum": {
+    count: 88,
+    ratings: [5, 5, 4, 5, 5, 4, 5, 5, 5, 4, 5, 5],
+    titleHooks: [
+      "This became my go-to niacinamide serum",
+      "Refined finish without the chalky feel",
+      "A steady serum for old marks and texture",
+      "One bottle and my routine feels cleaner",
+      "Very wearable for daytime",
+      "My skin looks more even on camera"
+    ],
+    toneHooks: [
+      "I wanted a niacinamide serum that did more than just sit on top of my skin.",
+      "My old dark spot serum felt harsh, so I switched to this.",
+      "I was looking for a tranexamic serum that could still feel polished every morning.",
+      "My routine works best when one serum can handle both texture and uneven-looking tone."
+    ],
+    texturePhrases: [
+      "sleek and quick to settle",
+      "smooth with a soft serum slip",
+      "lightweight with enough body to feel substantial",
+      "clean and silky without leaving tack behind"
+    ],
+    routinePhrases: [
+      "after cleansing and before moisturizer",
+      "under sunscreen on most weekdays",
+      "in both my morning and night routine",
+      "as the first treatment step after toner"
+    ],
+    resultPhrases: [
+      "the look of old spots is less distracting",
+      "my T-zone looks smoother and calmer",
+      "the overall tone of my face looks more even",
+      "foundation catches less on the areas that used to look rough"
+    ],
+    comparisonPhrases: [
+      "Compared with stronger niacinamide serums, this feels less harsh on my skin.",
+      "It sits better under moisturizer than the last dark spot serum I bought.",
+      "This one gives a cleaner finish than most treatment serums in my drawer.",
+      "It feels more balanced than products that only focus on one ingredient."
+    ],
+    closingPhrases: [
+      "This is the bottle I keep near the sink now.",
+      "I would repurchase because it is easy to stay consistent with.",
+      "It made my routine feel more reliable from day to day.",
+      "I like how polished my skin looks when this is part of the routine."
+    ],
+    variationTags: ["tone upkeep", "oil balance", "workday routine", "smooth finish"]
+  },
+  "tnv3-tranexamic-nicotinamide-serum": {
+    count: 76,
+    ratings: [5, 4, 5, 5, 4, 5, 5, 5, 4, 5, 5],
+    titleHooks: [
+      "This serum made my routine feel more refined",
+      "A dark spot serum that layers cleanly",
+      "The texture is better than most treatment serums",
+      "Easy to use under moisturizer",
+      "A smoother look around old marks",
+      "Very good balance of freshness and comfort"
+    ],
+    toneHooks: [
+      "I bought this because I wanted tranexamic acid, nicotinamide, and vitamin C in one step.",
+      "My routine gets cluttered fast, so I like formulas that do more than one job well.",
+      "I was searching for a tranexamic serum that could fit easily into daytime use.",
+      "Most dark spot serums I tried before felt sticky, and this one does not."
+    ],
+    texturePhrases: [
+      "thin but not watery",
+      "sleek and silky without drag",
+      "fresh going on and tidy once absorbed",
+      "light enough for layering but still comfortable"
+    ],
+    routinePhrases: [
+      "right after cleansing before cream",
+      "under SPF in the morning",
+      "as my main serum on most days",
+      "before moisturizer when my skin looks uneven"
+    ],
+    resultPhrases: [
+      "older spots look softer around the edges",
+      "my overall tone looks more even in mirror light",
+      "my skin looks clearer across the cheeks",
+      "makeup catches less on the areas that used to look uneven"
+    ],
+    comparisonPhrases: [
+      "It layers better than my previous vitamin C serum.",
+      "Compared with other dark spot serums, this one feels calmer on skin.",
+      "It gives me a more polished finish than most clear serums I have tried.",
+      "This feels more wearable in real life than formulas that stay tacky."
+    ],
+    closingPhrases: [
+      "I would happily keep this in my regular rotation.",
+      "It feels like a smart daily serum instead of a fussy treatment.",
+      "This is easy to recommend if you want one serum to do more.",
+      "I like that it makes my routine feel streamlined."
+    ],
+    variationTags: ["spot care", "daily serum", "under SPF", "smoother finish"]
+  },
   "pdrn-cream": {
     count: 68,
     ratings: [5, 5, 4, 5, 5, 4, 5, 5, 4, 5],
@@ -497,12 +644,12 @@ const reviewFinishHooks = [
 ];
 
 const reviewOpinionHooks = [
-  "My honest take: this was easier to like than I expected.",
   "This ended up feeling more polished than the price suggests.",
-  "I notice it most when my skin is having an off day.",
-  "It made my routine feel more consistent overall.",
-  "This is the kind of formula I keep close by.",
-  "I like that it feels effective without being fussy."
+  "I notice it most on days when my skin looks uneven.",
+  "The formula is easier to keep using than stronger alternatives.",
+  "It made the rest of my routine feel more balanced.",
+  "This is the kind of product I keep within easy reach.",
+  "I like that it feels purposeful without feeling complicated."
 ];
 
 function seededFloat(seed: number) {
@@ -542,67 +689,79 @@ function buildUniqueReviewCopy(product: BaseProduct, plan: ReviewPlan, index: nu
   const modes = [
     {
       title: `${titleHook}`,
-      content: `First impression: ${product.name} felt ${texture}. ${tone} Using it ${routine}, ${result}. ${closing}`
+      content: `${tone} ${product.name} feels ${texture}. I use it ${routine}, and ${result}. ${closing}`
     },
     {
       title: `${titleHook} for ${variation}`,
-      content: `Two weeks in, the main thing I notice is this: ${result}. ${tone} ${comparison} ${closing}`
+      content: `After roughly two weeks, ${result}. ${tone} ${comparison} ${closing}`
     },
     {
-      title: `${product.name}: ${titleHook.toLowerCase()}`,
-      content: `Short version: ${product.name} is ${texture}. I reach for it ${routine}, especially ${lifestyle}. ${closing}`
+      title: `${product.name} fits easily into my routine`,
+      content: `I reach for ${product.name} ${routine}, especially ${lifestyle}. The texture is ${texture}. ${closing}`
     },
     {
       title: `Why I kept ${product.name}`,
-      content: `${tone} That is what made me try ${product.name}. What stood out quickly was how ${texture} it feels and how ${result}. ${comparison}`
+      content: `${tone} ${comparison} ${product.name} feels ${texture}, and ${result}.`
     },
     {
-      title: `${product.name} surprised me`,
-      content: `My skin usually tells me right away when something is too much, but this one landed nicely. ${product.name} feels ${texture}, and ${result}. ${extraFinish} ${closing}`
-    },
-    {
-      title: `Worth it for the texture`,
-      content: `The texture sold me first. ${product.name} is ${texture}, sits well ${routine}, and ${result}.`
-    },
-    {
-      title: `Better than expected`,
-      content: `Honestly, I expected this to be just okay. Instead, ${product.name} feels ${texture}, looks more refined on skin, and ${result}. ${closing}`
+      title: `The texture made me keep using this`,
+      content: `What sold me first was the texture. ${product.name} feels ${texture}, wears well ${routine}, and ${result}.`
     },
     {
       title: `${product.name} on busy mornings`,
-      content: `On busy mornings, I want something that behaves well without extra work. ${product.name} feels ${texture}, wears nicely ${routine}, and ${result}. ${comparison}`
+      content: `On busy mornings, I want something that behaves well without extra work. ${product.name} feels ${texture}, and ${result}. ${extraFinish}`
     },
     {
-      title: `A calm finish without heaviness`,
-      content: `At night, comfort matters more to me than anything else. ${tone} ${product.name} feels ${texture}, and ${result}. ${closing}`
+      title: `The difference shows up later in the day`,
+      content: `The biggest difference for me shows up later in the day. ${tone} ${product.name} feels ${texture}, and ${result}. ${extraResult}.`
     },
     {
-      title: `${product.name} after a few weeks`,
-      content: `After a few weeks, the consistency is what kept me using ${product.name}. ${comparison} ${result}. ${closing}`
+      title: `${product.name} earned a permanent spot`,
+      content: `I kept rotating other products in and out, and this still kept its spot. ${product.name} feels ${texture}. ${comparison} ${closing}`
     },
     {
-      title: `If you care about texture`,
-      content: `If you care about texture, this one is easy to appreciate. ${product.name} feels ${texture}. ${extraFinish} ${closing}`
+      title: `More refined than I expected`,
+      content: `${opinion} ${tone} ${product.name} feels ${texture}, and ${result}.`
     },
     {
-      title: `${titleHook} - honest review`,
-      content: `${opinion} ${tone} ${product.name} feels ${texture}, and ${result}. ${comparison}`
+      title: `${variation} favorite`,
+      content: `For ${variation}, this checks the boxes I care about most. ${product.name} feels ${texture}. ${comparison} ${closing}`
     },
     {
-      title: `The difference showed up later`,
-      content: `The difference showed up most in how my skin looked later in the day. ${tone} ${product.name} feels ${texture}, and ${result}. ${extraResult}.`
+      title: `Simple, polished, and easy to use`,
+      content: `Some days I want a routine that looks polished without feeling heavy. ${product.name} fits that really well ${routine}. ${result}. ${closing}`
     },
     {
-      title: `${product.name} kept earning a spot`,
-      content: `I kept rotating this with other products and still came back to it. ${tone} ${product.name} feels ${texture}, and ${result}. ${closing}`
+      title: `${product.name} layers better than most`,
+      content: `My favorite part is how easy this is to layer. ${tone} ${product.name} feels ${texture}. ${extraFinish} ${closing}`
     },
     {
-      title: `Routine note on ${product.name}`,
-      content: `Routine note: I use ${product.name} ${routine}. ${tone} The texture feels ${texture}, and ${result}. ${extraFinish}`
+      title: `One I actually finished`,
+      content: `This was the one I kept finishing instead of letting it sit on a shelf. ${product.name} feels ${texture}, and ${result}. ${comparison}`
     },
     {
-      title: `${titleHook} for real life`,
-      content: `For real life, this just works. ${tone} ${product.name} feels ${texture}, looks elegant on skin, and ${result}. ${closing}`
+      title: `${titleHook} in real life`,
+      content: `I noticed it most ${lifestyle}. ${product.name} wears nicely ${routine}, and ${result}. ${closing}`
+    },
+    {
+      title: `Worth it for the texture`,
+      content: `If texture matters to you, this one is easy to appreciate. ${product.name} feels ${texture}. ${extraFinish} ${closing}`
+    },
+    {
+      title: `${product.name} keeps my routine looking neater`,
+      content: `${tone} ${product.name} feels ${texture}. ${comparison} ${result}. ${closing}`
+    },
+    {
+      title: `${titleHook} without extra fuss`,
+      content: `I did not need to change the rest of my routine for this to work well. ${product.name} feels ${texture}, I use it ${routine}, and ${result}. ${closing}`
+    },
+    {
+      title: `${product.name} feels easier to live with than most`,
+      content: `I have tried enough products in this category to know when one is easy to keep using. ${comparison} ${product.name} feels ${texture}, and ${result}. ${closing}`
+    },
+    {
+      title: `A quiet upgrade to my routine`,
+      content: `${tone} ${product.name} feels ${texture}. ${extraFinish} ${result}. ${closing}`
     }
   ];
   const startIndex = Math.floor(seededFloat(baseSeed + 53) * modes.length) % modes.length;
