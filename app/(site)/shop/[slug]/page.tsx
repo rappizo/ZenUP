@@ -24,8 +24,10 @@ import {
   getProductBySlug,
   getPublishedReviewsByProductId
 } from "@/lib/queries";
+import { nt16SerumSeo } from "@/lib/nt16-serum-page";
 import { toAbsoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
+import { tnv3SerumSeo } from "@/lib/tnv3-serum-page";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -43,15 +45,86 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const absoluteImageUrl = toAbsoluteUrl(product.imageUrl);
-  const title = product.slug === "pdrn-cream" ? pdrnCreamSeo.title : product.name;
+  const title =
+    product.slug === "nt16-niacinamide-tranexamic-serum"
+      ? nt16SerumSeo.title
+      : 
+    product.slug === "pdrn-cream"
+      ? pdrnCreamSeo.title
+      : product.slug === "tnv3-tranexamic-nicotinamide-serum"
+        ? tnv3SerumSeo.title
+        : product.name;
   const description =
-    product.slug === "pdrn-cream" ? pdrnCreamSeo.description : product.shortDescription;
+    product.slug === "nt16-niacinamide-tranexamic-serum"
+      ? nt16SerumSeo.description
+      : 
+    product.slug === "pdrn-cream"
+      ? pdrnCreamSeo.description
+      : product.slug === "tnv3-tranexamic-nicotinamide-serum"
+        ? tnv3SerumSeo.description
+        : product.shortDescription;
+
+  if (product.slug === "nt16-niacinamide-tranexamic-serum") {
+    return {
+      title,
+      description,
+      keywords: nt16SerumSeo.keywords,
+      alternates: {
+        canonical: `/shop/${product.slug}`
+      },
+      openGraph: {
+        title: `${title} | ${siteConfig.title}`,
+        description,
+        url: `${siteConfig.url}/shop/${product.slug}`,
+        images: [
+          {
+            url: absoluteImageUrl,
+            alt: product.name
+          }
+        ]
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | ${siteConfig.title}`,
+        description,
+        images: [absoluteImageUrl]
+      }
+    };
+  }
 
   if (product.slug === "pdrn-cream") {
     return {
       title,
       description,
       keywords: pdrnCreamSeo.keywords,
+      alternates: {
+        canonical: `/shop/${product.slug}`
+      },
+      openGraph: {
+        title: `${title} | ${siteConfig.title}`,
+        description,
+        url: `${siteConfig.url}/shop/${product.slug}`,
+        images: [
+          {
+            url: absoluteImageUrl,
+            alt: product.name
+          }
+        ]
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | ${siteConfig.title}`,
+        description,
+        images: [absoluteImageUrl]
+      }
+    };
+  }
+
+  if (product.slug === "tnv3-tranexamic-nicotinamide-serum") {
+    return {
+      title,
+      description,
+      keywords: tnv3SerumSeo.keywords,
       alternates: {
         canonical: `/shop/${product.slug}`
       },
@@ -131,11 +204,19 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const canReview = Boolean(account?.purchasedProductIds.includes(product.id));
   const savingsCents = getSavingsCents(product.compareAtPriceCents, product.priceCents);
   const isPdrnCream = product.slug === "pdrn-cream";
+  const seoDescription =
+    product.slug === "pdrn-cream"
+      ? pdrnCreamSeo.description
+      : product.slug === "tnv3-tranexamic-nicotinamide-serum"
+        ? tnv3SerumSeo.description
+        : product.slug === "nt16-niacinamide-tranexamic-serum"
+          ? nt16SerumSeo.description
+          : product.shortDescription;
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: isPdrnCream ? pdrnCreamSeo.description : product.shortDescription,
+    description: seoDescription,
     sku: product.productCode,
     image: displayGallery.slice(0, 8).map((image) => new URL(image, siteConfig.url).toString()),
     brand: {

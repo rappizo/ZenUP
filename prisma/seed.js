@@ -69,6 +69,80 @@ function buildDisplayName(index) {
 
 const products = [
   {
+    id: "prod_nt16_serum",
+    productCode: "0007",
+    productShortName: "NT16",
+    amazonAsin: null,
+    name: "NT16 11% Niacinamide + 5% Tranexamic Serum",
+    slug: "nt16-niacinamide-tranexamic-serum",
+    tagline:
+      "A daily niacinamide serum and tranexamic serum designed for a smoother, more even-looking finish.",
+    category: "Niacinamide Serum",
+    shortDescription:
+      "A silky dark spot serum that supports a more even-looking tone, a smoother surface, and a cleaner daily finish.",
+    description:
+      "Neatique NT16 11% Niacinamide + 5% Tranexamic Serum is made for shoppers looking for a niacinamide serum and tranexamic serum in one elegant daily layer. The formula centers on niacinamide and tranexamic acid to support a more even-looking complexion, a smoother skin surface, and a refined finish that fits easily into morning and evening routines.",
+    details:
+      "Ideal for uneven-looking tone, post-blemish mark care, and clarity-focused daily routines.\nUse after cleansing and before moisturizer, morning or night.\nFollow with sunscreen during daytime use and pair with a cream when you want a softer, more cushioned final finish.",
+    imageUrl: buildProductMediaUrl(
+      "HH067 NT16 11% Niacinamide + 5% Tranexamic Serum",
+      "01.png"
+    ),
+    galleryImages: [
+      "01.png",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg",
+      "06.jpg"
+    ]
+      .map((fileName) =>
+        buildProductMediaUrl("HH067 NT16 11% Niacinamide + 5% Tranexamic Serum", fileName)
+      )
+      .join("\n"),
+    featured: false,
+    status: "ACTIVE",
+    inventory: 122,
+    priceCents: 1899,
+    compareAtPriceCents: 2999,
+    currency: "USD",
+    pointsReward: 19
+  },
+  {
+    id: "prod_tnv3_serum",
+    productCode: "0006",
+    productShortName: "TNV3",
+    amazonAsin: null,
+    name: "TNV3 10% Tranexamic Acid + 2% Nicotinamide Serum + Vitamin C",
+    slug: "tnv3-tranexamic-nicotinamide-serum",
+    tagline:
+      "A daily tranexamic serum built around tranexamic acid, nicotinamide, and vitamin C for a more even-looking finish.",
+    category: "Tranexamic Serum",
+    shortDescription:
+      "A smooth daily serum designed for uneven-looking tone, post-blemish marks, and a cleaner, more even-looking skin finish.",
+    description:
+      "Neatique TNV3 10% Tranexamic Acid + 2% Nicotinamide Serum + Vitamin C is designed for shoppers looking for a tranexamic serum that feels elegant, layers easily, and supports a more even-looking complexion. The formula centers on tranexamic acid, nicotinamide, and vitamin C to help the skin look clearer, smoother, and more refined in daily routines.",
+    details:
+      "Ideal for uneven-looking tone, post-blemish mark care, and daily clarity-focused routines.\nUse after cleansing and before moisturizer, morning or night.\nFollow with sunscreen during daytime use and pair with a supportive cream when you want a more cushioned finish.",
+    imageUrl: buildProductMediaUrl(
+      "HH060 TNV3 10% Tranexamic Acid + 2% Nicotinamide Secrum",
+      "1.png"
+    ),
+    galleryImages: Array.from({ length: 8 }, (_, index) =>
+      buildProductMediaUrl(
+        "HH060 TNV3 10% Tranexamic Acid + 2% Nicotinamide Secrum",
+        `${index + 1}.png`
+      )
+    ).join("\n"),
+    featured: false,
+    status: "ACTIVE",
+    inventory: 126,
+    priceCents: 1799,
+    compareAtPriceCents: 2999,
+    currency: "USD",
+    pointsReward: 18
+  },
+  {
     id: "prod_at13_cream",
     productCode: "0005",
     productShortName: "AT13",

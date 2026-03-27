@@ -12,6 +12,118 @@ type ProductStory = {
 };
 
 export const productStories: Record<string, ProductStory> = {
+  "nt16-niacinamide-tranexamic-serum": {
+    gallery: getLocalProductGallery("nt16-niacinamide-tranexamic-serum"),
+    heroLabel: "HH067 NT16 11% Niacinamide + 5% Tranexamic Serum",
+    sections: [
+      {
+        title: "1. What It Is",
+        body:
+          "Neatique NT16 11% Niacinamide + 5% Tranexamic Serum is a daily niacinamide serum and tranexamic serum created for routines focused on a more even-looking tone, a clearer-looking surface, and a smoother finish."
+      },
+      {
+        title: "2. Texture",
+        body:
+          "The texture feels silky, fluid, and easy to spread. It settles quickly on the skin, making it simple to layer under moisturizer or sunscreen without leaving the surface heavy."
+      },
+      {
+        title: "3. Why The Name Is NT16",
+        body:
+          "NT16 comes from the formula's two signature percentages and hero ingredient direction. The identity points directly to the high niacinamide level and the tranexamic acid support built into the serum."
+      },
+      {
+        title: "4. Niacinamide Serum Focus",
+        body:
+          "Shoppers looking for a niacinamide serum often want a formula that supports a cleaner-looking, more balanced skin surface. NT16 is designed to fit that need while still feeling elegant enough for daily use."
+      },
+      {
+        title: "5. Tranexamic Serum Direction",
+        body:
+          "The 5% tranexamic acid level gives the formula a strong tranexamic serum identity. It is especially relevant for routines built around a more even-looking tone and support for visible post-blemish marks or uneven-looking areas."
+      },
+      {
+        title: "6. Why It Works As A Dark Spot Serum",
+        body:
+          "Many shoppers search for a dark spot serum when they want a daily-use product that helps the complexion look more even over time. NT16 answers that with a lightweight feel that is easy to keep consistent with."
+      },
+      {
+        title: "7. How The Two Ingredients Work Together",
+        body:
+          "Niacinamide helps support a smoother-looking, more refined skin surface, while tranexamic acid adds targeted support for tone-evening routines. Together they create a serum that feels purposeful without becoming complicated."
+      },
+      {
+        title: "8. Who It Is For",
+        body:
+          "NT16 is a strong option for shoppers who want a niacinamide serum, a tranexamic serum, or a dark spot serum in one bottle. It fits especially well into routines focused on visual clarity, smoothness, and a more even-looking finish."
+      },
+      {
+        title: "9. How To Use It",
+        body:
+          "Apply the serum after cleansing and before cream. In the morning, follow with sunscreen. In the evening, follow with a cream when you want the routine to feel more cushioned and complete."
+      },
+      {
+        title: "10. What Makes It Easy To Keep Using",
+        body:
+          "Because the texture is light, familiar, and easy to layer, NT16 can stay in regular rotation without making the routine feel crowded. That consistency is a big part of why this style of dark spot serum works well in daily life."
+      }
+    ]
+  },
+  "tnv3-tranexamic-nicotinamide-serum": {
+    gallery: getLocalProductGallery("tnv3-tranexamic-nicotinamide-serum"),
+    heroLabel: "HH060 TNV3 10% Tranexamic Acid + 2% Nicotinamide Secrum",
+    sections: [
+      {
+        title: "1. What It Is",
+        body:
+          "Neatique TNV3 10% Tranexamic Acid + 2% Nicotinamide Serum + Vitamin C is a daily tranexamic serum created for routines focused on a more even-looking tone, cleaner-looking skin clarity, and a smoother visual finish."
+      },
+      {
+        title: "2. Texture",
+        body:
+          "The texture feels fluid, silky, and fast to settle. It spreads easily across the skin and layers comfortably under moisturizer or sunscreen without leaving a sticky surface behind."
+      },
+      {
+        title: "3. Why The Name Is TNV3",
+        body:
+          "TNV3 comes from the three hero ingredients at the center of the formula: Tranexamic Acid, Nicotinamide, and Vitamin C. The name makes the formula identity simple to remember while reflecting the ingredient-led concept behind the serum."
+      },
+      {
+        title: "4. Tranexamic Serum Focus",
+        body:
+          "Shoppers looking for a tranexamic serum usually want a product that fits into daily routines while helping the complexion look more even and more visually refined. This serum is built to serve that role in a light, easy-to-layer format."
+      },
+      {
+        title: "5. Tranexamic Acid In The Routine",
+        body:
+          "Tranexamic acid gives the formula its tone-evening direction. It is especially relevant when a shopper wants a daily serum for areas that look uneven after blemishes, sun exposure, or overall skin fatigue."
+      },
+      {
+        title: "6. Nicotinamide Serum Support",
+        body:
+          "Nicotinamide helps round out the formula by supporting a smoother-looking, more balanced surface. In a nicotinamide serum, shoppers often want a finish that looks cleaner and more settled rather than overloaded."
+      },
+      {
+        title: "7. Vitamin C Contribution",
+        body:
+          "Vitamin C adds another layer to the formula story by supporting a fresher, more energized overall look. Together with tranexamic acid and nicotinamide, it helps the serum feel purposeful without becoming complicated."
+      },
+      {
+        title: "8. Why It Works As A Dark Spot Serum",
+        body:
+          "Many shoppers search for a dark spot serum when they want a formula that can fit into daily use while supporting a more even-looking appearance. TNV3 answers that need with a smooth serum texture that feels elegant enough for both morning and evening routines."
+      },
+      {
+        title: "9. How To Use It",
+        body:
+          "Apply the serum after cleansing and before cream. In the morning, follow with sunscreen. At night, pair it with a cream like PDRN Cream or Snail Mucin Cream when you want the routine to feel more cushioned and complete."
+      },
+      {
+        title: "10. What Makes It Easy To Stay Consistent With",
+        body:
+          "Because the texture is familiar, light, and comfortable, TNV3 is easy to keep in regular rotation. That makes it a strong option for shoppers who want a daily tranexamic serum, dark spot serum, or nicotinamide serum without adding friction to the routine."
+      }
+    ]
+  },
   "at13-arbutin-tranexamic-cream": {
     gallery: getLocalProductGallery("at13-arbutin-tranexamic-cream"),
     heroLabel: "HH061 AT13 8% Arbutin + 5% Tranexamic Cream",

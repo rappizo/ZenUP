@@ -14,62 +14,45 @@ function serializeGalleryImages(galleryImages: string[]) {
   return galleryImages.join("\n");
 }
 
-async function seedProductsIfEmpty() {
-  const productCount = await prisma.product.count();
+async function seedMissingProducts() {
+  const existingProducts = await prisma.product.findMany({
+    select: {
+      slug: true
+    }
+  });
+  const existingSlugs = new Set(existingProducts.map((product) => product.slug));
+  const missingProducts = sampleProducts.filter((product) => !existingSlugs.has(product.slug));
 
-  if (productCount > 0) {
+  if (missingProducts.length === 0) {
     return;
   }
 
-  for (const product of sampleProducts) {
-    await prisma.product.upsert({
-      where: { slug: product.slug },
-      update: {
-        productCode: product.productCode,
-        productShortName: product.productShortName,
-        amazonAsin: product.amazonAsin,
-        name: product.name,
-        tagline: product.tagline,
-        category: product.category,
-        shortDescription: product.shortDescription,
-        description: product.description,
-        details: product.details,
-        imageUrl: product.imageUrl,
-        galleryImages: serializeGalleryImages(product.galleryImages),
-        featured: product.featured,
-        status: product.status,
-        inventory: product.inventory,
-        priceCents: product.priceCents,
-        compareAtPriceCents: product.compareAtPriceCents,
-        currency: product.currency,
-        pointsReward: product.pointsReward,
-        stripePriceId: product.stripePriceId
-      },
-      create: {
-        id: product.id,
-        productCode: product.productCode,
-        productShortName: product.productShortName,
-        amazonAsin: product.amazonAsin,
-        name: product.name,
-        slug: product.slug,
-        tagline: product.tagline,
-        category: product.category,
-        shortDescription: product.shortDescription,
-        description: product.description,
-        details: product.details,
-        imageUrl: product.imageUrl,
-        galleryImages: serializeGalleryImages(product.galleryImages),
-        featured: product.featured,
-        status: product.status,
-        inventory: product.inventory,
-        priceCents: product.priceCents,
-        compareAtPriceCents: product.compareAtPriceCents,
-        currency: product.currency,
-        pointsReward: product.pointsReward,
-        stripePriceId: product.stripePriceId
-      }
-    });
-  }
+  await prisma.product.createMany({
+    data: missingProducts.map((product) => ({
+      id: product.id,
+      productCode: product.productCode,
+      productShortName: product.productShortName,
+      amazonAsin: product.amazonAsin,
+      name: product.name,
+      slug: product.slug,
+      tagline: product.tagline,
+      category: product.category,
+      shortDescription: product.shortDescription,
+      description: product.description,
+      details: product.details,
+      imageUrl: product.imageUrl,
+      galleryImages: serializeGalleryImages(product.galleryImages),
+      featured: product.featured,
+      status: product.status,
+      inventory: product.inventory,
+      priceCents: product.priceCents,
+      compareAtPriceCents: product.compareAtPriceCents,
+      currency: product.currency,
+      pointsReward: product.pointsReward,
+      stripePriceId: product.stripePriceId
+    })),
+    skipDuplicates: true
+  });
 }
 
 async function seedPostsIfEmpty() {
@@ -201,7 +184,7 @@ async function runBootstrap() {
     return;
   }
 
-  await seedProductsIfEmpty();
+  await seedMissingProducts();
   await ensureProductCodes();
   await seedPostsIfEmpty();
   await seedSettingsIfEmpty();
