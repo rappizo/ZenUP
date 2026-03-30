@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { submitProductReviewAction } from "@/app/(site)/account/actions";
 import { addToCartAction } from "@/app/(site)/cart/actions";
-import { ProductCustomerVoiceSlider } from "@/components/product/product-customer-voice-slider";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductReviewsShowcase } from "@/components/product/product-reviews-showcase";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -11,23 +9,55 @@ import { RatingStars } from "@/components/ui/rating-stars";
 import { getCurrentCustomerId } from "@/lib/customer-auth";
 import { formatCurrency, getSavingsCents } from "@/lib/format";
 import {
-  pdrnCreamCustomerVoiceVideos,
-  pdrnCreamEditorialSections,
-  pdrnCreamHighlightCards,
-  pdrnCreamRoutineContent,
-  pdrnCreamSeo,
-  pdrnCreamTextureGallery
-} from "@/lib/pdrn-cream-page";
-import { getProductStory } from "@/lib/product-content";
-import {
   getCustomerAccountById,
   getProductBySlug,
   getPublishedReviewsByProductId
 } from "@/lib/queries";
-import { nt16SerumSeo } from "@/lib/nt16-serum-page";
 import { toAbsoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
-import { tnv3SerumSeo } from "@/lib/tnv3-serum-page";
+
+const formulaHighlights = [
+  {
+    title: "Nicotinamide Riboside centered",
+    body:
+      "The formula leads with 600mg Nicotinamide Riboside Hydrogen Malate per serving so the product clearly belongs in the NAD+ category."
+  },
+  {
+    title: "Built as a complete stack",
+    body:
+      "Quercetin Phytosome, Trans-Resveratrol, and CoQ10 help the product feel like a finished daily system instead of a single-ingredient capsule."
+  },
+  {
+    title: "Transparent and easy to evaluate",
+    body:
+      "Clear serving size, 60 servings per bottle, and a visible supplement facts panel create a more credible supplement shopping experience."
+  }
+];
+
+const dailyUseNotes = [
+  "Take 2 veggie capsules daily.",
+  "Use consistently as part of a healthy-aging or cellular-energy routine.",
+  "Review the supplement facts panel and ingredient list before use.",
+  "Consult your healthcare professional if you are pregnant, nursing, taking medication, or managing a medical condition."
+];
+
+const faqItems = [
+  {
+    title: "What makes this product different from an NR-only formula?",
+    body:
+      "ZenUP is positioned as a more complete NAD+ daily stack. Instead of stopping at Nicotinamide Riboside alone, it also includes Quercetin Phytosome, Trans-Resveratrol, and CoQ10."
+  },
+  {
+    title: "How many servings are in each bottle?",
+    body:
+      "Each bottle contains 120 veggie capsules. At 2 capsules per serving, that gives customers 60 servings per bottle."
+  },
+  {
+    title: "Who is this product designed for?",
+    body:
+      "The page is written for customers looking for an ingredient-led NAD+ supplement to support a more consistent healthy-aging and daily wellness routine."
+  }
+];
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -44,119 +74,20 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
+  const title = product.name;
+  const description = product.shortDescription;
   const absoluteImageUrl = toAbsoluteUrl(product.imageUrl);
-  const title =
-    product.slug === "nt16-niacinamide-tranexamic-serum"
-      ? nt16SerumSeo.title
-      : 
-    product.slug === "pdrn-cream"
-      ? pdrnCreamSeo.title
-      : product.slug === "tnv3-tranexamic-nicotinamide-serum"
-        ? tnv3SerumSeo.title
-        : product.name;
-  const description =
-    product.slug === "nt16-niacinamide-tranexamic-serum"
-      ? nt16SerumSeo.description
-      : 
-    product.slug === "pdrn-cream"
-      ? pdrnCreamSeo.description
-      : product.slug === "tnv3-tranexamic-nicotinamide-serum"
-        ? tnv3SerumSeo.description
-        : product.shortDescription;
-
-  if (product.slug === "nt16-niacinamide-tranexamic-serum") {
-    return {
-      title,
-      description,
-      keywords: nt16SerumSeo.keywords,
-      alternates: {
-        canonical: `/shop/${product.slug}`
-      },
-      openGraph: {
-        title: `${title} | ${siteConfig.title}`,
-        description,
-        url: `${siteConfig.url}/shop/${product.slug}`,
-        images: [
-          {
-            url: absoluteImageUrl,
-            alt: product.name
-          }
-        ]
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: `${title} | ${siteConfig.title}`,
-        description,
-        images: [absoluteImageUrl]
-      }
-    };
-  }
-
-  if (product.slug === "pdrn-cream") {
-    return {
-      title,
-      description,
-      keywords: pdrnCreamSeo.keywords,
-      alternates: {
-        canonical: `/shop/${product.slug}`
-      },
-      openGraph: {
-        title: `${title} | ${siteConfig.title}`,
-        description,
-        url: `${siteConfig.url}/shop/${product.slug}`,
-        images: [
-          {
-            url: absoluteImageUrl,
-            alt: product.name
-          }
-        ]
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: `${title} | ${siteConfig.title}`,
-        description,
-        images: [absoluteImageUrl]
-      }
-    };
-  }
-
-  if (product.slug === "tnv3-tranexamic-nicotinamide-serum") {
-    return {
-      title,
-      description,
-      keywords: tnv3SerumSeo.keywords,
-      alternates: {
-        canonical: `/shop/${product.slug}`
-      },
-      openGraph: {
-        title: `${title} | ${siteConfig.title}`,
-        description,
-        url: `${siteConfig.url}/shop/${product.slug}`,
-        images: [
-          {
-            url: absoluteImageUrl,
-            alt: product.name
-          }
-        ]
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: `${title} | ${siteConfig.title}`,
-        description,
-        images: [absoluteImageUrl]
-      }
-    };
-  }
 
   return {
     title,
     description,
     keywords: [
       product.name,
-      `${product.category} skincare`,
-      `${product.name} review`,
-      `buy ${product.name}`,
-      `${siteConfig.name} ${product.category}`
+      "NAD+ supplement",
+      "nicotinamide riboside",
+      "healthy aging supplement",
+      "quercetin phytosome",
+      "resveratrol coq10"
     ],
     alternates: {
       canonical: `/shop/${product.slug}`
@@ -198,25 +129,14 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
     customerId ? getCustomerAccountById(customerId) : Promise.resolve(null)
   ]);
 
-  const story = getProductStory(product.slug);
-  const gallery = product.galleryImages.length > 0 ? product.galleryImages : story.gallery;
-  const displayGallery = gallery.length > 0 ? gallery : [product.imageUrl];
+  const displayGallery = product.galleryImages.length > 0 ? product.galleryImages : [product.imageUrl];
   const canReview = Boolean(account?.purchasedProductIds.includes(product.id));
   const savingsCents = getSavingsCents(product.compareAtPriceCents, product.priceCents);
-  const isPdrnCream = product.slug === "pdrn-cream";
-  const seoDescription =
-    product.slug === "pdrn-cream"
-      ? pdrnCreamSeo.description
-      : product.slug === "tnv3-tranexamic-nicotinamide-serum"
-        ? tnv3SerumSeo.description
-        : product.slug === "nt16-niacinamide-tranexamic-serum"
-          ? nt16SerumSeo.description
-          : product.shortDescription;
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: seoDescription,
+    description: product.description,
     sku: product.productCode,
     image: displayGallery.slice(0, 8).map((image) => new URL(image, siteConfig.url).toString()),
     brand: {
@@ -249,6 +169,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
+
         <div className="product-detail">
           <ProductGallery images={displayGallery} alt={product.name} />
           <div className="product-detail__copy">
@@ -270,6 +191,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
                 </span>
               ) : null}
             </div>
+
             <div className="product-detail__rating">
               <RatingStars
                 rating={product.averageRating}
@@ -284,11 +206,12 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
             <p>{product.description}</p>
             <div className="product-detail__facts">
-              <span className="pill">Ships in the United States</span>
-              <span className="pill">Silky daily texture</span>
-              <span className="pill">Easy morning and night layering</span>
-              {story.heroLabel ? <span className="pill">{story.heroLabel}</span> : null}
+              <span className="pill">120 veggie capsules</span>
+              <span className="pill">60 servings</span>
+              <span className="pill">Dietary supplement</span>
+              <span className="pill">Daily NAD+ support</span>
             </div>
+
             <form action={addToCartAction} className="checkout-form">
               <input type="hidden" name="productId" value={product.id} />
               <input type="hidden" name="redirectTo" value="/cart?status=added" />
@@ -304,11 +227,13 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
                 Add to cart
               </button>
             </form>
+
             <ul className="detail-list">
               {product.details.split("\n").map((detail) => (
                 <li key={detail}>{detail}</li>
               ))}
             </ul>
+
             <div className="stack-row">
               <ButtonLink href="/shop" variant="secondary">
                 Back to shop
@@ -321,165 +246,69 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         </div>
 
         <div className="product-page-stack">
-          {isPdrnCream ? (
-            <>
-              <ProductCustomerVoiceSlider
-                eyebrow="Customer voice"
-                heading="See how real shoppers talk about Neatique PDRN Cream before you buy."
-                description="A quick look at texture, finish, and daily-routine feedback from TikTok creators who help new shoppers picture how the cream actually wears."
-                videos={pdrnCreamCustomerVoiceVideos}
-              />
-
-              <section className="product-page-section product-highlight-section">
-                <div className="section-heading">
-                  <p className="section-heading__eyebrow">Why it stands out</p>
-                  <h2>
-                    A Salmon PDRN Cream, PDRN Pink Cream, and PDRN Capsule Cream story in one
-                    formula.
-                  </h2>
-                  <p className="section-heading__description">
-                    The formula is designed to feel plush on contact, elegant through the routine,
-                    and visibly refined once it becomes the final layer on skin.
-                  </p>
-                </div>
-                <div className="product-highlight-grid">
-                  {pdrnCreamHighlightCards.map((card) => (
-                    <article key={card.title} className="product-highlight-card">
-                      <p className="eyebrow">{card.eyebrow}</p>
-                      <h3>{card.title}</h3>
-                      <p>{card.body}</p>
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              {pdrnCreamEditorialSections.map((section) => (
-                <section
-                  key={section.id}
-                  className={`product-page-section product-editorial ${section.imagePosition === "left" ? "product-editorial--reverse" : ""}`}
-                >
-                  <div className="product-editorial__copy">
-                    <p className="eyebrow">{section.eyebrow}</p>
-                    <h2>{section.title}</h2>
-                    <div className="product-editorial__body">
-                      {section.paragraphs.map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
-                      ))}
-                    </div>
-                    {section.bullets ? (
-                      <ul className="product-editorial__bullets">
-                        {section.bullets.map((bullet) => (
-                          <li key={bullet}>{bullet}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                  {section.image.src ? (
-                    <div
-                      className={`product-editorial__image product-editorial__image--${section.imageVariant}`}
-                    >
-                      <Image
-                        src={section.image.src}
-                        alt={section.image.alt}
-                        width={880}
-                        height={section.imageVariant === "portrait" ? 1080 : 880}
-                        sizes="(max-width: 720px) 100vw, (max-width: 1080px) 80vw, 42vw"
-                        className="product-editorial__image-media"
-                      />
-                    </div>
-                  ) : null}
-                </section>
+          <section className="product-page-section">
+            <div className="section-heading">
+              <p className="section-heading__eyebrow">Formula Highlights</p>
+              <h2>A cleaner supplement page built around transparency and stack logic.</h2>
+              <p className="section-heading__description">
+                The new product layout focuses on why the formula exists, what is inside it, and
+                how it fits into a real customer routine.
+              </p>
+            </div>
+            <div className="story-sections">
+              {formulaHighlights.map((item) => (
+                <article key={item.title} className="panel">
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
               ))}
+            </div>
+          </section>
 
-              <section className="product-page-section product-editorial product-editorial--gallery">
-                <div className="product-editorial__copy">
-                  <p className="eyebrow">{pdrnCreamTextureGallery.eyebrow}</p>
-                  <h2>{pdrnCreamTextureGallery.title}</h2>
-                  <div className="product-editorial__body">
-                    {pdrnCreamTextureGallery.paragraphs.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </div>
-                <div className="product-editorial__gallery">
-                  {pdrnCreamTextureGallery.images.map((image) => (
-                    <div key={image.src} className="product-editorial__image product-editorial__image--square">
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
-                        width={880}
-                        height={880}
-                        sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 26vw"
-                        className="product-editorial__image-media"
-                      />
+          <section className="product-page-section product-routine">
+            <div className="product-routine__copy">
+              <p className="eyebrow">Daily Use</p>
+              <h2>Simple instructions make a premium supplement easier to trust and easier to repeat.</h2>
+              <p>
+                The page now explains the routine clearly instead of leaning on vague claims. That
+                helps the product feel more disciplined, more premium, and more believable.
+              </p>
+              <div className="product-routine__steps">
+                {dailyUseNotes.map((note, index) => (
+                  <article key={note} className="product-routine__step">
+                    <span className="product-routine__index">{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <h3>{note}</h3>
                     </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="product-page-section product-routine">
-                <div className="product-routine__media">
-                  <div className="product-editorial__image product-editorial__image--landscape">
-                    <Image
-                      src={pdrnCreamRoutineContent.image.src}
-                      alt={pdrnCreamRoutineContent.image.alt}
-                      width={1200}
-                      height={800}
-                      sizes="(max-width: 720px) 100vw, (max-width: 1080px) 80vw, 48vw"
-                      className="product-editorial__image-media"
-                    />
-                  </div>
-                </div>
-                <div className="product-routine__copy">
-                  <p className="eyebrow">{pdrnCreamRoutineContent.eyebrow}</p>
-                  <h2>{pdrnCreamRoutineContent.title}</h2>
-                  {pdrnCreamRoutineContent.paragraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                  <div className="product-routine__steps">
-                    {pdrnCreamRoutineContent.steps.map((step) => (
-                      <article key={step.index} className="product-routine__step">
-                        <span className="product-routine__index">{step.index}</span>
-                        <div>
-                          <h3>{step.title}</h3>
-                          <p>{step.body}</p>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                  <div className="stack-row">
-                    <ButtonLink href="/shop/pdrn-serum" variant="secondary">
-                      Shop PDRN Serum
-                    </ButtonLink>
-                    <ButtonLink href="/cart" variant="ghost">
-                      Go to cart
-                    </ButtonLink>
-                  </div>
-                </div>
-              </section>
-            </>
-          ) : null}
-
-          {!isPdrnCream && story.sections.length > 0 ? (
-            <section className="product-page-section">
-              <div className="section-heading">
-                <p className="section-heading__eyebrow">Product details</p>
-                <h2>Everything you may want to know before adding it to your routine.</h2>
-                <p className="section-heading__description">
-                  Browse the formula story, texture, finish, and easy layering notes before you
-                  head to cart.
-                </p>
-              </div>
-              <div className="story-sections">
-                {story.sections.map((section) => (
-                  <article key={section.title} className="panel">
-                    <h3>{section.title}</h3>
-                    <p>{section.body}</p>
                   </article>
                 ))}
               </div>
-            </section>
-          ) : null}
+            </div>
+
+            <div className="panel">
+              <p className="eyebrow">Important note</p>
+              <h3>Dietary supplement disclaimer</h3>
+              <p>
+                These statements have not been evaluated by the Food and Drug Administration. This
+                product is not intended to diagnose, treat, cure, or prevent any disease.
+              </p>
+            </div>
+          </section>
+
+          <section className="product-page-section">
+            <div className="section-heading">
+              <p className="section-heading__eyebrow">FAQ</p>
+              <h2>What serious shoppers usually want to know before buying.</h2>
+            </div>
+            <div className="story-sections">
+              {faqItems.map((item) => (
+                <article key={item.title} className="panel">
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
+              ))}
+            </div>
+          </section>
 
           <section id="reviews" className="product-page-section">
             <div className="section-heading">

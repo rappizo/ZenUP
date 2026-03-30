@@ -62,7 +62,7 @@ export default async function AdminEmailPage({ searchParams }: AdminEmailPagePro
               <input
                 id="email_from_name"
                 name="email_from_name"
-                defaultValue={settings.email_from_name || "Neatique Beauty"}
+                defaultValue={settings.email_from_name || "ZenUP"}
               />
             </div>
             <div className="field">

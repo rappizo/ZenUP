@@ -29,7 +29,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         <h3>{post.title}</h3>
         <p>{post.excerpt}</p>
-        <Link href={`/beauty-tips/${post.slug}`}>Read article</Link>
+        <Link href={`/blog/${post.slug}`}>Read article</Link>
       </div>
     </article>
   );

@@ -30,7 +30,7 @@ function toEmailSettings(record: Record<string, string>): EmailSettings {
     smtpSecure: parseBool(record.smtp_secure),
     smtpUser: record.smtp_user || "",
     smtpPass: record.smtp_pass || "",
-    fromName: record.email_from_name || "Neatique Beauty",
+    fromName: record.email_from_name || "ZenUP",
     fromEmail: record.email_from_address || "",
     contactRecipient: record.contact_recipient || record.email_from_address || ""
   };
@@ -116,11 +116,11 @@ export async function sendCustomerWelcomeEmail(input: {
 
   return sendEmail({
     to: input.email,
-    subject: "Your Neatique account is ready",
-    text: `Hi ${name}, your Neatique account has been created. You can sign in with ${input.email} and temporary password ${input.password}.`,
+    subject: "Your ZenUP account is ready",
+    text: `Hi ${name}, your ZenUP account has been created. You can sign in with ${input.email} and temporary password ${input.password}.`,
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.7;color:#2e2825">
-        <h2 style="font-family:Georgia,serif;color:#ed7361">Welcome to Neatique</h2>
+        <h2 style="font-family:Georgia,serif;color:#0f6a35">Welcome to ZenUP</h2>
         <p>Hi ${name}, your account has been created so you can track orders, points, and reviews.</p>
         <p><strong>Login email:</strong> ${input.email}</p>
         <p><strong>Temporary password:</strong> ${input.password}</p>
@@ -160,7 +160,7 @@ export async function sendContactSubmissionEmails(input: {
     text: `${input.name} <${input.email}>\n\n${input.message}`,
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.7;color:#2e2825">
-        <h2 style="font-family:Georgia,serif;color:#ed7361">New contact form submission</h2>
+        <h2 style="font-family:Georgia,serif;color:#0f6a35">New contact form submission</h2>
         <p><strong>Name:</strong> ${input.name}</p>
         <p><strong>Email:</strong> ${input.email}</p>
         <p><strong>Subject:</strong> ${input.subject}</p>
@@ -173,10 +173,10 @@ export async function sendContactSubmissionEmails(input: {
     from: `"${settings.fromName}" <${settings.fromEmail}>`,
     to: input.email,
     subject: "We received your message",
-    text: `Hi ${input.name}, thanks for contacting Neatique. We received your message and will get back to you soon.`,
+    text: `Hi ${input.name}, thanks for contacting ZenUP. We received your message and will get back to you soon.`,
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.7;color:#2e2825">
-        <h2 style="font-family:Georgia,serif;color:#ed7361">Thank you for contacting Neatique</h2>
+        <h2 style="font-family:Georgia,serif;color:#0f6a35">Thank you for contacting ZenUP</h2>
         <p>Hi ${input.name}, we received your message and our team will follow up soon.</p>
         <p><strong>Your subject:</strong> ${input.subject}</p>
       </div>
@@ -191,11 +191,11 @@ export async function sendSubscriptionCouponEmail(input: {
 }) {
   return sendEmail({
     to: input.email,
-    subject: `${SUBSCRIBE_COUPON_PERCENT_OFF}% off your first Neatique purchase`,
-    text: `Welcome to Neatique. Your subscriber offer is ${SUBSCRIBE_COUPON_CODE}. Apply it at checkout for ${getSubscribeCouponDescription()}. If you do not see this email in your inbox, please check your spam or promotions folder.`,
+    subject: `${SUBSCRIBE_COUPON_PERCENT_OFF}% off your first ZenUP purchase`,
+    text: `Welcome to ZenUP. Your subscriber offer is ${SUBSCRIBE_COUPON_CODE}. Apply it at checkout for ${getSubscribeCouponDescription()}. If you do not see this email in your inbox, please check your spam or promotions folder.`,
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.7;color:#2e2825">
-        <h2 style="font-family:Georgia,serif;color:#ed7361">Welcome to Neatique</h2>
+        <h2 style="font-family:Georgia,serif;color:#0f6a35">Welcome to ZenUP</h2>
         <p>Thank you for subscribing. Your welcome offer is ready.</p>
         <p><strong>Coupon code:</strong> ${SUBSCRIBE_COUPON_CODE}</p>
         <p><strong>Offer:</strong> ${getSubscribeCouponDescription()}</p>

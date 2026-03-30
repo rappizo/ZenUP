@@ -1,107 +1,55 @@
-"use client";
+import { ImagePromptPlaceholder } from "@/components/ui/image-prompt-placeholder";
+import { homeVisualPrompts } from "@/lib/home-visual-prompts";
 
-import { useEffect, useState } from "react";
-
-const videos = [
+const pillars = [
   {
-    id: "7616409897097334029",
-    creator: "@maddisonilene",
-    title: "A glow-first serum moment",
-    note: "A creator spotlight on soft glow, silky layering, and that polished skin finish."
+    title: "NAD+ pathway support",
+    body:
+      "Nicotinamide Riboside Hydrogen Malate sits at the center of the formula for customers who want a dedicated NAD+ daily product."
   },
   {
-    id: "7619033906880302367",
-    creator: "@camilacastaneda99",
-    title: "Daily routine favorite",
-    note: "A quick routine-style review showing how easily the texture fits into everyday skincare."
+    title: "Supporting stack built in",
+    body:
+      "Quercetin Phytosome, Trans-Resveratrol, and CoQ10 round out the formula so the routine feels complete instead of fragmented."
   },
   {
-    id: "7619379257407474974",
-    creator: "@yennceto",
-    title: "Comfort and dew in one step",
-    note: "A soft-focus beauty clip showing a dewy, comfortable finish in motion."
-  },
-  {
-    id: "7617252288888835359",
-    creator: "@gracesahm",
-    title: "Fresh glow with a polished finish",
-    note: "A creator moment that brings softness, glow, and daily-routine appeal to the page."
-  },
-  {
-    id: "7618994711973399839",
-    creator: "@ninlama2020",
-    title: "Hydration that still feels light",
-    note: "A quick beauty clip that helps shoppers see texture and finish before they tap into the product."
+    title: "Clear, professional label",
+    body:
+      "60 servings, transparent supplement facts, and a straightforward serving size make the product easier to evaluate and easier to keep using."
   }
 ];
 
 export function SocialProofSlider() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setCurrentIndex((current) => (current + 1) % videos.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [paused]);
-
-  const activeVideo = videos[currentIndex];
-
   return (
-    <div
-      className="social-proof"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <div className="social-proof social-proof--zenup">
       <div className="social-proof__copy">
-        <p className="eyebrow">Social proof</p>
-        <h3>See how Neatique looks in real routines.</h3>
+        <p className="eyebrow">Formula architecture</p>
+        <h3>One flagship product, built around the ingredients serious shoppers actually look for.</h3>
         <p>
-          Press play to watch texture, finish, and everyday routine moments in motion.
+          ZenUP is positioned as a focused NAD+ brand, not a broad supplement catalog. The site is
+          designed to make the formula, dosage, and daily-use story easy to understand at a glance.
         </p>
-        <div className="social-proof__nav">
-          {videos.map((video, index) => (
-            <button
-              key={video.id}
-              type="button"
-              className={`social-proof__pill ${index === currentIndex ? "social-proof__pill--active" : ""}`}
-              onClick={() => setCurrentIndex(index)}
-            >
-              {video.creator}
-            </button>
+        <div className="cards-3">
+          {pillars.map((pillar) => (
+            <article key={pillar.title} className="panel philosophy-card">
+              <h3>{pillar.title}</h3>
+              <p>{pillar.body}</p>
+            </article>
           ))}
         </div>
       </div>
 
       <div className="social-proof__player">
-        <div className="social-proof__embed">
-          <iframe
-            key={activeVideo.id}
-            src={`https://www.tiktok.com/player/v1/${activeVideo.id}`}
-            title={activeVideo.title}
-            allow="fullscreen"
-            allowFullScreen
-            loading="lazy"
-          />
+        <div className="social-proof__embed social-proof__embed--prompt">
+          <ImagePromptPlaceholder {...homeVisualPrompts.formulaBoard} className="social-proof__prompt" />
         </div>
         <div className="social-proof__meta">
-          <strong>{activeVideo.creator}</strong>
-          <h4>{activeVideo.title}</h4>
-          <p>{activeVideo.note}</p>
-          <a
-            href={`https://www.tiktok.com/${activeVideo.creator}/video/${activeVideo.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="link-inline"
-          >
-            Watch on TikTok
-          </a>
+          <strong>Label transparency</strong>
+          <h4>600mg NR HM, 250mg Quercetin Phytosome, 150mg Resveratrol, 100mg CoQ10</h4>
+          <p>
+            The ingredient panel is part of the sales story, so we surface it early and treat it
+            like proof, not fine print.
+          </p>
         </div>
       </div>
     </div>

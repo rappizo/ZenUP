@@ -1,10 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="10" fill="url(#zenupGradient)"/>
+  <path d="M17 22H33L20 42H34" stroke="white" stroke-width="5" stroke-linecap="square" stroke-linejoin="bevel"/>
+  <path d="M42 22V42" stroke="#FFF7DF" stroke-width="5" stroke-linecap="square"/>
+  <path d="M35 32H49" stroke="#FFF7DF" stroke-width="5" stroke-linecap="square"/>
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ed7361" />
-      <stop offset="100%" stop-color="#f8c6b9" />
+    <linearGradient id="zenupGradient" x1="6" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A4C25"/>
+      <stop offset="1" stop-color="#C7A14A"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="18" fill="#fff6f2" />
-  <path d="M18 46V18h8l12 17V18h8v28h-8L26 29v17z" fill="url(#g)" />
 </svg>

@@ -26,7 +26,9 @@ function normalizeBaseUrl(value: string | undefined) {
 }
 
 export function getBaseUrl(request?: Request) {
-  const configuredBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_BASE_URL);
+  const configuredBaseUrl = normalizeBaseUrl(
+    process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL
+  );
 
   if (configuredBaseUrl) {
     return configuredBaseUrl;

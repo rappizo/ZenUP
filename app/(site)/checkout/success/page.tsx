@@ -9,15 +9,15 @@ export default function CheckoutSuccessPage() {
         <p className="eyebrow">Checkout complete</p>
         <h1>Your order has been received.</h1>
         <p>
-          Thank you for shopping with Neatique. Your checkout was completed successfully and we will
+          Thank you for shopping with ZenUP. Your checkout was completed successfully and we will
           begin preparing your order.
         </p>
         <div className="stack-row">
           <ButtonLink href="/shop" variant="primary">
             Continue shopping
           </ButtonLink>
-          <ButtonLink href="/beauty-tips" variant="secondary">
-            Read beauty tips
+          <ButtonLink href="/blog" variant="secondary">
+            Read the blog
           </ButtonLink>
         </div>
       </div>

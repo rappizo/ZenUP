@@ -20,127 +20,40 @@ const productVoiceMap: Record<
   string,
   {
     label: string;
-    textureNotes: string[];
+    formulaNotes: string[];
     routineMoments: string[];
     resultNotes: string[];
     titleHooks: string[];
     comparisonHooks: string[];
   }
 > = {
-  "pdrn-cream": {
-    label: "PDRN Pink Cream",
-    textureNotes: [
-      "the capsule-and-cream texture feels smoother and more elegant than a standard moisturizer",
-      "it has that soft pink capsule look, but the finish on skin is calm rather than flashy",
-      "the formula feels plush at first and then settles into a polished, comfortable layer"
+  "zenup-nad-plus-nicotinamide-riboside": {
+    label: "ZenUP NAD+",
+    formulaNotes: [
+      "the formula feels more complete than most NR-only products I compared",
+      "the ingredient panel looks serious without becoming confusing",
+      "it gives me the kind of all-in-one NAD+ stack I actually wanted"
     ],
     routineMoments: [
-      "as the last step in my evening routine",
-      "after serum when my skin feels dry or overworked",
-      "on nights when I want my routine to feel more restorative"
+      "with breakfast every morning",
+      "as part of a simple daily healthy-aging routine",
+      "when I want to stay consistent without managing multiple bottles"
     ],
     resultNotes: [
-      "my skin looks more rested the next morning",
-      "the surface of my skin stays smoother and less tight overnight",
-      "I wake up with a softer, more settled finish"
+      "the routine feels easier to keep up with",
+      "I trust the stack more than a single-ingredient product",
+      "the formula feels like a better long-term fit for my goals"
     ],
     titleHooks: [
-      "More refined than I expected",
-      "The texture is the reason I kept using it",
-      "This feels much more polished than a basic cream",
-      "Noticeably better as a final step"
+      "More complete than most NR formulas",
+      "The ingredient stack is what sold me",
+      "Exactly the kind of NAD+ product I was looking for",
+      "Easy to keep in a daily routine"
     ],
     comparisonHooks: [
-      "I usually avoid richer creams, but this one never felt suffocating.",
-      "Compared with the thicker creams in my cabinet, this looks more refined on skin.",
-      "It gives me the comfort of a richer cream without making my routine feel heavy."
-    ]
-  },
-  "pdrn-serum": {
-    label: "PDRN5+ Serum",
-    textureNotes: [
-      "the texture is silky and quick to spread without leaving a tacky film",
-      "it has a smoother slip than most glow serums I have tried",
-      "the finish is lightweight, but it still makes my skin look more polished"
-    ],
-    routineMoments: [
-      "right after cleansing in the morning",
-      "under moisturizer twice a day",
-      "as the first real treatment step after toner"
-    ],
-    resultNotes: [
-      "my skin looks brighter and more even through the day",
-      "it gives my routine a cleaner, more luminous finish",
-      "I notice a fresher look without the sticky feeling I usually dislike"
-    ],
-    titleHooks: [
-      "This is the serum I reach for first",
-      "Lightweight, polished, and easy to finish",
-      "A better daytime serum than I expected",
-      "Looks glowy without going shiny"
-    ],
-    comparisonHooks: [
-      "Some serums sit on top of my skin, but this one disappears in a good way.",
-      "It feels more refined than the typical brightening serum texture.",
-      "I like that it gives glow without making the next layer pill."
-    ]
-  },
-  "snail-mucin-cream": {
-    label: "Snail Mucin Cream",
-    textureNotes: [
-      "the cream feels cushiony and comforting without looking greasy",
-      "it has a richer feel in the jar, but the finish on skin stays smooth",
-      "the texture gives that dewy comfort effect without turning oily"
-    ],
-    routineMoments: [
-      "before bed when my skin needs a more protective layer",
-      "after serum whenever my face feels dehydrated",
-      "in the evening when I want to lock everything in"
-    ],
-    resultNotes: [
-      "my dry areas feel less rough by the next morning",
-      "my skin stays softer for much longer overnight",
-      "I get a more supple look instead of that flat, tired feeling"
-    ],
-    titleHooks: [
-      "A much better comfort cream than I expected",
-      "This is the one I use on dry nights",
-      "Soft, dewy, and actually easy to wear",
-      "A dependable overnight cream"
-    ],
-    comparisonHooks: [
-      "It gives me the comfort I want from a night cream without the greasy after-feel.",
-      "Other creams can sit too heavily on me, but this one stays balanced.",
-      "The finish is dewy, but still neat enough that I do not feel over-coated."
-    ]
-  },
-  "snail-mucin-serum": {
-    label: "Snail Mucin Serum",
-    textureNotes: [
-      "the watery-light texture makes it easy to use every day",
-      "it feels fresh and bouncy instead of sticky",
-      "the serum spreads quickly and layers well under cream"
-    ],
-    routineMoments: [
-      "as my first hydrating layer after cleansing",
-      "under moisturizer on busy mornings",
-      "whenever my skin feels dull or dehydrated"
-    ],
-    resultNotes: [
-      "my skin stays more comfortable during the day",
-      "it helps the rest of my routine sit more smoothly",
-      "I notice a fresher, calmer look by afternoon"
-    ],
-    titleHooks: [
-      "Simple, light, and easy to keep using",
-      "A very wearable everyday serum",
-      "Fresh hydration without the stickiness",
-      "Much better layering than I expected"
-    ],
-    comparisonHooks: [
-      "A lot of hydrating serums feel syrupy on me, and this one does not.",
-      "It is one of the few light serums that still makes a visible difference for me.",
-      "This sits cleanly under moisturizer, which matters a lot in my routine."
+      "Compared with most products in this category, the label feels much more thought through.",
+      "It reads like a serious stack rather than just another trendy capsule.",
+      "I like that it reduces the need to piece the formula together myself."
     ]
   }
 };
@@ -157,31 +70,31 @@ function getVoice(product: Product) {
   return (
     productVoiceMap[product.slug] ?? {
       label: product.name,
-      textureNotes: [
-        "the texture is easier to wear than I expected",
-        "it feels polished on skin without being fussy",
-        "the finish is balanced and comfortable"
+      formulaNotes: [
+        "the formula feels more useful than I expected",
+        "the product presentation makes it easy to understand what I am buying",
+        "it is easier to keep using than some of the alternatives I tried"
       ],
       routineMoments: [
         "as part of my daily routine",
-        "after cleansing and before the final step",
-        "when my skin needs something more dependable"
+        "on a regular morning schedule",
+        "when I want a cleaner supplement setup"
       ],
       resultNotes: [
-        "my skin looks more settled afterward",
-        "it fits into my routine without effort",
-        "I keep noticing a smoother overall finish"
+        "the product fits naturally into my routine",
+        "I am more likely to stay consistent with it",
+        "it feels like a stronger long-term option"
       ],
       titleHooks: [
-        "More wearable than I expected",
-        "A strong addition to my routine",
         "Worth keeping in rotation",
-        "A much better finish than I expected"
+        "More practical than I expected",
+        "A stronger formula story than most",
+        "Easy to use every day"
       ],
       comparisonHooks: [
-        "It stands out because it feels refined instead of overdone.",
-        "This fits into my routine more naturally than a lot of similar products.",
-        "The biggest win for me is how easy it is to keep using."
+        "It stands out because the product story feels clearer than most.",
+        "The formula is easier to trust when the label is this direct.",
+        "The biggest win for me is how easy it is to evaluate."
       ]
     }
   );
@@ -189,28 +102,24 @@ function getVoice(product: Product) {
 
 function buildRewriteVariant(review: ReviewWithProduct, variantIndex: number) {
   const voice = getVoice(review.product);
-  const texture = voice.textureNotes[variantIndex % voice.textureNotes.length];
+  const formula = voice.formulaNotes[variantIndex % voice.formulaNotes.length];
   const routine = voice.routineMoments[(variantIndex + 1) % voice.routineMoments.length];
   const result = voice.resultNotes[(variantIndex + 2) % voice.resultNotes.length];
   const titleHook = voice.titleHooks[variantIndex % voice.titleHooks.length];
   const comparison = voice.comparisonHooks[(variantIndex + 1) % voice.comparisonHooks.length];
-  const mildQualifier =
-    review.rating >= 5
-      ? "This ended up being one of the better products in my routine."
-      : "It was not dramatic overnight, but it has been consistently good for me.";
 
   const titleStyles = [
     `${titleHook}`,
-    `${voice.label} has a much nicer finish than I expected`,
-    `The feel of this one is what keeps me using it`,
-    `A more polished routine step than most products in this category`
+    `${voice.label} fits easily into my routine`,
+    `The formula on this one feels more complete`,
+    `A better all-in-one supplement than I expected`
   ];
 
   const bodyStyles = [
-    `What I noticed first was that ${texture}. I have been using it ${routine}, and ${result}. ${comparison}`,
-    `Short version: ${voice.label} is easy to keep in a routine because ${texture}. I use it ${routine}, and the payoff for me is that ${result}.`,
-    `I bought this hoping for a formula that would look smoother on skin, and that is pretty much what happened. ${texture}. ${mildQualifier} ${result}.`,
-    `The reason I would repurchase this is the feel. ${texture}. In my routine I use it ${routine}, and it leaves everything looking neater and more finished.`
+    `What stood out first was that ${formula}. I use it ${routine}, and ${result}. ${comparison}`,
+    `Short version: ${voice.label} is easy to keep in rotation because ${formula}. I use it ${routine}, and ${result}.`,
+    `I bought this hoping for a cleaner daily NAD+ setup, and that is basically what I got. ${formula}. ${comparison}`,
+    `The reason I would keep using this is simple: ${formula}. In my routine I use it ${routine}, and ${result}.`
   ];
 
   return {

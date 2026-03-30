@@ -15,8 +15,8 @@ export async function SiteHeader() {
       <div className="announcement-bar">
         <div className="container announcement-bar__inner">
           <div className="announcement-bar__copy">
-            <p>United States shipping only. Thoughtful skincare for smooth, hydrated, glowing skin.</p>
-            <Link href="/contact">Need help choosing your routine?</Link>
+            <p>United States shipping only. Professional NAD+ nutrition for consistent daily use.</p>
+            <Link href="/contact">Need help reviewing the formula?</Link>
           </div>
         </div>
       </div>

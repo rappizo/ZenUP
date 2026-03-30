@@ -8,7 +8,7 @@ import type {
   RewardEntryRecord,
   StoreSettingsRecord
 } from "@/lib/types";
-import { getDefaultProductImageUrl, getLocalProductGallery } from "@/lib/product-media";
+import { getDefaultProductImageUrl } from "@/lib/product-media";
 import {
   samplePosts,
   sampleProducts,
@@ -16,85 +16,72 @@ import {
   sampleStoreSettings
 } from "@/lib/sample-store-data";
 
+const zenupImage =
+  getDefaultProductImageUrl("zenup-nad-plus-nicotinamide-riboside") ?? "/icon.svg";
+
 export const fallbackProducts: ProductRecord[] = sampleProducts;
 
 export const fallbackPosts: BeautyPostRecord[] = samplePosts;
 
 export const fallbackCustomers: CustomerRecord[] = [
   {
-    id: "cus_ava",
-    email: "ava@neatiquebeauty.com",
-    firstName: "Ava",
-    lastName: "Miller",
+    id: "cus_daniel",
+    email: "daniel@example.com",
+    firstName: "Daniel",
+    lastName: "Reed",
     hasPassword: false,
     passwordSetAt: null,
     lastLoginAt: null,
     marketingOptIn: true,
-    loyaltyPoints: 182,
-    totalSpentCents: 16400,
+    loyaltyPoints: 69,
+    totalSpentCents: 6900,
     orderCount: 1,
     reviewCount: 1,
-    createdAt: new Date("2026-03-08T09:00:00.000Z"),
-    updatedAt: new Date("2026-03-21T09:00:00.000Z")
+    createdAt: new Date("2026-03-26T09:00:00.000Z"),
+    updatedAt: new Date("2026-03-29T09:00:00.000Z")
   },
   {
-    id: "cus_emma",
-    email: "emma@example.com",
-    firstName: "Emma",
-    lastName: "Roberts",
+    id: "cus_marcus",
+    email: "marcus@example.com",
+    firstName: "Marcus",
+    lastName: "Taylor",
     hasPassword: false,
     passwordSetAt: null,
     lastLoginAt: null,
     marketingOptIn: true,
-    loyaltyPoints: 96,
-    totalSpentCents: 9600,
-    orderCount: 1,
-    reviewCount: 1,
-    createdAt: new Date("2026-03-11T09:00:00.000Z"),
-    updatedAt: new Date("2026-03-22T09:00:00.000Z")
-  },
-  {
-    id: "cus_zoe",
-    email: "zoe@example.com",
-    firstName: "Zoe",
-    lastName: "Turner",
-    hasPassword: false,
-    passwordSetAt: null,
-    lastLoginAt: null,
-    marketingOptIn: false,
-    loyaltyPoints: 39,
-    totalSpentCents: 3900,
-    orderCount: 1,
+    loyaltyPoints: 138,
+    totalSpentCents: 13800,
+    orderCount: 2,
     reviewCount: 0,
-    createdAt: new Date("2026-03-14T09:00:00.000Z"),
-    updatedAt: new Date("2026-03-20T09:00:00.000Z")
+    createdAt: new Date("2026-03-24T09:00:00.000Z"),
+    updatedAt: new Date("2026-03-29T09:00:00.000Z")
   }
 ];
 
 export const fallbackOrders: OrderRecord[] = [
   {
-    id: "ord_1003",
-    orderNumber: "NEA-1003",
-    email: "emma@example.com",
+    id: "ord_2002",
+    orderNumber: "ZEN-2002",
+    email: "marcus@example.com",
     status: "PAID",
     fulfillmentStatus: "SHIPPED",
     currency: "USD",
-    subtotalCents: 9000,
+    subtotalCents: 13800,
     discountCents: 0,
     shippingCents: 0,
     taxCents: 0,
-    totalCents: 9000,
-    pointsEarned: 90,
+    totalCents: 13800,
+    pointsEarned: 138,
     couponCode: null,
     couponId: null,
-    shippingName: "Emma Roberts",
+    shippingName: "Marcus Taylor",
     shippingAddress1: "1480 Sunset Blvd",
     shippingAddress2: null,
     shippingCity: "Los Angeles",
     shippingState: "CA",
     shippingPostalCode: "90026",
     shippingCountry: "US",
-    billingName: "Emma Roberts",
+    billingName: "Marcus Taylor",
     billingAddress1: "1480 Sunset Blvd",
     billingAddress2: null,
     billingCity: "Los Angeles",
@@ -102,102 +89,46 @@ export const fallbackOrders: OrderRecord[] = [
     billingPostalCode: "90026",
     billingCountry: "US",
     notes: null,
-    stripeCheckoutId: "cs_test_123",
-    stripePaymentIntentId: "pi_test_123",
-    customerId: "cus_emma",
-    createdAt: new Date("2026-03-22T09:00:00.000Z"),
-    updatedAt: new Date("2026-03-23T09:00:00.000Z"),
+    stripeCheckoutId: "cs_test_2002",
+    stripePaymentIntentId: "pi_test_2002",
+    customerId: "cus_marcus",
+    createdAt: new Date("2026-03-28T10:00:00.000Z"),
+    updatedAt: new Date("2026-03-29T10:00:00.000Z"),
     items: [
       {
-        id: "item_1003_a",
-        name: "PDRN Serum",
-        slug: "pdrn-serum",
-        quantity: 1,
-        unitPriceCents: 4800,
-        lineTotalCents: 4800,
-        imageUrl: getDefaultProductImageUrl("pdrn-serum") ?? "/products/pdrn-serum.svg"
-      },
-      {
-        id: "item_1003_b",
-        name: "Snail Mucin Cream",
-        slug: "snail-mucin-cream",
-        quantity: 1,
-        unitPriceCents: 4200,
-        lineTotalCents: 4200,
-        imageUrl: getDefaultProductImageUrl("snail-mucin-cream") ?? "/products/snail-mucin-cream.svg"
+        id: "item_2002_a",
+        name: "ZenUP NAD+ Nicotinamide Riboside 1100mg",
+        slug: "zenup-nad-plus-nicotinamide-riboside",
+        quantity: 2,
+        unitPriceCents: 6900,
+        lineTotalCents: 13800,
+        imageUrl: zenupImage
       }
     ]
   },
   {
-    id: "ord_1002",
-    orderNumber: "NEA-1002",
-    email: "zoe@example.com",
-    status: "PENDING",
-    fulfillmentStatus: "UNFULFILLED",
-    currency: "USD",
-    subtotalCents: 3900,
-    discountCents: 0,
-    shippingCents: 0,
-    taxCents: 0,
-    totalCents: 3900,
-    pointsEarned: 39,
-    couponCode: null,
-    couponId: null,
-    shippingName: "Zoe Turner",
-    shippingAddress1: "225 Lake Shore Dr",
-    shippingAddress2: null,
-    shippingCity: "Chicago",
-    shippingState: "IL",
-    shippingPostalCode: "60601",
-    shippingCountry: "US",
-    billingName: "Zoe Turner",
-    billingAddress1: "225 Lake Shore Dr",
-    billingAddress2: null,
-    billingCity: "Chicago",
-    billingState: "IL",
-    billingPostalCode: "60601",
-    billingCountry: "US",
-    notes: "Awaiting payment confirmation.",
-    stripeCheckoutId: null,
-    stripePaymentIntentId: null,
-    customerId: "cus_zoe",
-    createdAt: new Date("2026-03-21T09:00:00.000Z"),
-    updatedAt: new Date("2026-03-21T09:00:00.000Z"),
-    items: [
-      {
-        id: "item_1002_a",
-        name: "Snail Mucin Serum",
-        slug: "snail-mucin-serum",
-        quantity: 1,
-        unitPriceCents: 3900,
-        lineTotalCents: 3900,
-        imageUrl: getDefaultProductImageUrl("snail-mucin-serum") ?? "/products/snail-mucin-serum.svg"
-      }
-    ]
-  },
-  {
-    id: "ord_1001",
-    orderNumber: "NEA-1001",
-    email: "ava@neatiquebeauty.com",
+    id: "ord_2001",
+    orderNumber: "ZEN-2001",
+    email: "daniel@example.com",
     status: "PAID",
     fulfillmentStatus: "PROCESSING",
     currency: "USD",
-    subtotalCents: 5200,
+    subtotalCents: 6900,
     discountCents: 0,
     shippingCents: 0,
     taxCents: 0,
-    totalCents: 5200,
-    pointsEarned: 52,
+    totalCents: 6900,
+    pointsEarned: 69,
     couponCode: null,
     couponId: null,
-    shippingName: "Ava Miller",
+    shippingName: "Daniel Reed",
     shippingAddress1: "77 Spring St",
     shippingAddress2: "Unit 4A",
     shippingCity: "New York",
     shippingState: "NY",
     shippingPostalCode: "10012",
     shippingCountry: "US",
-    billingName: "Ava Miller",
+    billingName: "Daniel Reed",
     billingAddress1: "77 Spring St",
     billingAddress2: "Unit 4A",
     billingCity: "New York",
@@ -205,20 +136,20 @@ export const fallbackOrders: OrderRecord[] = [
     billingPostalCode: "10012",
     billingCountry: "US",
     notes: null,
-    stripeCheckoutId: "cs_test_1001",
-    stripePaymentIntentId: "pi_test_1001",
-    customerId: "cus_ava",
-    createdAt: new Date("2026-03-20T09:00:00.000Z"),
-    updatedAt: new Date("2026-03-20T09:00:00.000Z"),
+    stripeCheckoutId: "cs_test_2001",
+    stripePaymentIntentId: "pi_test_2001",
+    customerId: "cus_daniel",
+    createdAt: new Date("2026-03-27T10:00:00.000Z"),
+    updatedAt: new Date("2026-03-27T10:00:00.000Z"),
     items: [
       {
-        id: "item_1001_a",
-        name: "PDRN Cream",
-        slug: "pdrn-cream",
+        id: "item_2001_a",
+        name: "ZenUP NAD+ Nicotinamide Riboside 1100mg",
+        slug: "zenup-nad-plus-nicotinamide-riboside",
         quantity: 1,
-        unitPriceCents: 5200,
-        lineTotalCents: 5200,
-        imageUrl: getDefaultProductImageUrl("pdrn-cream") ?? "/products/pdrn-cream.svg"
+        unitPriceCents: 6900,
+        lineTotalCents: 6900,
+        imageUrl: zenupImage
       }
     ]
   }
@@ -228,32 +159,22 @@ export const fallbackRewards: RewardEntryRecord[] = [
   {
     id: "reward_1",
     type: "EARNED",
-    points: 52,
-    note: "Paid order NEA-1001",
-    orderId: "ord_1001",
-    customerId: "cus_ava",
-    customerEmail: "ava@neatiquebeauty.com",
-    createdAt: new Date("2026-03-20T09:05:00.000Z")
+    points: 69,
+    note: "Paid order ZEN-2001",
+    orderId: "ord_2001",
+    customerId: "cus_daniel",
+    customerEmail: "daniel@example.com",
+    createdAt: new Date("2026-03-27T10:05:00.000Z")
   },
   {
     id: "reward_2",
     type: "EARNED",
-    points: 90,
-    note: "Paid order NEA-1003",
-    orderId: "ord_1003",
-    customerId: "cus_emma",
-    customerEmail: "emma@example.com",
-    createdAt: new Date("2026-03-22T10:00:00.000Z")
-  },
-  {
-    id: "reward_3",
-    type: "ADJUSTMENT",
-    points: 40,
-    note: "Launch campaign bonus",
-    orderId: null,
-    customerId: "cus_ava",
-    customerEmail: "ava@neatiquebeauty.com",
-    createdAt: new Date("2026-03-23T11:00:00.000Z")
+    points: 138,
+    note: "Paid order ZEN-2002",
+    orderId: "ord_2002",
+    customerId: "cus_marcus",
+    customerEmail: "marcus@example.com",
+    createdAt: new Date("2026-03-28T10:05:00.000Z")
   }
 ];
 

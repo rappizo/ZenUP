@@ -11,7 +11,7 @@ function unauthorizedResponse() {
     {
       status: 401,
       headers: {
-        "WWW-Authenticate": 'Basic realm="Neatique Admin"'
+        "WWW-Authenticate": 'Basic realm="ZenUP Admin"'
       }
     }
   );

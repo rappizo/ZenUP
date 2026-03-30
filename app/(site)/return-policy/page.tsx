@@ -4,7 +4,7 @@ import { PolicyPage } from "@/components/policy/policy-page";
 export const metadata: Metadata = {
   title: "Return Policy",
   description:
-    "Read the Neatique Beauty Return Policy for our 30 Days Money Back promise and return support details.",
+    "Read the ZenUP Return Policy for our 30-day support window and return details.",
   alternates: {
     canonical: "/return-policy"
   }
@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    title: "30 Days Money Back",
+    title: "30-day support window",
     paragraphs: [
-      "Neatique Beauty offers a 30 Days Money Back policy for eligible orders purchased directly from our website. If you are not satisfied, contact us within 30 days of delivery and our team will review the request.",
+      "ZenUP offers a 30-day support window for eligible orders purchased directly from our website. If you are not satisfied, contact us within 30 days of delivery and our team will review the request.",
       "To help us process your request smoothly, please include your order number, the email used at checkout, and a short note about the issue."
     ]
   },
@@ -28,7 +28,7 @@ const sections = [
   {
     title: "Items that may not qualify",
     paragraphs: [
-      "We reserve the right to refuse requests that fall outside the 30-day window, show signs of misuse, involve abuse of the return policy, or relate to orders not purchased directly from Neatique Beauty.",
+      "We reserve the right to refuse requests that fall outside the 30-day window, show signs of misuse, involve abuse of the return policy, or relate to orders not purchased directly from ZenUP.",
       "Shipping fees, if applicable, may not be refundable unless the issue was caused by an error on our side."
     ]
   },
@@ -44,11 +44,11 @@ const sections = [
 const highlights = [
   {
     title: "30-day window",
-    description: "Eligible website orders can be reviewed for refund support within 30 days of delivery."
+    description: "Eligible website orders can be reviewed for support within 30 days of delivery."
   },
   {
     title: "Direct purchases only",
-    description: "The policy applies to items purchased directly from Neatique Beauty."
+    description: "The policy applies to items purchased directly from ZenUP."
   },
   {
     title: "Fast support",
@@ -60,9 +60,9 @@ export default function ReturnPolicyPage() {
   return (
     <PolicyPage
       eyebrow="Return Policy"
-      title="A 30 Days Money Back policy designed to keep shopping with Neatique confident and easy."
-      description="This Return Policy explains the return and refund support available for orders placed directly on Neatique Beauty, including our 30-day money-back window."
-      stats={["30 Days Money Back", "Applies to direct website orders", "Support handled by email"]}
+      title="A clear support policy designed to keep shopping with ZenUP confident and simple."
+      description="This Return Policy explains the return and refund support available for orders placed directly on ZenUP, including our 30-day review window."
+      stats={["30-day support window", "Applies to direct website orders", "Support handled by email"]}
       sections={[...sections]}
       highlights={[...highlights]}
     />

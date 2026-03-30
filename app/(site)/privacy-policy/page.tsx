@@ -4,7 +4,7 @@ import { PolicyPage } from "@/components/policy/policy-page";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Read the Neatique Beauty Privacy Policy for information about how we collect, use, and protect customer information.",
+    "Read the ZenUP Privacy Policy for information about how we collect, use, and protect customer information.",
   alternates: {
     canonical: "/privacy-policy"
   }
@@ -22,7 +22,7 @@ const sections = [
     title: "How we use your information",
     paragraphs: [
       "We use customer information to process orders, arrange payment, provide shipping updates, respond to support requests, improve the shopping experience, and maintain your account, rewards, and order history.",
-      "If you subscribe to marketing emails, we may also use your email address to send product updates, launch announcements, routine tips, and promotional offers."
+      "If you subscribe to marketing emails, we may also use your email address to send product updates, launch announcements, educational content, and promotional offers."
     ],
     bullets: [
       "To process and fulfill purchases",
@@ -35,7 +35,7 @@ const sections = [
   {
     title: "Payments, analytics, and service providers",
     paragraphs: [
-      "Payments on Neatique Beauty are processed through secure third-party providers such as Stripe. We do not store full payment card details on our own servers.",
+      "Payments on ZenUP are processed through secure third-party providers such as Stripe. We do not store full payment card details on our own servers.",
       "We may also use trusted tools for website analytics, order management, email delivery, and customer communication. These providers only receive the information needed to perform their services for us."
     ]
   },
@@ -74,8 +74,8 @@ export default function PrivacyPolicyPage() {
   return (
     <PolicyPage
       eyebrow="Privacy Policy"
-      title="How Neatique collects, uses, and protects customer information."
-      description="This Privacy Policy explains what information we collect on Neatique Beauty, how that information supports your orders and account experience, and the choices available to you."
+      title="How ZenUP collects, uses, and protects customer information."
+      description="This Privacy Policy explains what information we collect on ZenUP, how that information supports your order and account experience, and the choices available to you."
       stats={["Applies to site visitors and customers", "Secure payment processing", "Support available by contact request"]}
       sections={[...sections]}
       highlights={[...highlights]}

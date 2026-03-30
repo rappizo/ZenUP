@@ -45,7 +45,7 @@ function buildPublishedDate(formData: FormData, published: boolean) {
 function refreshStorefront(productSlugs: string[] = []) {
   revalidatePath("/");
   revalidatePath("/shop");
-  revalidatePath("/beauty-tips");
+  revalidatePath("/blog");
 
   for (const slug of productSlugs) {
     revalidatePath(`/shop/${slug}`);
@@ -647,7 +647,7 @@ export async function createPostAction(formData: FormData) {
     }
   });
 
-  revalidatePath("/beauty-tips");
+  revalidatePath("/blog");
   revalidatePath("/admin/posts");
   redirect("/admin/posts?status=created");
 }
@@ -675,7 +675,7 @@ export async function updatePostAction(formData: FormData) {
     }
   });
 
-  revalidatePath("/beauty-tips");
+  revalidatePath("/blog");
   revalidatePath("/admin/posts");
   redirect("/admin/posts?status=updated");
 }
@@ -686,7 +686,7 @@ export async function deletePostAction(formData: FormData) {
   const id = toPlainString(formData.get("id"));
   await prisma.post.delete({ where: { id } });
 
-  revalidatePath("/beauty-tips");
+  revalidatePath("/blog");
   revalidatePath("/admin/posts");
   redirect("/admin/posts?status=deleted");
 }
@@ -956,7 +956,7 @@ export async function saveEmailSettingsAction(formData: FormData) {
     ["smtp_secure", toBool(formData.get("smtp_secure")) ? "true" : "false"],
     ["smtp_user", toPlainString(formData.get("smtp_user"))],
     ["smtp_pass", toPlainString(formData.get("smtp_pass"))],
-    ["email_from_name", toPlainString(formData.get("email_from_name")) || "Neatique Beauty"],
+    ["email_from_name", toPlainString(formData.get("email_from_name")) || "ZenUP"],
     ["email_from_address", toPlainString(formData.get("email_from_address"))],
     ["contact_recipient", toPlainString(formData.get("contact_recipient"))]
   ];
@@ -986,7 +986,7 @@ export async function saveEmailMarketingSettingsAction(formData: FormData) {
     ["brevo_sync_contact", toBool(formData.get("brevo_sync_contact")) ? "true" : "false"],
     ["brevo_sync_customers", toBool(formData.get("brevo_sync_customers")) ? "true" : "false"],
     ["brevo_api_key", nextApiKey],
-    ["brevo_sender_name", toPlainString(formData.get("brevo_sender_name")) || "Neatique Beauty"],
+    ["brevo_sender_name", toPlainString(formData.get("brevo_sender_name")) || "ZenUP"],
     ["brevo_sender_email", toPlainString(formData.get("brevo_sender_email"))],
     ["brevo_reply_to", toPlainString(formData.get("brevo_reply_to"))],
     ["brevo_test_email", toPlainString(formData.get("brevo_test_email"))],

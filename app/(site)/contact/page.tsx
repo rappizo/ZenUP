@@ -8,26 +8,26 @@ type ContactPageProps = {
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact Neatique for customer care, retail support, and partnership questions.",
+  description: "Contact ZenUP for customer care, wholesale support, and product questions.",
   alternates: {
     canonical: "/contact"
   },
   keywords: [
-    "contact Neatique",
-    "Neatique customer support",
-    "skincare order support",
-    "Neatique contact page"
+    "contact ZenUP",
+    "ZenUP customer support",
+    "NAD+ supplement support",
+    "ZenUP contact page"
   ],
   openGraph: {
     title: `Contact | ${siteConfig.title}`,
-    description: "Contact Neatique for customer care, retail support, and partnership questions.",
+    description: "Contact ZenUP for customer care, wholesale support, and product questions.",
     url: `${siteConfig.url}/contact`,
     images: [defaultOgImage]
   },
   twitter: {
     card: "summary_large_image",
     title: `Contact | ${siteConfig.title}`,
-    description: "Contact Neatique for customer care, retail support, and partnership questions.",
+    description: "Contact ZenUP for customer care, wholesale support, and product questions.",
     images: [defaultOgImage.url]
   }
 };
@@ -40,10 +40,10 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
       <div className="container">
         <div className="contact-hero">
           <p className="eyebrow">Contact</p>
-          <h1>We are here to help with orders, product questions, and everyday routine advice.</h1>
+          <h1>We are here to help with orders, formula questions, and partnership requests.</h1>
           <p>
-            Reach out if you need help choosing a product, checking an order, or learning how to fit
-            Neatique into your current routine.
+            Reach out if you need help reviewing the supplement facts, checking an order, or
+            discussing wholesale and partnership opportunities.
           </p>
           <div className="page-hero__stats">
             <span className="pill">{siteConfig.supportEmail}</span>
@@ -56,10 +56,10 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
         <div className="section cards-2">
           <div className="contact-card">
-            <h3>Customer & retail support</h3>
+            <h3>Customer & wholesale support</h3>
             <p>
-              Reach out for shipping questions, order support, product guidance, or retail
-              inquiries.
+              Reach out for shipping questions, order support, ingredient questions, or retail and
+              distribution inquiries.
             </p>
             <div className="site-footer__contact">
               <span>{siteConfig.supportEmail}</span>
@@ -69,9 +69,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           </div>
           <div className="contact-card">
             <h3>Send a message</h3>
-            <p>
-              Tell us what you need and our team will get back to you as soon as possible.
-            </p>
+            <p>Tell us what you need and our team will get back to you as soon as possible.</p>
             <form action="/api/contact" method="post" className="contact-form">
               <div className="form-row">
                 <div className="field">

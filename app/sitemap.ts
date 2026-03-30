@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9
     },
     {
-      url: `${siteConfig.url}/beauty-tips`,
+      url: `${siteConfig.url}/blog`,
       changeFrequency: "weekly",
       priority: 0.9
     },
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8
     })),
     ...posts.map((post) => ({
-      url: `${siteConfig.url}/beauty-tips/${post.slug}`,
+      url: `${siteConfig.url}/blog/${post.slug}`,
       lastModified: post.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.75

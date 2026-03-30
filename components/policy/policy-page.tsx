@@ -79,8 +79,8 @@ export function PolicyPage({
             <div className="panel policy-sidebar__panel">
               <p className="eyebrow">Need Help?</p>
               <p>
-                If you have an order question or need support with your skincare routine, our team
-                is here to help.
+                If you have an order question or need help reviewing the product, label, or
+                routine, our team is here to help.
               </p>
               <div className="hero-actions">
                 <Link href="/contact" className="button button--primary">

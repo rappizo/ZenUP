@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 
-const COOKIE_NAME = "neatique-customer-session";
+const COOKIE_NAME = "zenup-customer-session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30;
 
 function hashSessionToken(token: string) {

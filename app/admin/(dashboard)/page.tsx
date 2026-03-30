@@ -17,9 +17,9 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
     <div className="admin-page">
       <div className="admin-page__header">
         <p className="eyebrow">Dashboard</p>
-        <h1>Keep the Neatique storefront, content engine, and loyalty flow in sync.</h1>
+        <h1>Keep the ZenUP storefront, formula content, and customer flow in sync.</h1>
         <p>
-          This control center covers catalog status, order activity, customer growth, points, and
+          This control center covers catalog status, order activity, customer growth, rewards, and
           key store settings for the United States market.
         </p>
       </div>
@@ -97,7 +97,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
               <input
                 id="support_email"
                 name="support_email"
-                defaultValue={settings.support_email || "support@neatiquebeauty.com"}
+                defaultValue={settings.support_email || "support@zenup.com"}
               />
             </div>
             <div className="field">

@@ -10,7 +10,7 @@ import {
   parseStoredCouponProductCodes
 } from "@/lib/coupons";
 
-const CART_COOKIE_NAME = "neatique-cart";
+const CART_COOKIE_NAME = "zenup-cart";
 
 export type CartItem = {
   productId: string;

@@ -22,9 +22,9 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         <Logo href="/" />
         <div>
           <p className="eyebrow">Admin access</p>
-          <h1>Manage products, orders, users, points, and SEO posts.</h1>
+          <h1>Manage products, orders, customers, rewards, and blog content.</h1>
           <p>
-            Use the admin credentials from your environment variables to enter the Neatique
+            Use the admin credentials from your environment variables to enter the ZenUP
             operations dashboard.
           </p>
         </div>

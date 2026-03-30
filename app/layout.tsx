@@ -9,27 +9,26 @@ const GOOGLE_TAG_ID = "G-WRS7GSKT5T";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Neatique Beauty",
-    template: "%s | Neatique Beauty"
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.title}`
   },
   description: siteConfig.description,
   applicationName: siteConfig.title,
   referrer: "origin-when-cross-origin",
   keywords: [
-    "Neatique Beauty",
-    "professional skincare",
-    "PDRN cream",
-    "PDRN serum",
-    "snail mucin cream",
-    "snail mucin serum",
-    "hydrating skincare",
-    "glow skincare",
-    "United States skincare brand"
+    "ZenUP",
+    "NAD+ supplement",
+    "nicotinamide riboside",
+    "cellular energy support",
+    "healthy aging supplement",
+    "quercetin phytosome",
+    "resveratrol",
+    "coq10"
   ],
   authors: [{ name: siteConfig.title, url: siteConfig.url }],
   creator: siteConfig.title,
   publisher: siteConfig.title,
-  category: "beauty",
+  category: "health",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg"

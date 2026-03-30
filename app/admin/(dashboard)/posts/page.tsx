@@ -17,10 +17,10 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
     <div className="admin-page">
       <div className="admin-page__header">
         <p className="eyebrow">Posts</p>
-        <h1>Publish SEO beauty content from a dedicated editorial backend.</h1>
+        <h1>Publish SEO supplement content from a dedicated editorial backend.</h1>
         <p>
-          This is the content engine for your Beauty Tips section. We can use it to publish routine
-          guides, ingredient explainers, and keyword-targeted blog posts on a regular cadence.
+          This is the content engine for your ZenUP blog. Use it to publish ingredient explainers,
+          buying guides, and routine articles that support the NAD+ product story.
         </p>
       </div>
 

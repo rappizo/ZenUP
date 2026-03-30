@@ -140,7 +140,7 @@ export default async function AdminEmailMarketingPage({
               <input
                 id="brevo_sender_name"
                 name="brevo_sender_name"
-                defaultValue={settings.brevo_sender_name || "Neatique Beauty"}
+                defaultValue={settings.brevo_sender_name || "ZenUP"}
               />
             </div>
 

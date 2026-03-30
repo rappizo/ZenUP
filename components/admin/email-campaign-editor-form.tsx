@@ -23,7 +23,7 @@ export function EmailCampaignEditorForm({
   action,
   mode,
   campaign,
-  defaultSenderName = "Neatique Beauty",
+  defaultSenderName = "ZenUP",
   defaultSenderEmail = "",
   defaultReplyTo = ""
 }: EmailCampaignEditorFormProps) {

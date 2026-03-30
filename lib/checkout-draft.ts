@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-const CHECKOUT_DRAFT_COOKIE_NAME = "neatique-checkout-draft";
+const CHECKOUT_DRAFT_COOKIE_NAME = "zenup-checkout-draft";
 
 export type CheckoutAddress = {
   fullName: string;

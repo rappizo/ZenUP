@@ -9,8 +9,8 @@ export function SiteFooter() {
         <div className="site-footer__brand">
           <Logo />
           <p>
-            Advanced skincare essentials for modern routines, designed to feel refined, bright, and
-            reliable from first use to finish.
+            Professional NAD+ nutrition designed around Nicotinamide Riboside, Quercetin
+            Phytosome, Resveratrol, and CoQ10 for a clearer daily routine.
           </p>
           <div className="site-footer__contact">
             <span>{siteConfig.supportEmail}</span>
@@ -50,8 +50,8 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="container site-footer__bottom">
-        <p>(c) 2026 Neatique Beauty. All rights reserved.</p>
-        <p>Secure checkout. Ships within 1 business day. 30 Days Money Back.</p>
+        <p>(c) 2026 ZenUP. All rights reserved.</p>
+        <p>Secure checkout. Ships within 1 business day. 30-day support window.</p>
       </div>
     </footer>
   );

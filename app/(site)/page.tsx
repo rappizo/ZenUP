@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { HomeBannerSlider } from "@/components/home/home-banner-slider";
 import { SocialProofSlider } from "@/components/home/social-proof-slider";
+import { ImagePromptPlaceholder } from "@/components/ui/image-prompt-placeholder";
 import { PostCard } from "@/components/ui/post-card";
 import { ProductCard } from "@/components/ui/product-card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { homeVisualPrompts } from "@/lib/home-visual-prompts";
 import { getFeaturedProducts, getPublishedPosts } from "@/lib/queries";
 import { siteConfig } from "@/lib/site-config";
 import { buildSiteImageUrl } from "@/lib/site-media";
@@ -15,123 +16,49 @@ import {
   SUBSCRIBE_COUPON_PERCENT_OFF
 } from "@/lib/subscribe-offer";
 
-const homePageTitle = "Professional Skincare for Smooth, Hydrated, Radiant Skin";
+const homePageTitle = "Professional NAD+ Nutrition for Cellular Energy and Healthy Aging";
 const homePageDescription =
-  "Discover Neatique Beauty, a professional skincare collection built around PDRN and Snail Mucin essentials for glow, comfort, hydration, and refined daily rituals in the United States.";
+  "Discover ZenUP, a professional NAD+ supplement brand centered on Nicotinamide Riboside, Quercetin Phytosome, Resveratrol, and CoQ10.";
 
-const homeImages = {
-  signature: {
-    src: buildSiteImageUrl("home", "Signature Brand Campaign.png"),
-    alt: "Neatique skincare arranged in a warm signature campaign still life.",
-    width: 800,
-    height: 800
-  },
-  morning: {
-    src: buildSiteImageUrl("home", "Morning Vanity Scene.png"),
-    alt: "Neatique products styled on a vanity for a bright morning skincare ritual.",
-    width: 800,
-    height: 800
-  },
-  lifestyle: {
-    src: buildSiteImageUrl("home", "Brand Lifestyle Moment.png"),
-    alt: "Neatique skincare featured in a soft lifestyle campaign moment.",
-    width: 800,
-    height: 800
-  },
-  texture: {
-    src: buildSiteImageUrl("home", "Texture Close-Up.png"),
-    alt: "Close-up texture view of Neatique skincare with a smooth, glossy finish.",
-    width: 800,
-    height: 800
-  },
-  ritual: {
-    src: buildSiteImageUrl("home", "Refined Sink-Side Ritual.png"),
-    alt: "Neatique skincare arranged beside a sink for an elevated daily ritual.",
-    width: 800,
-    height: 800
-  },
-  application: {
-    src: buildSiteImageUrl("home", "Application Close-UP.png"),
-    alt: "Close-up of Neatique skincare application for a soft, hydrated finish.",
-    width: 800,
-    height: 800
-  },
-  pdrn: {
-    src: buildSiteImageUrl("home", "PDRN Editorial Still Life.png"),
-    alt: "PDRN skincare products styled in a polished editorial still life.",
-    width: 800,
-    height: 800
-  },
-  snail: {
-    src: buildSiteImageUrl("home", "Snail Mucin Texture Story.png"),
-    alt: "Snail mucin skincare styled to highlight a dewy, replenishing texture story.",
-    width: 800,
-    height: 800
-  },
-  evening: {
-    src: buildSiteImageUrl("home", "Soft Evening Brand Moment.png"),
-    alt: "Neatique skincare styled in a soft evening brand moment with a calm glow.",
-    width: 1071,
-    height: 800
-  }
-};
-
-const brandPillars = [
+const formulaCards = [
   {
-    eyebrow: "Professional Feel",
-    title: "Skincare that looks polished on the vanity and effortless in daily life.",
+    eyebrow: "Core NAD+ Support",
+    title: "600mg Nicotinamide Riboside Hydrogen Malate",
     description:
-      "Neatique focuses on elevated textures, easy layering, and a refined finish that never feels overworked."
+      "A serious daily serving level for customers who want the formula anchored by a recognized NAD+ precursor."
   },
   {
-    eyebrow: "Comfort First",
-    title: "Every serum and cream is built to help skin feel calm, cushioned, and cared for.",
+    eyebrow: "Amplifier",
+    title: "250mg Quercetin Phytosome",
     description:
-      "The collection is designed for women who want hydration, softness, and glow without a complicated routine."
+      "Included to strengthen the healthy-aging positioning and create a more complete stack in one bottle."
   },
   {
-    eyebrow: "Ritual Ready",
-    title: "A four-piece collection made to work from first step to final layer.",
+    eyebrow: "Longevity Companion",
+    title: "150mg Trans-Resveratrol + 100mg CoQ10",
     description:
-      "Use the formulas on their own or pair them together for a morning-to-evening rhythm that stays easy to maintain."
+      "Resveratrol and CoQ10 round out the formula for customers looking beyond single-ingredient NR products."
   }
 ];
 
 const routineSteps = [
   {
     step: "01",
-    title: "Start with a serum that feels fresh and weightless",
+    title: "Take 2 capsules daily",
     description:
-      "Use a lightweight layer first to bring in hydration and help the rest of the routine sit beautifully on the skin."
+      "The routine is simple by design so customers can stay consistent instead of managing a complicated stack."
   },
   {
     step: "02",
-    title: "Choose the finish your skin is asking for",
+    title: "Use it as the anchor product",
     description:
-      "Reach for PDRN when you want bounce and a polished glow, or Snail Mucin when you want soft, replenishing comfort."
+      "ZenUP is built to cover the core ingredients most NAD+ shoppers already want in one place."
   },
   {
     step: "03",
-    title: "Seal everything in with a cream that stays elegant",
+    title: "Stay with the routine",
     description:
-      "Finish with a cream texture that helps skin feel smooth, nourished, and ready for the rest of the day or night."
-  }
-];
-
-const ingredientStories = [
-  {
-    eyebrow: "PDRN Ritual",
-    title: "For skin that looks smooth, rested, and quietly luminous.",
-    description:
-      "Our PDRN pairing is made for women who want their routine to feel polished while helping the complexion look fresher and more refined.",
-    image: homeImages.pdrn
-  },
-  {
-    eyebrow: "Snail Mucin Ritual",
-    title: "For comfort, hydration, and a soft dewy finish that lasts.",
-    description:
-      "The Snail Mucin duo is ideal for routines that need cushion, replenishing moisture, and a more supple-looking glow.",
-    image: homeImages.snail
+      "This site is positioned around steady, professional daily use rather than short-term hype or cluttered messaging."
   }
 ];
 
@@ -142,15 +69,12 @@ export const metadata: Metadata = {
     canonical: "/"
   },
   keywords: [
-    "Neatique Beauty",
-    "professional skincare",
-    "PDRN cream",
-    "PDRN serum",
-    "snail mucin cream",
-    "snail mucin serum",
-    "hydrating skincare",
-    "glow skincare",
-    "United States skincare brand"
+    "ZenUP",
+    "NAD+ supplement",
+    "nicotinamide riboside",
+    "healthy aging supplement",
+    "quercetin phytosome",
+    "resveratrol coq10 formula"
   ],
   openGraph: {
     title: `${homePageTitle} | ${siteConfig.title}`,
@@ -159,10 +83,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: homeImages.signature.src,
-        width: homeImages.signature.width,
-        height: homeImages.signature.height,
-        alt: homeImages.signature.alt
+        url: buildSiteImageUrl("home", "ZenUP Hero Main.png"),
+        width: 768,
+        height: 768,
+        alt: "ZenUP NAD+ bottle"
       }
     ]
   },
@@ -170,7 +94,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${homePageTitle} | ${siteConfig.title}`,
     description: homePageDescription,
-    images: [homeImages.signature.src]
+    images: [buildSiteImageUrl("home", "ZenUP Hero Main.png")]
   }
 };
 
@@ -180,11 +104,12 @@ type HomePageProps = {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const [products, posts, params] = await Promise.all([
-    getFeaturedProducts(4),
-    getPublishedPosts(2),
+    getFeaturedProducts(1),
+    getPublishedPosts(3),
     searchParams
   ]);
 
+  const featuredProduct = products[0];
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -197,7 +122,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         email: siteConfig.supportEmail,
         telephone: siteConfig.phone,
         areaServed: "US",
-        image: `${siteConfig.url}${homeImages.signature.src}`
+        image: `${siteConfig.url}${buildSiteImageUrl("home", "ZenUP Hero Main.png")}`
       },
       {
         "@type": "WebSite",
@@ -209,30 +134,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           "@id": `${siteConfig.url}/#organization`
         }
       },
-      {
-        "@type": "CollectionPage",
-        "@id": `${siteConfig.url}/#homepage`,
-        url: siteConfig.url,
-        name: homePageTitle,
-        description: homePageDescription,
-        isPartOf: {
-          "@id": `${siteConfig.url}/#website`
-        },
-        about: {
-          "@id": `${siteConfig.url}/#organization`
-        },
-        primaryImageOfPage: `${siteConfig.url}${homeImages.signature.src}`
-      },
-      {
-        "@type": "ItemList",
-        name: "Featured skincare products",
-        itemListElement: products.map((product, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          name: product.name,
-          url: `${siteConfig.url}/shop/${product.slug}`
-        }))
-      }
+      ...(featuredProduct
+        ? [
+            {
+              "@type": "Product",
+              name: featuredProduct.name,
+              description: featuredProduct.description,
+              image: [new URL(featuredProduct.imageUrl, siteConfig.url).toString()],
+              brand: {
+                "@type": "Brand",
+                name: siteConfig.name
+              },
+              offers: {
+                "@type": "Offer",
+                url: `${siteConfig.url}/shop/${featuredProduct.slug}`,
+                priceCurrency: featuredProduct.currency,
+                price: (featuredProduct.priceCents / 100).toFixed(2),
+                availability: "https://schema.org/InStock"
+              }
+            }
+          ]
+        : [])
     ]
   };
 
@@ -249,44 +171,39 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="container">
           <div className="brand-manifesto">
             <div className="brand-manifesto__copy">
-              <p className="eyebrow">Neatique Beauty</p>
+              <p className="eyebrow">ZenUP Brand Positioning</p>
               <h1 className="brand-manifesto__title">
-                Professional skincare for smooth, hydrated, glow-ready skin.
+                One flagship NAD+ product. Clear formula logic. Professional presentation.
               </h1>
               <p className="brand-manifesto__lead">
-                Neatique blends elegant textures with modern simplicity so women can build a ritual
-                that feels polished, calming, and easy to return to every day.
+                ZenUP is built around a single hero product so the story stays focused: a premium
+                daily supplement for shoppers who care about NAD+ support, healthy aging, and a
+                cleaner long-term routine.
               </p>
               <div className="brand-manifesto__pills">
+                <span className="pill">120 veggie capsules</span>
+                <span className="pill">60 servings per bottle</span>
                 <span className="pill">United States shipping</span>
-                <span className="pill">PDRN and Snail Mucin essentials</span>
-                <span className="pill">Serums and creams for daily routines</span>
               </div>
               <p className="brand-manifesto__note">
-                From first layer to final finish, every formula is meant to support skin comfort,
-                refined texture, and a healthy-looking glow that fits naturally into real life.
+                The site has been restructured to sell one product well before expanding the
+                catalog, and the homepage image slots now double as direct prompt briefs so you
+                can generate custom ZenUP campaign assets without redesigning the layout.
               </p>
               <div className="hero-actions">
-                <Link href="/shop" className="button button--primary">
-                  Shop the collection
+                <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
+                  View product
                 </Link>
-                <Link href="/beauty-tips" className="button button--secondary">
-                  Explore beauty tips
+                <Link href="/blog" className="button button--secondary">
+                  Explore the blog
                 </Link>
               </div>
             </div>
 
-            <div className="home-image home-image--square home-image--hero">
-              <Image
-                src={homeImages.signature.src}
-                alt={homeImages.signature.alt}
-                width={homeImages.signature.width}
-                height={homeImages.signature.height}
-                sizes="(max-width: 1080px) 100vw, 44vw"
-                quality={84}
-                priority
-              />
-            </div>
+            <ImagePromptPlaceholder
+              {...homeVisualPrompts.brandStory}
+              className="brand-manifesto__visual"
+            />
           </div>
         </div>
       </section>
@@ -294,56 +211,45 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className="section">
         <div className="container">
           <SectionHeading
-            eyebrow="Signature Collection"
-            title="Four core essentials created for brighter, softer, more confident skin days."
-            description="Meet the PDRN and Snail Mucin formulas that anchor the Neatique collection, from fresh serum layers to comforting cream finishes."
+            eyebrow="Formula Breakdown"
+            title="Built around the ingredients the NAD+ customer already knows to compare."
+            description="The homepage now leads with formula clarity so the product feels credible before the customer ever reaches the cart."
           />
-          <div className="product-grid">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="cards-3">
+            {formulaCards.map((card) => (
+              <article key={card.title} className="panel philosophy-card">
+                <p className="eyebrow">{card.eyebrow}</p>
+                <h3>{card.title}</h3>
+                <p>{card.description}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <div className="philosophy-band">
-            <div className="philosophy-band__hero">
-              <div className="philosophy-band__intro">
-                <p className="eyebrow">Brand Philosophy</p>
-                <h2>Luxury in feel, clarity in routine, and comfort in every layer.</h2>
-                <p>
-                  Neatique is built for women who want skincare to feel elevated without feeling
-                  complicated. The brand philosophy centers on glow, softness, visual polish, and a
-                  ritual that still makes sense on busy mornings and calm evenings alike.
-                </p>
-              </div>
-
-              <div className="philosophy-band__media">
-                <div className="home-image home-image--landscape philosophy-band__feature">
-                  <Image
-                    src={homeImages.morning.src}
-                    alt={homeImages.morning.alt}
-                    width={homeImages.morning.width}
-                    height={homeImages.morning.height}
-                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 58vw, 36vw"
-                    quality={82}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="philosophy-band__grid">
-              {brandPillars.map((pillar) => (
-                <article key={pillar.eyebrow} className="panel philosophy-card">
-                  <p className="eyebrow">{pillar.eyebrow}</p>
-                  <h3>{pillar.title}</h3>
-                  <p>{pillar.description}</p>
-                </article>
-              ))}
+      {featuredProduct ? (
+        <section className="section">
+          <div className="container">
+            <SectionHeading
+              eyebrow="Flagship Product"
+              title="The storefront is now focused on a single high-priority landing product."
+              description="This keeps the catalog lean while you prepare more detailed assets and higher-converting landing page content."
+            />
+            <div className="product-grid product-grid--single">
+              <ProductCard product={featuredProduct} />
             </div>
           </div>
+        </section>
+      ) : null}
+
+      <section className="section">
+        <div className="container">
+          <SectionHeading
+            eyebrow="Why This Setup Works"
+            title="The ingredient panel is now part of the hero story instead of hidden secondary content."
+            description="For a supplement brand, formula transparency and daily-use clarity need to show up earlier than generic brand lifestyle messaging."
+          />
+          <SocialProofSlider />
         </div>
       </section>
 
@@ -353,32 +259,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="ritual-spotlight__hero">
               <div className="ritual-spotlight__content">
                 <SectionHeading
-                  eyebrow="Designed For Daily Rituals"
-                  title="A simple three-step rhythm that keeps skincare feeling calm, clear, and luxurious."
-                  description="Whether the routine starts at a busy vanity or ends with a quiet evening reset, Neatique is designed to keep each step intuitive and beautiful to use."
+                  eyebrow="Daily Use"
+                  title="A simple three-step message customers can understand in seconds."
+                  description="The product story now emphasizes dosage clarity, consistency, and a more professional healthy-aging routine."
                 />
               </div>
               <div className="ritual-spotlight__media">
-                <div className="home-image home-image--square">
-                  <Image
-                    src={homeImages.ritual.src}
-                    alt={homeImages.ritual.alt}
-                    width={homeImages.ritual.width}
-                    height={homeImages.ritual.height}
-                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 24vw"
-                    quality={82}
-                  />
-                </div>
-                <div className="home-image home-image--square">
-                  <Image
-                    src={homeImages.application.src}
-                    alt={homeImages.application.alt}
-                    width={homeImages.application.width}
-                    height={homeImages.application.height}
-                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 20vw"
-                    quality={82}
-                  />
-                </div>
+                <ImagePromptPlaceholder {...homeVisualPrompts.routineScene} className="ritual-prompt" />
+                <ImagePromptPlaceholder {...homeVisualPrompts.ingredientMacro} className="ritual-prompt" />
               </div>
             </div>
 
@@ -398,47 +286,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className="section">
         <div className="container">
           <SectionHeading
-            eyebrow="Loved Online"
-            title="Real creator moments that help shoppers picture the texture, glow, and finish."
-            description="See the formulas in motion, then move straight into the products that match the skin feel you want to build into your routine."
-          />
-          <SocialProofSlider />
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container ingredient-story-grid">
-          {ingredientStories.map((story) => (
-            <article key={story.eyebrow} className="ingredient-story panel">
-              <div className="home-image home-image--square">
-                <Image
-                  src={story.image.src}
-                  alt={story.image.alt}
-                  width={story.image.width}
-                  height={story.image.height}
-                  sizes="(max-width: 1080px) 100vw, 44vw"
-                  quality={82}
-                />
-              </div>
-              <div className="ingredient-story__copy">
-                <p className="eyebrow">{story.eyebrow}</p>
-                <h3>{story.title}</h3>
-                <p>{story.description}</p>
-                <Link href="/shop" className="link-inline">
-                  Explore the shop
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <SectionHeading
-            eyebrow="Beauty Tips"
-            title="Routine guidance made to feel useful, clear, and easy to come back to."
-            description="Discover ingredient explainers, layering ideas, and practical skincare notes designed to help women get more from every step of the ritual."
+            eyebrow="Blog"
+            title="Educational content rewritten for a professional supplement audience."
+            description="The article library now supports NAD+, Nicotinamide Riboside, formula comparison, and routine-building instead of skincare topics."
           />
           <div className="post-grid">
             {posts.map((post) => (
@@ -452,15 +302,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="container">
           <div className="home-cta">
             <div className="home-cta__copy">
-              <p className="eyebrow">Ready For Your Ritual</p>
-              <h2>Find the serum and cream pairing that makes your routine feel softer, brighter, and more refined.</h2>
+              <p className="eyebrow">Next Step</p>
+              <h2>ZenUP is ready to sell one product cleanly before you expand the catalog.</h2>
               <p>
-                Explore the Neatique collection, build a cart around the texture your skin is
-                asking for, and create a daily ritual that feels polished without feeling heavy.
+                The homepage, product story, blog, and visual system now all reinforce the same
+                positioning: premium NAD+ supplementation with a focused, ingredient-led message.
               </p>
               <div className="hero-actions">
-                <Link href="/shop" className="button button--primary">
-                  Shop Neatique
+                <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
+                  Shop ZenUP NAD+
                 </Link>
                 <Link href="/contact" className="button button--secondary">
                   Contact the team
@@ -468,16 +318,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </div>
             </div>
 
-            <div className="home-image home-image--landscape">
-              <Image
-                src={homeImages.evening.src}
-                alt={homeImages.evening.alt}
-                width={homeImages.evening.width}
-                height={homeImages.evening.height}
-                sizes="(max-width: 1080px) 100vw, 48vw"
-                quality={84}
-              />
-            </div>
+            <ImagePromptPlaceholder {...homeVisualPrompts.ctaBanner} className="home-cta__visual" />
           </div>
         </div>
       </section>
@@ -489,8 +330,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <p className="eyebrow">Subscriber Welcome Offer</p>
               <h2>Subscribe and get {SUBSCRIBE_COUPON_PERCENT_OFF}% off your first purchase.</h2>
               <p>
-                Join the Neatique list for skincare notes, product updates, and a welcome coupon
-                delivered straight to your inbox.
+                Join the ZenUP list for NAD+ product updates, formula education, and a welcome
+                coupon delivered straight to your inbox.
               </p>
               <div className="page-hero__stats">
                 <span className="pill">{SUBSCRIBE_COUPON_CODE}</span>

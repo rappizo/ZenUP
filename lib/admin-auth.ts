@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const COOKIE_NAME = "neatique-admin-session";
+const COOKIE_NAME = "zenup-admin-session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 12;
 
 function base64UrlEncode(input: string) {

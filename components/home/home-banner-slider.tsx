@@ -1,125 +1,54 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { buildSiteImageUrl } from "@/lib/site-media";
+import { ImagePromptPlaceholder } from "@/components/ui/image-prompt-placeholder";
+import { homeVisualPrompts } from "@/lib/home-visual-prompts";
 
-const slides = [
-  {
-    title: "A soft, polished start to your everyday routine",
-    description:
-      "Discover silky textures and glow-focused care made to leave skin looking smooth, fresh, and beautifully comfortable.",
-    href: "/shop/pdrn-serum",
-    middleImage: buildSiteImageUrl("home-banner", "1.jpg"),
-    rightImage: buildSiteImageUrl("home-banner", "3.jpg")
-  },
-  {
-    title: "Daily hydration that feels light, calm, and dewy",
-    description:
-      "Explore formulas that wrap the skin in moisture and help create a softer, more luminous finish from morning to night.",
-    href: "/shop/snail-mucin-serum",
-    middleImage: buildSiteImageUrl("home-banner", "4.jpg"),
-    rightImage: buildSiteImageUrl("home-banner", "6.jpg")
-  },
-  {
-    title: "Comforting care for skin that craves softness and glow",
-    description:
-      "Build a routine with serums and creams designed to feel elegant, easy to layer, and lovely to come back to every day.",
-    href: "/shop/snail-mucin-cream",
-    middleImage: buildSiteImageUrl("home-banner", "7.jpg"),
-    rightImage: buildSiteImageUrl("home-banner", "8.jpg")
-  }
+const highlights = [
+  "600mg Nicotinamide Riboside Hydrogen Malate",
+  "250mg Quercetin Phytosome",
+  "150mg Trans-Resveratrol + 100mg CoQ10"
 ];
 
 export function HomeBannerSlider() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setCurrentIndex((current) => (current + 1) % slides.length);
-    }, 6000);
-
-    return () => clearInterval(timer);
-  }, [paused]);
-
   return (
     <section className="home-banner">
       <div className="container">
-        <div
-          className="custom-slider-container"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          <div
-            className="custom-slider-wrapper"
-            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-          >
-            {slides.map((slide, index) => (
-              <div key={slide.title} className="custom-slide">
-                <div className="slide-part text-part">
-                  <div className="text-content">
-                    <p className="eyebrow">Neatique Beauty</p>
-                    <h3>{slide.title}</h3>
-                    <p>{slide.description}</p>
-                    <Link href={slide.href} className="shop-btn">
-                      SHOP NOW
-                    </Link>
-                  </div>
+        <div className="custom-slider-container custom-slider-container--zenup">
+          <div className="custom-slide custom-slide--zenup">
+            <div className="slide-part text-part">
+              <div className="text-content">
+                <p className="eyebrow">ZenUP NAD+ System</p>
+                <h3>Professional NAD+ nutrition built for consistent daily use.</h3>
+                <p>
+                  ZenUP combines Nicotinamide Riboside with Quercetin Phytosome,
+                  Trans-Resveratrol, and CoQ10 in one clean 120-capsule formula for customers
+                  building a serious healthy-aging routine.
+                </p>
+                <div className="hero-copy__badges">
+                  {highlights.map((item) => (
+                    <span key={item} className="pill">
+                      {item}
+                    </span>
+                  ))}
                 </div>
-                <div className="slide-part image-part middle-img">
-                  <Image
-                    src={slide.middleImage}
-                    alt={`${slide.title} campaign visual`}
-                    width={560}
-                    height={760}
-                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 26vw"
-                    quality={82}
-                    priority={index === 0}
-                  />
-                </div>
-                <div className="slide-part image-part right-img">
-                  <Image
-                    src={slide.rightImage}
-                    alt={`${slide.title} skincare detail`}
-                    width={560}
-                    height={760}
-                    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 26vw"
-                    quality={82}
-                    priority={index === 0}
-                  />
+                <div className="hero-actions">
+                  <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
+                    Shop ZenUP NAD+
+                  </Link>
+                  <Link href="/blog" className="button button--secondary">
+                    Read the blog
+                  </Link>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          <button
-            type="button"
-            className="slider-nav prev-btn"
-            onClick={() => {
-              setCurrentIndex((current) => (current - 1 + slides.length) % slides.length);
-              setPaused(false);
-            }}
-            aria-label="Previous slide"
-          >
-            &#10094;
-          </button>
-          <button
-            type="button"
-            className="slider-nav next-btn"
-            onClick={() => {
-              setCurrentIndex((current) => (current + 1) % slides.length);
-              setPaused(false);
-            }}
-            aria-label="Next slide"
-          >
-            &#10095;
-          </button>
+            <div className="slide-part image-part middle-img">
+              <ImagePromptPlaceholder {...homeVisualPrompts.bannerHero} className="home-banner__prompt" />
+            </div>
+
+            <div className="slide-part image-part right-img">
+              <ImagePromptPlaceholder {...homeVisualPrompts.bannerFormula} className="home-banner__prompt" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

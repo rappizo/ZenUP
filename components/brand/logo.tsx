@@ -10,11 +10,11 @@ export function Logo({ href = "/", className }: LogoProps) {
   return (
     <Link href={href} className={cn("brand-logo", className)}>
       <span className="brand-logo__mark" aria-hidden="true">
-        N
+        Z+
       </span>
       <span className="brand-logo__text">
-        <strong>Neatique</strong>
-        <span>Professional Skincare</span>
+        <strong>ZenUP</strong>
+        <span>NAD+ Cellular Nutrition</span>
       </span>
     </Link>
   );

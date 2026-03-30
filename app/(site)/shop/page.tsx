@@ -7,28 +7,27 @@ import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "Browse the full Neatique collection of bright, modern skincare essentials.",
+  description: "Browse the ZenUP catalog, currently focused on one flagship NAD+ supplement.",
   alternates: {
     canonical: "/shop"
   },
   keywords: [
-    "Neatique shop",
-    "buy PDRN cream",
-    "buy PDRN serum",
-    "buy snail mucin cream",
-    "buy snail mucin serum",
-    "professional skincare shop"
+    "ZenUP shop",
+    "NAD+ supplement",
+    "buy nicotinamide riboside",
+    "healthy aging supplement",
+    "NR supplement with resveratrol"
   ],
   openGraph: {
     title: `Shop | ${siteConfig.title}`,
-    description: "Browse the full Neatique collection of bright, modern skincare essentials.",
+    description: "Browse the ZenUP catalog, currently focused on one flagship NAD+ supplement.",
     url: `${siteConfig.url}/shop`,
     images: [defaultOgImage]
   },
   twitter: {
     card: "summary_large_image",
     title: `Shop | ${siteConfig.title}`,
-    description: "Browse the full Neatique collection of bright, modern skincare essentials.",
+    description: "Browse the ZenUP catalog, currently focused on one flagship NAD+ supplement.",
     images: [defaultOgImage.url]
   }
 };
@@ -40,25 +39,25 @@ export default async function ShopPage() {
     <section className="section">
       <div className="container">
         <div className="page-hero">
-          <p className="eyebrow">Shop Neatique</p>
-          <h1>Skincare made to feel soft, elegant, and easy to love every day.</h1>
+          <p className="eyebrow">Shop ZenUP</p>
+          <h1>A focused storefront built around one premium NAD+ formula.</h1>
           <p>
-            Explore the Neatique collection of PDRN and Snail Mucin essentials, created for smooth
-            texture, comfortable hydration, and a healthy-looking glow.
+            The catalog currently centers on ZenUP NAD+ so shoppers can move directly from formula
+            review to purchase without unnecessary distractions.
           </p>
           <div className="page-hero__stats">
-            <span className="pill">{products.length} products</span>
-            <span className="pill">United States only</span>
-            <span className="pill">Glow-focused routines</span>
+            <span className="pill">{products.length} flagship product</span>
+            <span className="pill">120 veggie capsules</span>
+            <span className="pill">United States shipping</span>
           </div>
         </div>
         <div className="section">
           <SectionHeading
-            eyebrow="Collection"
-            title="Choose the texture and finish that best fits your routine."
-            description="Whether you love a silky serum, a comforting cream, or an extra dewy finish, the collection is designed to make daily skincare feel simple and beautiful."
+            eyebrow="Current Catalog"
+            title="One hero product now, more detailed landing pages later."
+            description="This version of the site keeps the shopping flow tight while you continue building richer assets and future product pages."
           />
-          <div className="product-grid--shop">
+          <div className="product-grid product-grid--single">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

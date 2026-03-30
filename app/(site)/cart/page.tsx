@@ -20,7 +20,7 @@ type CartPageProps = {
 
 export const metadata: Metadata = {
   title: "Cart",
-  description: "Review your Neatique selections and continue to checkout."
+  description: "Review your ZenUP selections and continue to checkout."
 };
 
 export default async function CartPage({ searchParams }: CartPageProps) {
@@ -39,7 +39,7 @@ export default async function CartPage({ searchParams }: CartPageProps) {
       <div className="container">
         <div className="page-hero">
           <p className="eyebrow">Cart</p>
-          <h1>Your skincare picks, ready for checkout.</h1>
+          <h1>Your ZenUP order, ready for checkout.</h1>
           <p>
             Review your items, adjust quantities, and continue to secure checkout when you are
             ready.
@@ -95,7 +95,7 @@ export default async function CartPage({ searchParams }: CartPageProps) {
           <div className="empty-state">
             <p className="eyebrow">Your bag is empty</p>
             <h1>Add a product to get started.</h1>
-            <p>Explore the collection and build a routine that feels light, smooth, and radiant.</p>
+            <p>Explore the ZenUP catalog and start with the flagship NAD+ formula.</p>
             <ButtonLink href="/shop" variant="primary">
               Browse products
             </ButtonLink>

@@ -4,7 +4,7 @@ import { PolicyPage } from "@/components/policy/policy-page";
 export const metadata: Metadata = {
   title: "Shipping Policy",
   description:
-    "Read the Neatique Beauty Shipping Policy for order processing, United States delivery, and shipping timing details.",
+    "Read the ZenUP Shipping Policy for order processing, United States delivery, and shipping timing details.",
   alternates: {
     canonical: "/shipping-policy"
   }
@@ -14,7 +14,7 @@ const sections = [
   {
     title: "Order processing",
     paragraphs: [
-      "Neatique Beauty currently ships within the United States only. Orders are typically processed and shipped within 1 business day after payment is successfully completed.",
+      "ZenUP currently ships within the United States only. Orders are typically processed and shipped within 1 business day after payment is successfully completed.",
       "Orders placed on weekends or holidays are processed on the next business day. During launches, promotions, or unusually busy periods, processing may take slightly longer."
     ]
   },
@@ -61,7 +61,7 @@ export default function ShippingPolicyPage() {
     <PolicyPage
       eyebrow="Shipping Policy"
       title="Fast order handling with most paid orders shipped within 1 business day."
-      description="This Shipping Policy explains how Neatique processes United States orders, how shipment timing works, and what customers should know before placing an order."
+      description="This Shipping Policy explains how ZenUP processes United States orders, how shipment timing works, and what customers should know before placing an order."
       stats={["Ships within the United States", "Most orders leave in 1 business day", "Tracking sent by email"]}
       sections={[...sections]}
       highlights={[...highlights]}

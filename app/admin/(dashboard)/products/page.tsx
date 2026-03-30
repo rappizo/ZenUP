@@ -14,7 +14,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
     <div className="admin-page">
       <div className="admin-page__header">
         <p className="eyebrow">Products</p>
-        <h1>Manage the Neatique product catalog.</h1>
+        <h1>Manage the ZenUP product catalog.</h1>
         <p>
           Open any card to edit the main image, gallery images, pricing, inventory, and product
           copy.
