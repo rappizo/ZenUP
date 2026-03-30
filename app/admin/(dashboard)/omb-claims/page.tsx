@@ -81,51 +81,57 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
               Showing {fromClaim} to {toClaim} of {totalCount} claims.
             </p>
           </div>
-          <form method="get" className="admin-inline-form">
-            <div className="field">
-              <label htmlFor="email">Search email</label>
-              <input
-                id="email"
-                name="email"
-                defaultValue={searchEmail}
-                placeholder="customer@example.com"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="platform">Platform</label>
-              <select id="platform" name="platform" defaultValue={searchPlatform}>
-                <option value="">All platforms</option>
-                {platformOptions.map((platform) => (
-                  <option key={platform.value} value={platform.value}>
-                    {platform.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="product">Product</label>
-              <select id="product" name="product" defaultValue={searchProduct}>
-                <option value="">All products</option>
-                {productOptions.map((product) => (
-                  <option key={product} value={product}>
-                    {product}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button type="submit" className="button button--secondary">
+        </div>
+        <form method="get" className="omb-claim-filters">
+          <div className="field">
+            <label htmlFor="email">Search email</label>
+            <input
+              id="email"
+              name="email"
+              defaultValue={searchEmail}
+              placeholder="customer@example.com"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="platform">Platform</label>
+            <select id="platform" name="platform" defaultValue={searchPlatform}>
+              <option value="">All platforms</option>
+              {platformOptions.map((platform) => (
+                <option key={platform.value} value={platform.value}>
+                  {platform.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="product">Product</label>
+            <select id="product" name="product" defaultValue={searchProduct}>
+              <option value="">All products</option>
+              {productOptions.map((product) => (
+                <option key={product} value={product}>
+                  {product}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="omb-claim-filters__actions">
+            <button type="submit" className="button button--primary">
               Apply filters
             </button>
             <Link href="/admin/omb-claims" className="button button--secondary">
               Reset
             </Link>
-          </form>
-        </div>
+          </div>
+        </form>
         <div className="stack-row">
           <span className="pill">
             {formatNumber(completedTodayCount)} completed today (Los Angeles)
           </span>
-          {searchPlatform ? <span className="pill">Platform: {platformOptions.find((item) => item.value === searchPlatform)?.label || searchPlatform}</span> : null}
+          {searchPlatform ? (
+            <span className="pill">
+              Platform: {platformOptions.find((item) => item.value === searchPlatform)?.label || searchPlatform}
+            </span>
+          ) : null}
           {searchProduct ? <span className="pill">Product: {searchProduct}</span> : null}
           <span className="pill">Submitted times shown in Los Angeles time</span>
           <span className="pill">50 per page</span>
