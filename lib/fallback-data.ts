@@ -270,6 +270,9 @@ export const fallbackDashboardSummary: DashboardSummary = {
     .filter((order) => order.status === "PAID" || order.status === "FULFILLED")
     .reduce((sum, order) => sum + order.totalCents, 0),
   pointsIssued: fallbackRewards.reduce((sum, reward) => sum + Math.max(reward.points, 0), 0),
+  completedOmbClaimsToday: 0,
+  contactFormTodayCount: 0,
+  contactFormUnhandledCount: 0,
   lowInventoryProducts: fallbackProducts.filter((product) => product.inventory < 125),
   recentOrders: fallbackOrders
 };

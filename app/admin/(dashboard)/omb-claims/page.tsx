@@ -1,17 +1,43 @@
 import Link from "next/link";
 import { updateOmbClaimAction } from "@/app/admin/actions";
 import { RatingStars } from "@/components/ui/rating-stars";
-import { formatDate } from "@/lib/format";
-import { getOmbClaims } from "@/lib/queries";
+import { formatDate, formatNumber, formatTime, LOS_ANGELES_TIME_ZONE } from "@/lib/format";
+import { getOmbClaimPage } from "@/lib/queries";
 
 type AdminOmbClaimsPageProps = {
-  searchParams: Promise<{ email?: string; status?: string }>;
+  searchParams: Promise<{ email?: string; page?: string; status?: string }>;
 };
 
 export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaimsPageProps) {
   const params = await searchParams;
-  const searchEmail = (params.email || "").trim();
-  const claims = await getOmbClaims(searchEmail);
+  const requestedPage = Number.parseInt(params.page || "1", 10);
+  const claimPage = await getOmbClaimPage(
+    Number.isFinite(requestedPage) ? requestedPage : 1,
+    50,
+    params.email || ""
+  );
+  const {
+    claims,
+    totalCount,
+    completedTodayCount,
+    currentPage,
+    totalPages,
+    pageSize,
+    searchEmail
+  } = claimPage;
+  const fromClaim = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const toClaim = Math.min(currentPage * pageSize, totalCount);
+
+  function buildPageHref(page: number) {
+    const query = new URLSearchParams();
+    query.set("page", String(page));
+
+    if (searchEmail) {
+      query.set("email", searchEmail);
+    }
+
+    return `/admin/omb-claims?${query.toString()}`;
+  }
 
   return (
     <div className="admin-page">
@@ -32,7 +58,7 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
           <div>
             <h2>Claims</h2>
             <p className="form-note">
-              {claims.length} claim{claims.length === 1 ? "" : "s"} found.
+              Showing {fromClaim} to {toClaim} of {totalCount} claims.
             </p>
           </div>
           <form method="get" className="admin-inline-form">
@@ -49,6 +75,13 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
               Search
             </button>
           </form>
+        </div>
+        <div className="stack-row">
+          <span className="pill">
+            {formatNumber(completedTodayCount)} completed today (Los Angeles)
+          </span>
+          <span className="pill">Submitted times shown in Los Angeles time</span>
+          <span className="pill">50 per page</span>
         </div>
       </section>
 
@@ -72,21 +105,21 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
             </thead>
             <tbody>
               {claims.map((claim) => {
-                const redirectTo = searchEmail
-                  ? `/admin/omb-claims?email=${encodeURIComponent(searchEmail)}`
-                  : "/admin/omb-claims";
+                const redirectTo = buildPageHref(currentPage);
                 const formId = `claim-form-${claim.id}`;
                 const progressLabel = claim.completedAt
                   ? "Completed"
                   : claim.reviewRating && claim.reviewRating >= 4
                     ? "Waiting for last step"
                     : "Waiting for step 2";
+                const submittedAt = claim.completedAt ?? claim.createdAt;
 
                 return (
                   <tr key={claim.id}>
                     <td>
                       <div className="admin-table__cell-stack">
-                        <strong>{formatDate(claim.createdAt)}</strong>
+                        <strong>{formatDate(submittedAt, LOS_ANGELES_TIME_ZONE)}</strong>
+                        <span>{formatTime(submittedAt, LOS_ANGELES_TIME_ZONE, true)}</span>
                         <span className="form-note">{progressLabel}</span>
                       </div>
                     </td>
@@ -170,6 +203,30 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
           <p>Try a different email search or wait for new OMB submissions to arrive.</p>
         </section>
       )}
+
+      <section className="admin-form">
+        <div className="admin-review-pagination">
+          <div className="stack-row">
+            <Link
+              href={currentPage > 1 ? buildPageHref(currentPage - 1) : "#"}
+              className={`button button--secondary${currentPage > 1 ? "" : " button--disabled"}`}
+              aria-disabled={currentPage <= 1}
+            >
+              Previous
+            </Link>
+            <span className="pill">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Link
+              href={currentPage < totalPages ? buildPageHref(currentPage + 1) : "#"}
+              className={`button button--secondary${currentPage < totalPages ? "" : " button--disabled"}`}
+              aria-disabled={currentPage >= totalPages}
+            >
+              Next
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

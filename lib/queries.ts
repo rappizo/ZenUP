@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import type {
+  AdminOmbClaimPageRecord,
   AdminProductReviewPageRecord,
   AdminReviewProductSummary,
   AdminFormSubmissionPageRecord,
@@ -21,6 +22,7 @@ import { unstable_cache } from "next/cache";
 import { parseStoredCouponProductCodes } from "@/lib/coupons";
 import { hasValidPostgresDatabaseUrl } from "@/lib/database-config";
 import { prisma } from "@/lib/db";
+import { getDateKeyInTimeZone, LOS_ANGELES_TIME_ZONE } from "@/lib/format";
 import {
   ensureLegacyContactFormBackfill,
   FORM_DEFINITIONS,
@@ -800,6 +802,80 @@ export async function getOmbClaims(searchEmail = "") {
   );
 }
 
+export async function getOmbClaimPage(page = 1, pageSize = 50, searchEmail = "") {
+  const normalizedSearchEmail = searchEmail.trim().toLowerCase();
+  const fallback: AdminOmbClaimPageRecord = {
+    claims: [],
+    totalCount: 0,
+    completedTodayCount: 0,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize,
+    searchEmail: normalizedSearchEmail
+  };
+
+  return withFallback(
+    async () => {
+      const where = normalizedSearchEmail
+        ? {
+            email: {
+              contains: normalizedSearchEmail,
+              mode: "insensitive" as const
+            }
+          }
+        : undefined;
+
+      const [totalCount, claims, completedClaims] = await prisma.$transaction([
+        prisma.ombClaim.count({ where }),
+        prisma.ombClaim.findMany({
+          where,
+          orderBy: [{ createdAt: "desc" }],
+          skip: Math.max(0, page - 1) * pageSize,
+          take: pageSize
+        }),
+        prisma.ombClaim.findMany({
+          where: {
+            completedAt: {
+              not: null
+            }
+          },
+          select: {
+            completedAt: true
+          }
+        })
+      ]);
+
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+      const laTodayKey = getDateKeyInTimeZone(new Date(), LOS_ANGELES_TIME_ZONE);
+      const completedTodayCount = completedClaims.filter((claim) =>
+        getDateKeyInTimeZone(claim.completedAt, LOS_ANGELES_TIME_ZONE) === laTodayKey
+      ).length;
+
+      const pagedClaims =
+        currentPage === page
+          ? claims
+          : await prisma.ombClaim.findMany({
+              where,
+              orderBy: [{ createdAt: "desc" }],
+              skip: (currentPage - 1) * pageSize,
+              take: pageSize
+            });
+
+      return {
+        claims: pagedClaims.map(mapOmbClaim),
+        totalCount,
+        completedTodayCount,
+        currentPage,
+        totalPages,
+        pageSize,
+        searchEmail: normalizedSearchEmail
+      } satisfies AdminOmbClaimPageRecord;
+    },
+    fallback
+  );
+}
+
 export async function getOmbClaimById(id: string) {
   return withFallback(
     async () => {
@@ -1245,7 +1321,18 @@ export async function getCustomerAccountById(customerId: string) {
 export async function getDashboardSummary() {
   return withFallback(
     async () => {
-      const [activeProductCount, publishedPostCount, customerCount, orders, rewards] =
+      await ensureLegacyContactFormBackfill();
+
+      const [
+        activeProductCount,
+        publishedPostCount,
+        customerCount,
+        orders,
+        rewards,
+        completedClaims,
+        contactFormDates,
+        contactFormUnhandledCount
+      ] =
         await prisma.$transaction([
           prisma.product.count({ where: { status: "ACTIVE" } }),
           prisma.post.count({ where: { published: true } }),
@@ -1256,6 +1343,30 @@ export async function getDashboardSummary() {
           }),
           prisma.rewardEntry.findMany({
             include: { customer: true }
+          }),
+          prisma.ombClaim.findMany({
+            where: {
+              completedAt: {
+                not: null
+              }
+            },
+            select: {
+              completedAt: true
+            }
+          }),
+          prisma.formSubmission.findMany({
+            where: {
+              formKey: "contact"
+            },
+            select: {
+              createdAt: true
+            }
+          }),
+          prisma.formSubmission.count({
+            where: {
+              formKey: "contact",
+              handled: false
+            }
           })
         ]);
 
@@ -1277,6 +1388,13 @@ export async function getDashboardSummary() {
         .filter((order) => order.status === "PAID" || order.status === "FULFILLED")
         .reduce((sum, order) => sum + order.totalCents, 0);
       const pointsIssued = rewards.reduce((sum, reward) => sum + Math.max(reward.points, 0), 0);
+      const laTodayKey = getDateKeyInTimeZone(new Date(), LOS_ANGELES_TIME_ZONE);
+      const completedOmbClaimsToday = completedClaims.filter((claim) =>
+        getDateKeyInTimeZone(claim.completedAt, LOS_ANGELES_TIME_ZONE) === laTodayKey
+      ).length;
+      const contactFormTodayCount = contactFormDates.filter(
+        (submission) => getDateKeyInTimeZone(submission.createdAt, LOS_ANGELES_TIME_ZONE) === laTodayKey
+      ).length;
 
       const summary: DashboardSummary = {
         activeProductCount,
@@ -1285,6 +1403,9 @@ export async function getDashboardSummary() {
         orderCount: orders.length,
         paidRevenueCents,
         pointsIssued,
+        completedOmbClaimsToday,
+        contactFormTodayCount,
+        contactFormUnhandledCount,
         lowInventoryProducts,
         recentOrders
       };

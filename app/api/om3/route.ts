@@ -25,6 +25,10 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL("/om?error=claim", request.url), 303);
   }
 
+  if (claim.completedAt) {
+    return NextResponse.redirect(new URL(`/om2/thank-you?claim=${claim.id}`, request.url), 303);
+  }
+
   if (!claim.reviewRating || !isHighRating(claim.reviewRating)) {
     return NextResponse.redirect(new URL(`/om2/thank-you?claim=${claim.id}`, request.url), 303);
   }
@@ -33,6 +37,47 @@ export async function POST(request: Request) {
 
   if (!extraBottleAddress) {
     return redirectWithError(request, claim.id, "address");
+  }
+
+  const [existingOrderClaim, existingEmailClaim] = await prisma.$transaction([
+    prisma.ombClaim.findFirst({
+      where: {
+        id: {
+          not: claim.id
+        },
+        completedAt: {
+          not: null
+        },
+        orderId: claim.orderId
+      },
+      select: { id: true }
+    }),
+    prisma.ombClaim.findFirst({
+      where: {
+        id: {
+          not: claim.id
+        },
+        completedAt: {
+          not: null
+        },
+        email: claim.email
+      },
+      select: { id: true }
+    })
+  ]);
+
+  if (existingOrderClaim) {
+    return NextResponse.redirect(
+      new URL(`/om?platform=${claim.platformKey}&error=duplicate-order`, request.url),
+      303
+    );
+  }
+
+  if (existingEmailClaim) {
+    return NextResponse.redirect(
+      new URL(`/om?platform=${claim.platformKey}&error=duplicate-email`, request.url),
+      303
+    );
   }
 
   let screenshotPayload:

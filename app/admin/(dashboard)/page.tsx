@@ -45,6 +45,15 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
           <strong>{formatNumber(summary.pointsIssued)}</strong>
           <span>Points issued</span>
         </div>
+        <div className="stat-card">
+          <strong>{formatNumber(summary.completedOmbClaimsToday)}</strong>
+          <span>Completed OMB claims today (Los Angeles)</span>
+        </div>
+        <div className="stat-card">
+          <strong>{formatNumber(summary.contactFormTodayCount)}</strong>
+          <span>Contact forms today new</span>
+          <span>Unhandled: {formatNumber(summary.contactFormUnhandledCount)}</span>
+        </div>
       </div>
 
       <div className="cards-2">

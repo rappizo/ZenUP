@@ -34,6 +34,41 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(`/om?platform=${platform.key}&error=order-id`, request.url), 303);
   }
 
+  const [existingOrderClaim, existingEmailClaim] = await prisma.$transaction([
+    prisma.ombClaim.findFirst({
+      where: {
+        completedAt: {
+          not: null
+        },
+        orderId
+      },
+      select: { id: true }
+    }),
+    prisma.ombClaim.findFirst({
+      where: {
+        completedAt: {
+          not: null
+        },
+        email
+      },
+      select: { id: true }
+    })
+  ]);
+
+  if (existingOrderClaim) {
+    return NextResponse.redirect(
+      new URL(`/om?platform=${platform.key}&error=duplicate-order`, request.url),
+      303
+    );
+  }
+
+  if (existingEmailClaim) {
+    return NextResponse.redirect(
+      new URL(`/om?platform=${platform.key}&error=duplicate-email`, request.url),
+      303
+    );
+  }
+
   const claim = await prisma.ombClaim.create({
     data: {
       platformKey: platform.key,

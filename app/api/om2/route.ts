@@ -62,6 +62,49 @@ export async function POST(request: Request) {
 
   const highRating = isHighRating(rating);
 
+  if (!highRating) {
+    const [existingOrderClaim, existingEmailClaim] = await prisma.$transaction([
+      prisma.ombClaim.findFirst({
+        where: {
+          id: {
+            not: claim.id
+          },
+          completedAt: {
+            not: null
+          },
+          orderId: claim.orderId
+        },
+        select: { id: true }
+      }),
+      prisma.ombClaim.findFirst({
+        where: {
+          id: {
+            not: claim.id
+          },
+          completedAt: {
+            not: null
+          },
+          email: claim.email
+        },
+        select: { id: true }
+      })
+    ]);
+
+    if (existingOrderClaim) {
+      return NextResponse.redirect(
+        new URL(`/om?platform=${platform.key}&error=duplicate-order`, request.url),
+        303
+      );
+    }
+
+    if (existingEmailClaim) {
+      return NextResponse.redirect(
+        new URL(`/om?platform=${platform.key}&error=duplicate-email`, request.url),
+        303
+      );
+    }
+  }
+
   await prisma.ombClaim.update({
     where: { id: claim.id },
     data: {

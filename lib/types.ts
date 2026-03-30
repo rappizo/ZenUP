@@ -209,6 +209,9 @@ export type DashboardSummary = {
   orderCount: number;
   paidRevenueCents: number;
   pointsIssued: number;
+  completedOmbClaimsToday: number;
+  contactFormTodayCount: number;
+  contactFormUnhandledCount: number;
   lowInventoryProducts: ProductRecord[];
   recentOrders: OrderRecord[];
 };
@@ -276,4 +279,14 @@ export type OmbClaimRecord = {
   completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type AdminOmbClaimPageRecord = {
+  claims: OmbClaimRecord[];
+  totalCount: number;
+  completedTodayCount: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  searchEmail: string;
 };

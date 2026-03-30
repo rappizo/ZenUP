@@ -93,6 +93,14 @@ export function getOrderMatchErrorMessage(error: string | null | undefined) {
     return "The order ID does not match the selected platform format. Please recheck it and try again.";
   }
 
+  if (error === "duplicate-order") {
+    return "We already have a completed OMB claim for this order ID. If you have any questions, please contact us.";
+  }
+
+  if (error === "duplicate-email") {
+    return "We already have a completed OMB claim for this email. If you have any questions, please contact us.";
+  }
+
   return null;
 }
 
