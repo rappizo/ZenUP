@@ -1,6 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
+const defaultSupportEmail = (process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "").trim();
+const defaultSupportPhone = (process.env.NEXT_PUBLIC_SUPPORT_PHONE || "").trim();
 
 function buildProductMediaUrl(folder, fileName) {
   return `/media/product/${encodeURIComponent(folder)}/${encodeURIComponent(fileName)}`;
@@ -204,7 +206,8 @@ async function main() {
 
   for (const [key, value] of Object.entries({
     shipping_region: "United States only",
-    support_email: "support@zenup.com",
+    support_email: defaultSupportEmail,
+    support_phone: defaultSupportPhone,
     reward_rule: "1 point per $1 spent",
     stripe_mode: "Test mode until live keys are added",
     email_enabled: "false",

@@ -67,7 +67,9 @@ function isTransientDatabaseError(error: unknown) {
 
   return (
     message.includes("Timed out fetching a new connection from the connection pool") ||
-    message.includes("Can't reach database server")
+    message.includes("Can't reach database server") ||
+    message.includes("MaxClientsInSessionMode") ||
+    message.includes("max clients reached")
   );
 }
 
@@ -1338,7 +1340,8 @@ export async function getStoreSettings() {
         return accumulator;
       }, {});
     },
-    fallbackSettings
+    fallbackSettings,
+    { allowFallbackOnDatabaseError: true }
   );
 }
 

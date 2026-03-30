@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { siteConfig } from "@/lib/site-config";
+import { getStoreSettings } from "@/lib/queries";
+import { resolveStorefrontContact, siteConfig } from "@/lib/site-config";
 import { Logo } from "@/components/brand/logo";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const settings = await getStoreSettings();
+  const contact = resolveStorefrontContact(settings);
+
   return (
     <footer className="site-footer">
       <div className="container site-footer__grid">
@@ -13,9 +17,9 @@ export function SiteFooter() {
             Phytosome, Resveratrol, and CoQ10 for a clearer daily routine.
           </p>
           <div className="site-footer__contact">
-            <span>{siteConfig.supportEmail}</span>
-            <span>{siteConfig.phone}</span>
-            <span>Ships within the United States</span>
+            {contact.supportEmail ? <span>{contact.supportEmail}</span> : null}
+            {contact.phone ? <span>{contact.phone}</span> : null}
+            <span>Ships within {contact.shippingRegion}</span>
           </div>
         </div>
         <div>

@@ -7,8 +7,8 @@ import { PostCard } from "@/components/ui/post-card";
 import { ProductCard } from "@/components/ui/product-card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { homeVisualPrompts } from "@/lib/home-visual-prompts";
-import { getFeaturedProducts, getPublishedPosts } from "@/lib/queries";
-import { siteConfig } from "@/lib/site-config";
+import { getFeaturedProducts, getPublishedPosts, getStoreSettings } from "@/lib/queries";
+import { hasConfiguredEmailDelivery, resolveStorefrontContact, siteConfig } from "@/lib/site-config";
 import { buildSiteImageUrl } from "@/lib/site-media";
 import {
   getSubscribeCouponDescription,
@@ -103,13 +103,16 @@ type HomePageProps = {
 };
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const [products, posts, params] = await Promise.all([
+  const [products, posts, settings, params] = await Promise.all([
     getFeaturedProducts(1),
     getPublishedPosts(3),
+    getStoreSettings(),
     searchParams
   ]);
 
   const featuredProduct = products[0];
+  const contact = resolveStorefrontContact(settings);
+  const emailDeliveryReady = hasConfiguredEmailDelivery(settings);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -119,8 +122,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         name: siteConfig.title,
         url: siteConfig.url,
         description: homePageDescription,
-        email: siteConfig.supportEmail,
-        telephone: siteConfig.phone,
+        ...(contact.supportEmail ? { email: contact.supportEmail } : {}),
+        ...(contact.phone ? { telephone: contact.phone } : {}),
         areaServed: "US",
         image: `${siteConfig.url}${buildSiteImageUrl("home", "ZenUP Hero Main.png")}`
       },
@@ -328,15 +331,22 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <div className="subscribe-panel">
             <div className="subscribe-panel__copy">
               <p className="eyebrow">Subscriber Welcome Offer</p>
-              <h2>Subscribe and get {SUBSCRIBE_COUPON_PERCENT_OFF}% off your first purchase.</h2>
+              <h2>
+                {emailDeliveryReady
+                  ? `Subscribe and get ${SUBSCRIBE_COUPON_PERCENT_OFF}% off your first purchase.`
+                  : "Join the ZenUP list and we will queue your launch offer."}
+              </h2>
               <p>
-                Join the ZenUP list for NAD+ product updates, formula education, and a welcome
-                coupon delivered straight to your inbox.
+                {emailDeliveryReady
+                  ? "Join the ZenUP list for NAD+ product updates, formula education, and a welcome coupon delivered straight to your inbox."
+                  : "Join the ZenUP list for NAD+ product updates and launch news. If automated email delivery is still being finalized, we will store your signup safely and activate the offer as soon as sending is live."}
               </p>
               <div className="page-hero__stats">
                 <span className="pill">{SUBSCRIBE_COUPON_CODE}</span>
                 <span className="pill">{getSubscribeCouponDescription()}</span>
-                <span className="pill">Sent by email instantly</span>
+                <span className="pill">
+                  {emailDeliveryReady ? "Sent by email instantly" : "Queued until email delivery is live"}
+                </span>
               </div>
             </div>
 
@@ -352,11 +362,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 />
               </div>
               <button type="submit" className="button button--primary">
-                Send my {SUBSCRIBE_COUPON_PERCENT_OFF}% offer
+                {emailDeliveryReady
+                  ? `Send my ${SUBSCRIBE_COUPON_PERCENT_OFF}% offer`
+                  : "Join the ZenUP list"}
               </button>
               <p className="form-note">
-                We will email your code so you can keep it for checkout. Please check spam or
-                promotions if it does not arrive right away.
+                {emailDeliveryReady
+                  ? "We will email your code so you can keep it for checkout. Please check spam or promotions if it does not arrive right away."
+                  : "We will save your signup immediately. If automated email is not active yet, your request stays queued instead of getting lost."}
               </p>
             </form>
           </div>
@@ -375,6 +388,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </p>
             <Link href="/" className="button button--primary">
               Close
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      {params.subscribed === "queued" ? (
+        <div className="success-modal" role="dialog" aria-modal="true" aria-labelledby="subscribe-queued-title">
+          <div className="success-modal__backdrop" />
+          <div className="success-modal__panel">
+            <p className="eyebrow">You are on the list</p>
+            <h2 id="subscribe-queued-title">Your signup was saved while email delivery is still being finalized.</h2>
+            <p>
+              We recorded your request successfully. The welcome offer is queued and can be sent
+              once automated email delivery is enabled for the store.
+            </p>
+            <Link href="/" className="button button--primary">
+              Continue browsing
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { saveStoreSettingsAction } from "@/app/admin/actions";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { getDashboardSummary, getStoreSettings } from "@/lib/queries";
+import { siteConfig } from "@/lib/site-config";
 
 type AdminDashboardPageProps = {
   searchParams: Promise<{ status?: string }>;
@@ -51,7 +52,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         </div>
         <div className="stat-card">
           <strong>{formatNumber(summary.contactFormTodayCount)}</strong>
-          <span>Contact forms today new</span>
+          <span>New contact forms today</span>
           <span>Unhandled: {formatNumber(summary.contactFormUnhandledCount)}</span>
         </div>
       </div>
@@ -73,7 +74,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
           <ul className="admin-list">
             {summary.recentOrders.map((order) => (
               <li key={order.id}>
-                {order.orderNumber} · {order.email} · {formatCurrency(order.totalCents)} · {order.status}
+                {order.orderNumber} | {order.email} | {formatCurrency(order.totalCents)} | {order.status}
               </li>
             ))}
           </ul>
@@ -97,12 +98,24 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
               <input
                 id="support_email"
                 name="support_email"
-                defaultValue={settings.support_email || "support@zenup.com"}
+                defaultValue={settings.support_email || siteConfig.supportEmail || ""}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="support_phone">Support phone</label>
+              <input
+                id="support_phone"
+                name="support_phone"
+                defaultValue={settings.support_phone || siteConfig.phone || ""}
               />
             </div>
             <div className="field">
               <label htmlFor="reward_rule">Reward rule</label>
-              <input id="reward_rule" name="reward_rule" defaultValue={settings.reward_rule || "1 point per $1 spent"} />
+              <input
+                id="reward_rule"
+                name="reward_rule"
+                defaultValue={settings.reward_rule || "1 point per $1 spent"}
+              />
             </div>
             <div className="field">
               <label htmlFor="stripe_mode">Stripe mode</label>

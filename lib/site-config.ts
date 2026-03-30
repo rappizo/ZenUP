@@ -1,4 +1,29 @@
-const defaultSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
+import type { StoreSettingsRecord } from "@/lib/types";
+
+function normalizeOptionalValue(value: string | null | undefined) {
+  return (value ?? "").trim();
+}
+
+function normalizeSiteUrl(value: string | null | undefined) {
+  const normalized = normalizeOptionalValue(value);
+
+  if (!normalized) {
+    return "";
+  }
+
+  const withProtocol = /^https?:\/\//i.test(normalized) ? normalized : `https://${normalized}`;
+  return withProtocol.replace(/\/+$/, "");
+}
+
+const defaultSiteUrl =
+  normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
+  normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ||
+  normalizeSiteUrl(process.env.VERCEL_URL) ||
+  "http://localhost:3000";
+
+const defaultSupportEmail = normalizeOptionalValue(process.env.NEXT_PUBLIC_SUPPORT_EMAIL);
+const defaultSupportPhone = normalizeOptionalValue(process.env.NEXT_PUBLIC_SUPPORT_PHONE);
+const googleTagId = normalizeOptionalValue(process.env.NEXT_PUBLIC_GOOGLE_TAG_ID);
 
 export const siteConfig = {
   name: "ZenUP",
@@ -7,8 +32,9 @@ export const siteConfig = {
   description:
     "Professional NAD+ nutrition built around Nicotinamide Riboside, Quercetin Phytosome, Resveratrol, and CoQ10 for a focused healthy-aging routine.",
   accentColor: "#0f6a35",
-  supportEmail: "support@zenup.com",
-  phone: "+1 (213) 555-0186",
+  supportEmail: defaultSupportEmail,
+  phone: defaultSupportPhone,
+  googleTagId,
   nav: [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
@@ -51,3 +77,30 @@ export const siteConfig = {
     ]
   }
 };
+
+function parseEnabledSetting(value: string | null | undefined) {
+  const normalized = normalizeOptionalValue(value).toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "on";
+}
+
+export function resolveStorefrontContact(settings?: Partial<StoreSettingsRecord>) {
+  const supportEmail = normalizeOptionalValue(settings?.support_email) || siteConfig.supportEmail;
+  const phone = normalizeOptionalValue(settings?.support_phone) || siteConfig.phone;
+  const shippingRegion = normalizeOptionalValue(settings?.shipping_region) || "United States only";
+
+  return {
+    supportEmail,
+    phone,
+    shippingRegion
+  };
+}
+
+export function hasConfiguredEmailDelivery(settings?: Partial<StoreSettingsRecord>) {
+  return Boolean(
+    parseEnabledSetting(settings?.email_enabled) &&
+      normalizeOptionalValue(settings?.smtp_host) &&
+      normalizeOptionalValue(settings?.smtp_user) &&
+      normalizeOptionalValue(settings?.smtp_pass) &&
+      normalizeOptionalValue(settings?.email_from_address)
+  );
+}

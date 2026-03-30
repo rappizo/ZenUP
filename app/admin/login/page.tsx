@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { loginAction } from "@/app/admin/actions";
 import { Logo } from "@/components/brand/logo";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { isAdminAuthenticated, isAdminConfigReady } from "@/lib/admin-auth";
 
 type AdminLoginPageProps = {
   searchParams: Promise<{ error?: string }>;
@@ -9,6 +9,7 @@ type AdminLoginPageProps = {
 
 export default async function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
   const authenticated = await isAdminAuthenticated();
+  const adminConfigReady = isAdminConfigReady();
 
   if (authenticated) {
     redirect("/admin");
@@ -29,6 +30,17 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
           </p>
         </div>
         {params.error === "1" ? <p className="notice">Invalid username or password.</p> : null}
+        {params.error === "config" ? (
+          <p className="notice">
+            Admin login is disabled until the required environment variables are configured.
+          </p>
+        ) : null}
+        {!adminConfigReady ? (
+          <p className="notice">
+            Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_SESSION_SECRET` in your environment
+            before using admin login.
+          </p>
+        ) : null}
         <form action={loginAction} className="contact-form">
           <div className="field">
             <label htmlFor="username">Username</label>

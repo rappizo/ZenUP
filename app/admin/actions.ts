@@ -15,6 +15,7 @@ import {
 } from "@/lib/brevo";
 import {
   clearAdminSession,
+  isAdminConfigReady,
   requireAdminSession,
   setAdminSession,
   validateAdminCredentials
@@ -386,6 +387,10 @@ function parseReviewDateInput(value: string | undefined | null) {
 export async function loginAction(formData: FormData) {
   const username = toPlainString(formData.get("username"));
   const password = toPlainString(formData.get("password"));
+
+  if (!isAdminConfigReady()) {
+    redirect("/admin/login?error=config");
+  }
 
   if (!validateAdminCredentials(username, password)) {
     redirect("/admin/login?error=1");
@@ -928,6 +933,7 @@ export async function saveStoreSettingsAction(formData: FormData) {
   const settings = [
     ["shipping_region", toPlainString(formData.get("shipping_region"))],
     ["support_email", toPlainString(formData.get("support_email"))],
+    ["support_phone", toPlainString(formData.get("support_phone"))],
     ["reward_rule", toPlainString(formData.get("reward_rule"))],
     ["stripe_mode", toPlainString(formData.get("stripe_mode"))]
   ];

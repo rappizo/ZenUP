@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { siteConfig } from "@/lib/site-config";
+import { getStoreSettings } from "@/lib/queries";
+import { resolveStorefrontContact, siteConfig } from "@/lib/site-config";
 import { defaultOgImage } from "@/lib/seo";
 
 type ContactPageProps = {
@@ -33,7 +34,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage({ searchParams }: ContactPageProps) {
-  const { sent } = await searchParams;
+  const [params, settings] = await Promise.all([searchParams, getStoreSettings()]);
+  const { sent } = params;
+  const contact = resolveStorefrontContact(settings);
 
   return (
     <section className="section">
@@ -46,9 +49,9 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             discussing wholesale and partnership opportunities.
           </p>
           <div className="page-hero__stats">
-            <span className="pill">{siteConfig.supportEmail}</span>
-            <span className="pill">{siteConfig.phone}</span>
-            <span className="pill">US region support</span>
+            {contact.supportEmail ? <span className="pill">{contact.supportEmail}</span> : null}
+            {contact.phone ? <span className="pill">{contact.phone}</span> : null}
+            <span className="pill">{contact.shippingRegion} support</span>
           </div>
         </div>
 
@@ -62,8 +65,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               distribution inquiries.
             </p>
             <div className="site-footer__contact">
-              <span>{siteConfig.supportEmail}</span>
-              <span>{siteConfig.phone}</span>
+              {contact.supportEmail ? <span>{contact.supportEmail}</span> : null}
+              {contact.phone ? <span>{contact.phone}</span> : null}
               <span>Monday to Friday, 9 AM to 6 PM PT</span>
             </div>
           </div>

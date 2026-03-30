@@ -1,6 +1,7 @@
 import type { BeautyPostRecord, ProductRecord, ProductReviewRecord, StoreSettingsRecord } from "@/lib/types";
 import { getDefaultProductImageUrl, getLocalProductGallery } from "@/lib/product-media";
 import { buildSiteImageUrl } from "@/lib/site-media";
+import { siteConfig } from "@/lib/site-config";
 
 function average(values: number[]) {
   if (values.length === 0) {
@@ -250,7 +251,8 @@ export const samplePosts: BeautyPostRecord[] = [
 
 export const sampleStoreSettings: StoreSettingsRecord = {
   shipping_region: "United States only",
-  support_email: "support@zenup.com",
+  support_email: siteConfig.supportEmail,
+  support_phone: siteConfig.phone,
   reward_rule: "1 point per $1 spent",
   stripe_mode: "Test mode until live keys are added",
   email_enabled: "false",

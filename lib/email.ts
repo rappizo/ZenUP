@@ -6,6 +6,8 @@ import {
   SUBSCRIBE_COUPON_PERCENT_OFF
 } from "@/lib/subscribe-offer";
 
+export const EMAIL_CONFIG_INCOMPLETE_REASON = "Email configuration is incomplete.";
+
 type EmailSettings = {
   enabled: boolean;
   smtpHost: string;
@@ -83,7 +85,7 @@ async function sendEmail(input: {
   const settings = await getEmailSettings();
 
   if (!canSendEmail(settings)) {
-    return { delivered: false, reason: "Email configuration is incomplete." };
+    return { delivered: false, reason: EMAIL_CONFIG_INCOMPLETE_REASON };
   }
 
   const transporter = nodemailer.createTransport({

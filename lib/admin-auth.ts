@@ -5,6 +5,10 @@ import { redirect } from "next/navigation";
 const COOKIE_NAME = "zenup-admin-session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 12;
 
+function getEnvValue(name: "ADMIN_SESSION_SECRET" | "ADMIN_USERNAME" | "ADMIN_PASSWORD") {
+  return (process.env[name] || "").trim();
+}
+
 function base64UrlEncode(input: string) {
   return Buffer.from(input).toString("base64url");
 }
@@ -14,16 +18,42 @@ function base64UrlDecode(input: string) {
 }
 
 function getAdminSecret() {
-  return process.env.ADMIN_SESSION_SECRET || "change-me-in-env";
+  const secret = getEnvValue("ADMIN_SESSION_SECRET");
+
+  if (!secret || secret === "change-me-in-env" || secret === "replace-with-a-long-random-secret") {
+    throw new Error("ADMIN_SESSION_SECRET must be configured before admin login is enabled.");
+  }
+
+  return secret;
 }
 
 function getSignature(payload: string) {
   return createHmac("sha256", getAdminSecret()).update(payload).digest("base64url");
 }
 
+export function isAdminConfigReady() {
+  const username = getEnvValue("ADMIN_USERNAME");
+  const password = getEnvValue("ADMIN_PASSWORD");
+  const secret = getEnvValue("ADMIN_SESSION_SECRET");
+
+  return Boolean(
+    username &&
+      password &&
+      password !== "change-this-password" &&
+      secret &&
+      secret !== "change-me-in-env" &&
+      secret !== "replace-with-a-long-random-secret"
+  );
+}
+
 export function validateAdminCredentials(username: string, password: string) {
-  const adminUsername = process.env.ADMIN_USERNAME || "admin";
-  const adminPassword = process.env.ADMIN_PASSWORD || "change-this-password";
+  const adminUsername = getEnvValue("ADMIN_USERNAME");
+  const adminPassword = getEnvValue("ADMIN_PASSWORD");
+
+  if (!adminUsername || !adminPassword || adminPassword === "change-this-password") {
+    return false;
+  }
+
   return username === adminUsername && password === adminPassword;
 }
 
@@ -45,7 +75,13 @@ export function verifyAdminToken(token: string) {
     return false;
   }
 
-  const expected = getSignature(payload);
+  let expected = "";
+
+  try {
+    expected = getSignature(payload);
+  } catch {
+    return false;
+  }
 
   if (signature.length !== expected.length) {
     return false;

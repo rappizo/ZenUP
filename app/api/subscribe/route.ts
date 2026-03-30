@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { sendSubscriptionCouponEmail } from "@/lib/email";
+import { EMAIL_CONFIG_INCOMPLETE_REASON, sendSubscriptionCouponEmail } from "@/lib/email";
 import { syncEmailMarketingContact } from "@/lib/email-marketing";
 import { createFormSubmission } from "@/lib/form-submissions";
 import {
@@ -68,6 +68,10 @@ export async function POST(request: Request) {
     const result = await sendSubscriptionCouponEmail({ email });
 
     if (!result.delivered) {
+      if (result.reason === EMAIL_CONFIG_INCOMPLETE_REASON) {
+        return NextResponse.redirect(new URL("/?subscribed=queued", request.url), 303);
+      }
+
       return NextResponse.redirect(new URL("/?subscribe_error=email", request.url), 303);
     }
   } catch (error) {
