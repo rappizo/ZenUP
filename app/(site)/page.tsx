@@ -434,11 +434,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="container">
           <div className="home-cta home-cta--image">
             <div className="home-cta__copy">
-              <p className="eyebrow">Start Your Routine</p>
-              <h2>Take the next step with one premium NAD+ formula built for consistent daily use.</h2>
+              <p className="eyebrow">ZENUP - A DR. PROOF BRAND</p>
+              <h2>Professional NAD+ nutrition built to feel credible, disciplined, and ready for daily use.</h2>
               <p>
-                If you want a single bottle that combines Nicotinamide Riboside, Quercetin Phytosome,
-                Trans-Resveratrol, and CoQ10, ZenUP keeps the decision simple.
+                ZenUP is built for customers who want a serious formula, transparent ingredient amounts,
+                and a cleaner path to long-term routine consistency. With Nicotinamide Riboside Hydrogen
+                Malate, Quercetin Phytosome, Trans-Resveratrol, and CoQ10 in one bottle, the brand
+                presents a more complete NAD+ support option without unnecessary noise.
               </p>
               <div className="hero-actions">
                 <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
