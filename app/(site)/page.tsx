@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeBannerSlider } from "@/components/home/home-banner-slider";
-import { SocialProofSlider } from "@/components/home/social-proof-slider";
 import { PostCard } from "@/components/ui/post-card";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -30,17 +29,17 @@ const formulaCards = [
     eyebrow: "Core NAD+ Support",
     title: "600mg Nicotinamide Riboside Hydrogen Malate",
     description:
-      "A serious daily serving level that leads the page with the ingredient most NAD+ shoppers already compare first.",
+      "A serious daily serving level for shoppers who want a clearly labeled NAD+ routine anchored by Nicotinamide Riboside.",
     detail:
-      "Instead of burying the lead, ZenUP makes the NR amount obvious so the customer immediately understands what anchors the formula and why the bottle belongs in a premium daily routine."
+      "This gives the bottle a strong identity for customers comparing daily-use NR options and looking for a premium supplement they can keep in rotation."
   },
   {
     eyebrow: "Amplifier",
     title: "250mg Quercetin Phytosome",
     description:
-      "Included to strengthen the healthy-aging position and make the formula feel more complete than a single-ingredient NR bottle.",
+      "Included to make the daily stack feel more complete than an NR-only bottle and to support a more premium healthy-aging routine.",
     detail:
-      "That supporting layer helps the product read like a deliberately structured stack rather than a minimal label that still requires the customer to add more capsules later."
+      "For customers who do not want to buy several separate add-ons, this supporting layer makes the formula feel more deliberate and easier to stay consistent with."
   },
   {
     eyebrow: "Longevity Companion",
@@ -48,7 +47,7 @@ const formulaCards = [
     description:
       "Two supporting ingredients that round out the daily-use story for customers who want a stronger all-in-one stack.",
     detail:
-      "Together they reinforce the feeling that ZenUP is built for consistency, perceived value, and a cleaner one-bottle experience instead of a pieced-together purchase."
+      "Together they help the bottle feel fuller, more valuable, and better suited to a long-term routine instead of a pieced-together supplement purchase."
   }
 ];
 
@@ -79,37 +78,6 @@ const flagshipFormulaFacts = [
   }
 ];
 
-const flagshipBenefits = [
-  {
-    title: "Single-product focus",
-    description:
-      "The storefront is built around one flagship SKU, so the message stays clean, the comparison is faster, and the buyer journey feels decisive from the first scroll."
-  },
-  {
-    title: "Premium formula logic",
-    description:
-      "The ingredient story leads with NR strength, then reinforces the formula with companion ingredients that feel deliberate, relevant, and easier to justify in one daily routine."
-  },
-  {
-    title: "Designed to convert",
-    description:
-      "Price, reviews, formula details, and purchase action now sit together in one stronger flagship block, so the customer does not have to hunt for the next step."
-  }
-];
-
-const flagshipStoryCards = [
-  {
-    title: "Built for decisive comparison",
-    description:
-      "The page puts formula strength, serving count, reviews, and price logic in one scan so serious shoppers can evaluate the bottle without jumping between sections."
-  },
-  {
-    title: "Made to replace routine clutter",
-    description:
-      "Because Quercetin Phytosome, Trans-Resveratrol, and CoQ10 are already included, the offer reads like one complete NAD+ routine instead of a bottle that still needs add-ons."
-  }
-];
-
 const routineSteps = [
   {
     step: "01",
@@ -121,7 +89,7 @@ const routineSteps = [
     step: "02",
     title: "Keep one bottle in rotation",
     description:
-      "ZenUP is positioned as the anchor of the routine so customers do not need to juggle multiple bottles to feel complete."
+      "A single bottle helps the routine stay simple, so customers do not need to juggle multiple products to feel covered."
   },
   {
     step: "03",
@@ -253,7 +221,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <SectionHeading
             eyebrow="Formula Breakdown"
             title="Built around the ingredients the NAD+ customer already knows to compare."
-            description="The homepage now leads with formula clarity, dosage transparency, and a cleaner premium presentation."
+            description="A clean ingredient story helps shoppers understand what is inside the bottle, how much they are getting, and why the formula feels complete."
           />
           <div className="cards-3">
             {formulaCards.map((card) => (
@@ -273,6 +241,91 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <div className="container">
             <div className="home-flagship">
               <div className="home-flagship__main">
+                <div className="home-flagship__content">
+                  <p className="eyebrow">Flagship Product</p>
+                  <h2>{featuredProduct.name}</h2>
+                  <p className="home-flagship__lead">{featuredProduct.description}</p>
+                  <p className="home-flagship__story-copy">
+                    ZenUP keeps the offer simple: one premium daily NAD+ formula, clear serving logic,
+                    and supporting ingredients already built in so customers can go from evaluation to purchase
+                    without second-guessing what else they need to add.
+                  </p>
+
+                  <div className="home-flagship__pricing">
+                    {typeof featuredProduct.compareAtPriceCents === "number" ? (
+                      <span className="home-flagship__compare">
+                        {formatCurrency(featuredProduct.compareAtPriceCents, featuredProduct.currency)}
+                      </span>
+                    ) : null}
+                    <div className="home-flagship__price-row">
+                      <strong>{formatCurrency(featuredProduct.priceCents, featuredProduct.currency)}</strong>
+                      {savingsCents > 0 ? (
+                        <span className="pill">
+                          Save {formatCurrency(savingsCents, featuredProduct.currency)}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="home-flagship__price-note">
+                      120 veggie capsules, 60 servings, and {featuredProduct.pointsReward} reward points
+                      on every bottle.
+                    </p>
+                    <p className="home-flagship__price-support">
+                      Built for shoppers who want one bottle that already covers NR, Quercetin Phytosome,
+                      Trans-Resveratrol, and CoQ10 in a straightforward daily serving.
+                    </p>
+                    <div className="home-flagship__pricing-actions">
+                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--primary">
+                        Buy now
+                      </Link>
+                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--secondary">
+                        View supplement details
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="home-flagship__reviews">
+                    <div className="home-flagship__reviews-intro">
+                      <div className="home-flagship__reviews-header">
+                        <p className="eyebrow">Customer feedback</p>
+                        <h3>Real feedback helps new shoppers buy with more confidence.</h3>
+                      </div>
+                      <p className="home-flagship__reviews-copy">
+                        Buyers consistently call out the ingredient strength, premium feel, and how easy
+                        the bottle is to keep in a daily routine.
+                      </p>
+                      {typeof averageRating === "number" ? (
+                        <RatingStars
+                          rating={averageRating}
+                          reviewCount={reviewCount}
+                          size="md"
+                          showCount
+                        />
+                      ) : null}
+                    </div>
+
+                    <div className="home-flagship__review-grid">
+                      {reviewHighlights.length > 0 ? (
+                        reviewHighlights.map((review) => (
+                          <article key={review.id} className="home-flagship__review">
+                            <div className="home-flagship__review-meta">
+                              <RatingStars rating={review.rating} size="sm" showValue={false} />
+                              <span>{review.displayName}</span>
+                            </div>
+                            <h4>{review.title}</h4>
+                            <p>{review.content}</p>
+                          </article>
+                        ))
+                      ) : (
+                        <article className="home-flagship__review home-flagship__review--empty">
+                          <p>
+                            Customer review highlights will appear here as published feedback comes in.
+                          </p>
+                        </article>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="home-flagship__media">
                   <div className="home-image home-image--portrait home-flagship__image">
                     <Image
@@ -303,124 +356,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                       ))}
                     </div>
                     <p className="home-flagship__formula-note">
-                      The formula is positioned for customers who want one decisive NAD+ product page with
-                      transparent ingredient amounts, stronger perceived value, and less routine clutter.
+                      One bottle, 60 servings, and a supporting stack that helps the product feel more complete
+                      for customers who want a serious everyday NAD+ supplement.
                     </p>
                   </article>
-                </div>
-
-                <div className="home-flagship__content">
-                  <p className="eyebrow">Flagship Product</p>
-                  <h2>{featuredProduct.name}</h2>
-                  <p className="home-flagship__lead">{featuredProduct.description}</p>
-                  <p className="home-flagship__story-copy">
-                    ZenUP is merchandised like a single flagship offer rather than a crowded supplement shelf.
-                    That lets the product story stay concentrated on what matters most: a professional NR-led
-                    formula, transparent serving logic, and a checkout path that feels immediate once the customer
-                    decides the formula fits.
-                  </p>
-
-                  <div className="home-flagship__story-grid">
-                    {flagshipStoryCards.map((card) => (
-                      <article key={card.title} className="home-flagship__story-card">
-                        <h3>{card.title}</h3>
-                        <p>{card.description}</p>
-                      </article>
-                    ))}
-                  </div>
-
-                  {typeof averageRating === "number" ? (
-                    <RatingStars
-                      rating={averageRating}
-                      reviewCount={reviewCount}
-                      size="md"
-                      showCount
-                    />
-                  ) : null}
-
-                  <div className="home-flagship__pricing">
-                    {typeof featuredProduct.compareAtPriceCents === "number" ? (
-                      <span className="home-flagship__compare">
-                        {formatCurrency(featuredProduct.compareAtPriceCents, featuredProduct.currency)}
-                      </span>
-                    ) : null}
-                    <div className="home-flagship__price-row">
-                      <strong>{formatCurrency(featuredProduct.priceCents, featuredProduct.currency)}</strong>
-                      {savingsCents > 0 ? (
-                        <span className="pill">
-                          Save {formatCurrency(savingsCents, featuredProduct.currency)}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="home-flagship__price-note">
-                      120 veggie capsules, 60 servings, and {featuredProduct.pointsReward} reward points
-                      on every bottle.
-                    </p>
-                    <p className="home-flagship__price-support">
-                      Keeping the main purchase action directly under the price makes the offer feel cleaner:
-                      the customer sees the value, confirms the serving logic, and can move to checkout without
-                      breaking their momentum.
-                    </p>
-                    <div className="home-flagship__pricing-actions">
-                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--primary">
-                        Buy now
-                      </Link>
-                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--secondary">
-                        View full product page
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="cards-3 home-flagship__benefits">
-                    {flagshipBenefits.map((benefit) => (
-                      <article key={benefit.title} className="panel philosophy-card">
-                        <h3>{benefit.title}</h3>
-                        <p>{benefit.description}</p>
-                      </article>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="home-flagship__reviews">
-                <div className="home-flagship__reviews-intro">
-                  <div className="home-flagship__reviews-header">
-                    <p className="eyebrow">Customer feedback</p>
-                    <h3>Early reviews already reinforce the premium formula story.</h3>
-                  </div>
-                  <p className="home-flagship__reviews-copy">
-                    The review section now works like proof, not filler. It gives the customer a fast
-                    confidence signal around formula completeness, premium presentation, and day-to-day usability.
-                  </p>
-                  {typeof averageRating === "number" ? (
-                    <RatingStars
-                      rating={averageRating}
-                      reviewCount={reviewCount}
-                      size="md"
-                      showCount
-                    />
-                  ) : null}
-                </div>
-
-                <div className="home-flagship__review-grid">
-                  {reviewHighlights.length > 0 ? (
-                    reviewHighlights.map((review) => (
-                      <article key={review.id} className="home-flagship__review">
-                        <div className="home-flagship__review-meta">
-                          <RatingStars rating={review.rating} size="sm" showValue={false} />
-                          <span>{review.displayName}</span>
-                        </div>
-                        <h4>{review.title}</h4>
-                        <p>{review.content}</p>
-                      </article>
-                    ))
-                  ) : (
-                    <article className="home-flagship__review home-flagship__review--empty">
-                      <p>
-                        Customer review highlights will appear here as published feedback comes in.
-                      </p>
-                    </article>
-                  )}
                 </div>
               </div>
             </div>
@@ -430,18 +369,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <section className="section">
         <div className="container">
-          <SocialProofSlider />
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
           <div className="home-routine">
             <div className="home-routine__intro">
               <SectionHeading
                 eyebrow="Daily Use"
-                title="A flagship product story that feels calm, premium, and easy to understand."
-                description="Because there is only one product, the homepage can focus on clear usage, stronger proof, and a more natural buying journey."
+                title="A daily routine that feels calm, premium, and easy to follow."
+                description="Straightforward directions and a simple two-capsule serving make the formula easier to understand and easier to use every day."
               />
               <div className="page-hero__stats">
                 <span className="pill">Straightforward daily serving</span>
@@ -486,8 +419,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="container">
           <SectionHeading
             eyebrow="Blog"
-            title="Educational content rewritten for a professional supplement audience."
-            description="The article library now supports NAD+, Nicotinamide Riboside, formula comparison, and routine-building instead of skincare topics."
+            title="NAD+ education that helps shoppers understand the formula before they buy."
+            description="Read articles on Nicotinamide Riboside, daily-use questions, and how customers compare NAD+ support options."
           />
           <div className="post-grid">
             {posts.map((post) => (
@@ -501,11 +434,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="container">
           <div className="home-cta home-cta--image">
             <div className="home-cta__copy">
-              <p className="eyebrow">Next Step</p>
-              <h2>The homepage now reads like a premium one-product brand instead of a generic catalog.</h2>
+              <p className="eyebrow">Start Your Routine</p>
+              <h2>Take the next step with one premium NAD+ formula built for consistent daily use.</h2>
               <p>
-                ZenUP now has a clearer flagship story, stronger visual rhythm, and a more focused
-                path from brand introduction to product purchase.
+                If you want a single bottle that combines Nicotinamide Riboside, Quercetin Phytosome,
+                Trans-Resveratrol, and CoQ10, ZenUP keeps the decision simple.
               </p>
               <div className="hero-actions">
                 <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">

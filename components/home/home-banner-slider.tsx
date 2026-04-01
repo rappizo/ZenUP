@@ -26,9 +26,8 @@ export function HomeBannerSlider() {
             <p className="eyebrow">Professional NAD+ Formula</p>
             <h1>One premium NAD+ formula built for daily cellular energy support.</h1>
             <p>
-              ZenUP keeps the storefront focused: one flagship Nicotinamide Riboside formula,
-              premium presentation, and a clear healthy-aging story that feels credible from the
-              first screen.
+              ZenUP centers on one flagship Nicotinamide Riboside formula with Quercetin, Resveratrol,
+              and CoQ10 already included, so shoppers can move quickly from learning to purchasing.
             </p>
             <div className="home-hero__facts">
               <span className="pill">600mg NR Hydrogen Malate</span>

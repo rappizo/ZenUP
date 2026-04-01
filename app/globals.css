@@ -4000,14 +4000,14 @@ body {
 
 .home-flagship__main {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
   gap: 24px;
   align-items: start;
 }
 
 .home-flagship__media {
   display: grid;
-  gap: 16px;
+  gap: 18px;
   align-content: start;
 }
 
@@ -4058,37 +4058,10 @@ body {
   line-height: 1.55;
 }
 
-.home-flagship__story-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.home-flagship__story-card {
-  display: grid;
-  gap: 10px;
-  padding: 16px;
-  border: 1px solid rgba(10, 76, 37, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-}
-
-.home-flagship__story-card h3 {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: 1.16rem;
-  line-height: 1;
-}
-
-.home-flagship__story-card p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.72;
-}
-
 .home-flagship__pricing {
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  gap: 12px;
+  padding: 22px;
   border: 1px solid rgba(10, 76, 37, 0.08);
   background: rgba(255, 255, 255, 0.92);
 }
@@ -4127,14 +4100,9 @@ body {
   width: 100%;
 }
 
-.home-flagship__benefits {
-  gap: 16px;
-}
-
 .home-flagship__reviews {
   display: grid;
-  grid-template-columns: minmax(260px, 0.42fr) minmax(0, 0.58fr);
-  gap: 20px;
+  gap: 18px;
   padding: 20px;
   border: 1px solid rgba(10, 76, 37, 0.08);
   background: rgba(255, 255, 255, 0.94);
@@ -4287,7 +4255,6 @@ body {
   .home-flagship__review-grid,
   .home-hero__stats,
   .home-flagship__fact-grid,
-  .home-flagship__story-grid,
   .home-proof__support-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -4316,7 +4283,6 @@ body {
   .home-hero__stats,
   .home-proof__card-grid,
   .home-flagship__fact-grid,
-  .home-flagship__story-grid,
   .home-proof__support-grid {
     grid-template-columns: 1fr;
   }
