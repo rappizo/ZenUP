@@ -3,6 +3,8 @@
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { runAiPostAutomation } from "@/lib/ai-post-automation";
+import { normalizeArticleContent } from "@/lib/article-format";
 import { prisma } from "@/lib/db";
 import {
   getBrevoSettings,
@@ -21,7 +23,9 @@ import {
   validateAdminCredentials
 } from "@/lib/admin-auth";
 import { normalizeCouponCode, parseCouponScopeInput, serializeCouponScope } from "@/lib/coupons";
+import { generateAiReviewDrafts, getOpenAiReviewSettings } from "@/lib/openai-reviews";
 import { ensureProductCodes, getNextProductCode } from "@/lib/product-codes";
+import { parseReviewReferenceFile } from "@/lib/review-reference-file";
 import type {
   CouponDiscountType,
   EmailAudienceType,
@@ -33,7 +37,7 @@ import type {
   ProductStatus,
   ReviewStatus
 } from "@/lib/types";
-import { normalizeMultilineValue, toBool, toInt, toPlainString, toPriceCents } from "@/lib/utils";
+import { normalizeMultilineValue, slugify, toBool, toInt, toPlainString, toPriceCents } from "@/lib/utils";
 
 function buildPublishedDate(formData: FormData, published: boolean) {
   const rawDate = toPlainString(formData.get("publishedAt"));
@@ -104,6 +108,15 @@ function buildOmbClaimRedirect(status: string, redirectTo?: string) {
 function buildEmailMarketingRedirect(status: string, campaignId?: string, redirectTo?: string) {
   const fallbackPath = campaignId ? `/admin/email-marketing/${campaignId}` : "/admin/email-marketing";
   const basePath = redirectTo || fallbackPath;
+  const [pathname, queryString = ""] = basePath.split("?");
+  const params = new URLSearchParams(queryString);
+  params.set("status", status);
+  const nextQuery = params.toString();
+  return nextQuery ? `${pathname}?${nextQuery}` : pathname;
+}
+
+function buildPostsRedirect(status: string, redirectTo?: string) {
+  const basePath = redirectTo || "/admin/posts";
   const [pathname, queryString = ""] = basePath.split("?");
   const params = new URLSearchParams(queryString);
   params.set("status", status);
@@ -384,6 +397,10 @@ function parseReviewDateInput(value: string | undefined | null) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function parseAiReviewQuantity(value: FormDataEntryValue | null) {
+  return Math.max(1, Math.min(100, toInt(value, 10)));
+}
+
 export async function loginAction(formData: FormData) {
   const username = toPlainString(formData.get("username"));
   const password = toPlainString(formData.get("password"));
@@ -635,6 +652,7 @@ export async function createPostAction(formData: FormData) {
   await requireAdminSession();
 
   const published = toBool(formData.get("published"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
 
   await prisma.post.create({
     data: {
@@ -644,7 +662,8 @@ export async function createPostAction(formData: FormData) {
       category: toPlainString(formData.get("category")),
       readTime: toInt(formData.get("readTime"), 4),
       coverImageUrl: toPlainString(formData.get("coverImageUrl")),
-      content: toPlainString(formData.get("content")),
+      coverImageAlt: toPlainString(formData.get("coverImageAlt")) || null,
+      content: normalizeArticleContent(toPlainString(formData.get("content"))),
       seoTitle: toPlainString(formData.get("seoTitle")),
       seoDescription: toPlainString(formData.get("seoDescription")),
       published,
@@ -654,7 +673,7 @@ export async function createPostAction(formData: FormData) {
 
   revalidatePath("/blog");
   revalidatePath("/admin/posts");
-  redirect("/admin/posts?status=created");
+  redirect(buildPostsRedirect("created", redirectTo));
 }
 
 export async function updatePostAction(formData: FormData) {
@@ -662,8 +681,9 @@ export async function updatePostAction(formData: FormData) {
 
   const published = toBool(formData.get("published"));
   const id = toPlainString(formData.get("id"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
 
-  await prisma.post.update({
+  const updatedPost = await prisma.post.update({
     where: { id },
     data: {
       title: toPlainString(formData.get("title")),
@@ -672,28 +692,82 @@ export async function updatePostAction(formData: FormData) {
       category: toPlainString(formData.get("category")),
       readTime: toInt(formData.get("readTime"), 4),
       coverImageUrl: toPlainString(formData.get("coverImageUrl")),
-      content: toPlainString(formData.get("content")),
+      coverImageAlt: toPlainString(formData.get("coverImageAlt")) || null,
+      content: normalizeArticleContent(toPlainString(formData.get("content"))),
       seoTitle: toPlainString(formData.get("seoTitle")),
       seoDescription: toPlainString(formData.get("seoDescription")),
       published,
       publishedAt: buildPublishedDate(formData, published)
+    },
+    select: {
+      slug: true
     }
   });
 
   revalidatePath("/blog");
   revalidatePath("/admin/posts");
-  redirect("/admin/posts?status=updated");
+  revalidatePath(`/blog/${updatedPost.slug}`);
+  redirect(buildPostsRedirect("updated", redirectTo));
 }
 
 export async function deletePostAction(formData: FormData) {
   await requireAdminSession();
 
   const id = toPlainString(formData.get("id"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
   await prisma.post.delete({ where: { id } });
 
   revalidatePath("/blog");
   revalidatePath("/admin/posts");
-  redirect("/admin/posts?status=deleted");
+  redirect(buildPostsRedirect("deleted", redirectTo));
+}
+
+export async function saveAiPostAutomationSettingsAction(formData: FormData) {
+  await requireAdminSession();
+
+  const settings = [
+    ["ai_post_enabled", toBool(formData.get("ai_post_enabled")) ? "true" : "false"],
+    ["ai_post_cadence_days", String(Math.max(1, toInt(formData.get("ai_post_cadence_days"), 2)))],
+    ["ai_post_auto_publish", toBool(formData.get("ai_post_auto_publish")) ? "true" : "false"],
+    [
+      "ai_post_include_external_links",
+      toBool(formData.get("ai_post_include_external_links")) ? "true" : "false"
+    ]
+  ];
+
+  await Promise.all(
+    settings.map(([key, value]) =>
+      prisma.storeSetting.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value }
+      })
+    )
+  );
+
+  revalidatePath("/admin/posts");
+  redirect(buildPostsRedirect("automation-settings-saved"));
+}
+
+export async function generateAiPostNowAction(formData: FormData) {
+  await requireAdminSession();
+
+  const redirectTo = toPlainString(formData.get("redirectTo")) || "/admin/posts";
+  const result = await runAiPostAutomation({
+    trigger: "manual"
+  });
+
+  revalidatePath("/admin/posts");
+
+  if (!result.ok) {
+    redirect(buildPostsRedirect(`ai-failed-${slugify(result.status)}`, redirectTo));
+  }
+
+  if (!result.created) {
+    redirect(buildPostsRedirect(`ai-skipped-${slugify(result.status)}`, redirectTo));
+  }
+
+  redirect(buildPostsRedirect(result.published ? "ai-post-published" : "ai-post-draft-created", redirectTo));
 }
 
 export async function updateOrderAction(formData: FormData) {
@@ -826,6 +900,89 @@ export async function deleteReviewAction(formData: FormData) {
   redirect(buildReviewRedirect("deleted", redirectTo, productSlug));
 }
 
+export async function approveReviewAction(formData: FormData) {
+  await requireAdminSession();
+
+  const id = toPlainString(formData.get("id"));
+  const productSlug = toPlainString(formData.get("productSlug"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
+
+  if (!id) {
+    redirect(buildReviewRedirect("missing-review", redirectTo, productSlug));
+  }
+
+  const existingReview = await prisma.productReview.findUnique({
+    where: { id },
+    select: {
+      publishedAt: true
+    }
+  });
+
+  await prisma.productReview.update({
+    where: { id },
+    data: {
+      status: "PUBLISHED",
+      publishedAt: existingReview?.publishedAt ?? new Date()
+    }
+  });
+
+  revalidatePath("/admin/reviews");
+  if (productSlug) {
+    revalidatePath(`/admin/reviews/${productSlug}`);
+  }
+  refreshStorefront(productSlug ? [productSlug] : []);
+  redirect(buildReviewRedirect("approved", redirectTo, productSlug));
+}
+
+export async function bulkModerateReviewsAction(formData: FormData) {
+  await requireAdminSession();
+
+  const productSlug = toPlainString(formData.get("productSlug"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
+  const intent = toPlainString(formData.get("intent")) || "delete";
+  const reviewIds = Array.from(
+    new Set(
+      formData
+        .getAll("reviewIds")
+        .map((value) => (typeof value === "string" ? value.trim() : ""))
+        .filter(Boolean)
+    )
+  );
+
+  if (reviewIds.length === 0) {
+    redirect(buildReviewRedirect("no-selection", redirectTo, productSlug));
+  }
+
+  if (intent === "approve") {
+    await prisma.productReview.updateMany({
+      where: {
+        id: {
+          in: reviewIds
+        }
+      },
+      data: {
+        status: "PUBLISHED",
+        publishedAt: new Date()
+      }
+    });
+  } else {
+    await prisma.productReview.deleteMany({
+      where: {
+        id: {
+          in: reviewIds
+        }
+      }
+    });
+  }
+
+  revalidatePath("/admin/reviews");
+  if (productSlug) {
+    revalidatePath(`/admin/reviews/${productSlug}`);
+  }
+  refreshStorefront(productSlug ? [productSlug] : []);
+  redirect(buildReviewRedirect(intent === "approve" ? "bulk-approved" : "bulk-deleted", redirectTo, productSlug));
+}
+
 export async function bulkImportReviewsAction(formData: FormData) {
   await requireAdminSession();
 
@@ -925,6 +1082,110 @@ export async function bulkImportReviewsAction(formData: FormData) {
   }
   refreshStorefront(productSlug ? [productSlug] : []);
   redirect(buildReviewRedirect("imported", redirectTo, productSlug));
+}
+
+export async function generateAiReviewsAction(formData: FormData) {
+  await requireAdminSession();
+
+  const productSlug = toPlainString(formData.get("productSlug"));
+  const redirectTo = toPlainString(formData.get("redirectTo"));
+  const quantity = parseAiReviewQuantity(formData.get("quantity"));
+  const generationMode = toPlainString(formData.get("generationMode")) === "reference" ? "reference" : "direct";
+  const referenceFile = formData.get("referenceFile");
+  const openAiSettings = getOpenAiReviewSettings();
+
+  if (!openAiSettings.ready) {
+    redirect(buildReviewRedirect("ai-not-configured", redirectTo, productSlug));
+  }
+
+  const product = await prisma.product.findUnique({
+    where: { slug: productSlug },
+    select: {
+      id: true,
+      productCode: true,
+      productShortName: true,
+      name: true,
+      slug: true,
+      tagline: true,
+      category: true,
+      shortDescription: true,
+      description: true,
+      details: true
+    }
+  });
+
+  if (!product) {
+    redirect(buildReviewRedirect("missing-product", redirectTo, productSlug));
+  }
+
+  const hasUploadedReferenceFile =
+    referenceFile &&
+    typeof referenceFile !== "string" &&
+    typeof referenceFile.name === "string" &&
+    referenceFile.name.trim().length > 0;
+
+  if (generationMode === "reference" && !hasUploadedReferenceFile) {
+    redirect(buildReviewRedirect("missing-reference-file", redirectTo, productSlug));
+  }
+
+  const referenceReviews =
+    generationMode === "reference" ? await parseReviewReferenceFile(referenceFile) : [];
+
+  if (generationMode === "reference" && hasUploadedReferenceFile && referenceReviews.length === 0) {
+    redirect(buildReviewRedirect("invalid-reference-file", redirectTo, productSlug));
+  }
+
+  const existingReviews = await prisma.productReview.findMany({
+    where: { productId: product.id },
+    orderBy: [{ reviewDate: "desc" }, { createdAt: "desc" }],
+    take: 20,
+    select: {
+      rating: true,
+      title: true,
+      content: true,
+      displayName: true
+    }
+  });
+
+  try {
+    const drafts = await generateAiReviewDrafts({
+      product,
+      quantity,
+      existingReviews,
+      referenceReviews
+    });
+
+    const now = new Date();
+    let createIndex = 0;
+
+    for (const draft of drafts) {
+      const createdAt = new Date(now.getTime() + createIndex * 1000);
+      await prisma.productReview.create({
+        data: {
+          productId: product.id,
+          rating: draft.rating,
+          title: draft.title,
+          content: draft.content,
+          displayName: draft.displayName,
+          reviewDate: createdAt,
+          status: "PENDING",
+          verifiedPurchase: false,
+          adminNotes: referenceReviews.length
+            ? `AI generated with ${referenceReviews.length} uploaded reference reviews.`
+            : "AI generated directly from product context, with no reference file.",
+          source: "AI_GENERATED",
+          createdAt
+        }
+      });
+      createIndex += 1;
+    }
+  } catch {
+    redirect(buildReviewRedirect("ai-failed", redirectTo, product.slug));
+  }
+
+  revalidatePath("/admin/reviews");
+  revalidatePath(`/admin/reviews/${product.slug}`);
+  redirect(buildReviewRedirect("ai-generated", redirectTo, product.slug));
 }
 
 export async function saveStoreSettingsAction(formData: FormData) {

@@ -1,33 +1,163 @@
+import Link from "next/link";
 import {
   createPostAction,
   deletePostAction,
+  generateAiPostNowAction,
+  saveAiPostAutomationSettingsAction,
   updatePostAction
 } from "@/app/admin/actions";
-import { formatDate } from "@/lib/format";
-import { getAllPosts } from "@/lib/queries";
+import { formatDate, formatTime } from "@/lib/format";
+import { getAiPostAutomationOverview, getAllPosts } from "@/lib/queries";
 
 type AdminPostsPageProps = {
   searchParams: Promise<{ status?: string }>;
 };
 
+const STATUS_MESSAGES: Record<string, string> = {
+  created: "Post created.",
+  updated: "Post updated.",
+  deleted: "Post deleted.",
+  "automation-settings-saved": "AI post automation settings were saved.",
+  "ai-post-draft-created": "AI created a new draft post.",
+  "ai-post-published": "AI created and published a new post.",
+  "ai-failed-failed": "AI post generation failed. Review your OpenAI or database configuration.",
+  "ai-skipped-not-due": "The next scheduled run is not due yet.",
+  "ai-skipped-draft-pending": "An unpublished AI draft already exists, so automation skipped creating another one."
+};
+
 export default async function AdminPostsPage({ searchParams }: AdminPostsPageProps) {
-  const [posts, params] = await Promise.all([getAllPosts(), searchParams]);
+  const [posts, automation, params] = await Promise.all([
+    getAllPosts(),
+    getAiPostAutomationOverview(),
+    searchParams
+  ]);
 
   return (
     <div className="admin-page">
       <div className="admin-page__header">
         <p className="eyebrow">Posts</p>
-        <h1>Publish SEO supplement content from a dedicated editorial backend.</h1>
+        <h1>Run AI-assisted SEO publishing from the same editorial backend you already use.</h1>
         <p>
-          This is the content engine for your ZenUP blog. Use it to publish ingredient explainers,
-          buying guides, and routine articles that support the NAD+ product story.
+          Review automation status, trigger the next AI draft, and manage every ZenUP blog article
+          from one post library sorted by newest first.
         </p>
       </div>
 
-      {params.status ? <p className="notice">Post action completed: {params.status}.</p> : null}
+      {params.status ? (
+        <p className="notice">
+          {STATUS_MESSAGES[params.status] || `Post action completed: ${params.status}.`}
+        </p>
+      ) : null}
+
+      <div className="cards-3">
+        <section className="admin-card">
+          <p className="eyebrow">Automation status</p>
+          <h3>{automation.enabled ? "Automation is active" : "Automation is paused"}</h3>
+          <p>
+            {automation.autoPublish
+              ? `A new AI post will publish every ${automation.cadenceDays} day(s) when the cycle is due.`
+              : `A new AI draft will be created every ${automation.cadenceDays} day(s) when the cycle is due.`}
+          </p>
+          <div className="stack-row stack-row--wrap">
+            <span className="pill">{automation.model ? `Text ${automation.model}` : "No text model"}</span>
+            <span className="pill">{automation.imageModel ? `Image ${automation.imageModel}` : "No image model"}</span>
+            <span className="pill">{automation.includeExternalLinks ? "External links on" : "External links off"}</span>
+          </div>
+        </section>
+
+        <section className="admin-card">
+          <p className="eyebrow">Rotation queue</p>
+          <h3>{automation.nextProductName || "No product queued yet"}</h3>
+          <p>
+            {automation.nextProductCode
+              ? `Next in line: product ${automation.nextProductCode}.`
+              : "The queue will start with the first active product once automation runs."}
+          </p>
+          <div className="stack-row stack-row--wrap">
+            <span className="pill">{automation.aiPostCount} AI posts total</span>
+            <span className="pill">{automation.publishedAiPostCount} published</span>
+            <span className="pill">{automation.draftAiPostCount} drafts</span>
+          </div>
+        </section>
+
+        <section className="admin-card">
+          <p className="eyebrow">Last run</p>
+          <h3>{automation.lastRunAt ? formatDate(automation.lastRunAt) : "Not run yet"}</h3>
+          <p>
+            {automation.lastPostTitle
+              ? `Latest AI post: ${automation.lastPostTitle}.`
+              : "No AI-generated post has been created yet."}
+          </p>
+          <div className="stack-row stack-row--wrap">
+            <span className="pill">{automation.lastStatus || "No status yet"}</span>
+            {automation.lastRunAt ? (
+              <span className="pill">{formatTime(automation.lastRunAt)}</span>
+            ) : null}
+          </div>
+        </section>
+      </div>
 
       <section className="admin-form">
-        <h2>Create SEO post</h2>
+        <h2>AI SEO post automation</h2>
+        <form action={saveAiPostAutomationSettingsAction}>
+          <div className="admin-form__grid">
+            <label className="field field--checkbox">
+              <input type="checkbox" name="ai_post_enabled" defaultChecked={automation.enabled} />
+              Enable scheduled AI post generation
+            </label>
+            <div className="field">
+              <label htmlFor="ai_post_cadence_days">Cadence in days</label>
+              <input
+                id="ai_post_cadence_days"
+                name="ai_post_cadence_days"
+                type="number"
+                min="1"
+                defaultValue={automation.cadenceDays}
+                required
+              />
+            </div>
+            <label className="field field--checkbox">
+              <input type="checkbox" name="ai_post_auto_publish" defaultChecked={automation.autoPublish} />
+              Publish automatically when a run succeeds
+            </label>
+            <label className="field field--checkbox">
+              <input
+                type="checkbox"
+                name="ai_post_include_external_links"
+                defaultChecked={automation.includeExternalLinks}
+              />
+              Allow approved authority links in AI posts
+            </label>
+          </div>
+          <button type="submit" className="button button--primary">
+            Save automation settings
+          </button>
+        </form>
+      </section>
+
+      <section className="admin-form">
+        <div className="admin-review-pagination">
+          <div>
+            <h2>Generate the next AI post now</h2>
+            <p className="form-note">
+              The system will pick the next product in the rotation, generate the article and cover
+              image, then create a draft or publish it based on your automation settings.
+            </p>
+          </div>
+          <div className="stack-row stack-row--wrap">
+            <span className="pill">Current queue target: {automation.nextProductName || "Not set"}</span>
+          </div>
+        </div>
+        <form action={generateAiPostNowAction}>
+          <input type="hidden" name="redirectTo" value="/admin/posts" />
+          <button type="submit" className="button button--primary">
+            Generate next AI post
+          </button>
+        </form>
+      </section>
+
+      <section className="admin-form">
+        <h2>Create manual post</h2>
         <form action={createPostAction}>
           <div className="admin-form__grid">
             <div className="field">
@@ -49,6 +179,10 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
             <div className="field">
               <label htmlFor="coverImageUrl">Cover image URL</label>
               <input id="coverImageUrl" name="coverImageUrl" placeholder="/posts/example.svg" required />
+            </div>
+            <div className="field">
+              <label htmlFor="coverImageAlt">Cover image alt</label>
+              <input id="coverImageAlt" name="coverImageAlt" />
             </div>
             <div className="field">
               <label htmlFor="publishedAt">Published at</label>
@@ -84,9 +218,17 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
       <div className="cards-2">
         {posts.map((post) => (
           <section key={post.id} className="admin-form">
+            <div className="stack-row stack-row--wrap">
+              <span className="pill">{post.category}</span>
+              <span className="pill">{post.published ? "Published" : "Draft"}</span>
+              <span className="pill">{post.aiGenerated ? "AI generated" : "Manual"}</span>
+              {post.sourceProductName ? <span className="pill">{post.sourceProductName}</span> : null}
+              {post.focusKeyword ? <span className="pill">{post.focusKeyword}</span> : null}
+            </div>
             <h2>{post.title}</h2>
             <p>
-              {post.category} · {post.published ? "Published" : "Draft"} · {formatDate(post.publishedAt)}
+              Created {formatDate(post.createdAt)} {formatTime(post.createdAt)}. Updated{" "}
+              {formatDate(post.updatedAt)} {formatTime(post.updatedAt)}.
             </p>
             <form action={updatePostAction}>
               <input type="hidden" name="id" value={post.id} />
@@ -112,13 +254,15 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
                   <input name="coverImageUrl" defaultValue={post.coverImageUrl} />
                 </div>
                 <div className="field">
+                  <label>Cover image alt</label>
+                  <input name="coverImageAlt" defaultValue={post.coverImageAlt || ""} />
+                </div>
+                <div className="field">
                   <label>Published at</label>
                   <input
                     name="publishedAt"
                     type="datetime-local"
-                    defaultValue={
-                      post.publishedAt ? new Date(post.publishedAt).toISOString().slice(0, 16) : ""
-                    }
+                    defaultValue={post.publishedAt ? new Date(post.publishedAt).toISOString().slice(0, 16) : ""}
                   />
                 </div>
                 <div className="field">
@@ -142,9 +286,14 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
                 <label>Content</label>
                 <textarea name="content" defaultValue={post.content} />
               </div>
-              <button type="submit" className="button button--primary">
-                Save changes
-              </button>
+              <div className="stack-row stack-row--wrap">
+                <button type="submit" className="button button--primary">
+                  Save changes
+                </button>
+                <Link href={`/blog/${post.slug}`} className="button button--secondary">
+                  View article
+                </Link>
+              </div>
             </form>
             <form action={deletePostAction}>
               <input type="hidden" name="id" value={post.id} />

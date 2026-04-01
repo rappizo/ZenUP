@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { HomeBannerSlider } from "@/components/home/home-banner-slider";
 import { SocialProofSlider } from "@/components/home/social-proof-slider";
-import { ImagePromptPlaceholder } from "@/components/ui/image-prompt-placeholder";
 import { PostCard } from "@/components/ui/post-card";
-import { ProductCard } from "@/components/ui/product-card";
+import { RatingStars } from "@/components/ui/rating-stars";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { homeVisualPrompts } from "@/lib/home-visual-prompts";
-import { getFeaturedProducts, getPublishedPosts, getStoreSettings } from "@/lib/queries";
+import { formatCurrency, getSavingsCents } from "@/lib/format";
+import {
+  getFeaturedProducts,
+  getPublishedPosts,
+  getPublishedReviewsByProductId,
+  getStoreSettings
+} from "@/lib/queries";
 import { hasConfiguredEmailDelivery, resolveStorefrontContact, siteConfig } from "@/lib/site-config";
 import { buildSiteImageUrl } from "@/lib/site-media";
 import {
@@ -25,19 +30,64 @@ const formulaCards = [
     eyebrow: "Core NAD+ Support",
     title: "600mg Nicotinamide Riboside Hydrogen Malate",
     description:
-      "A serious daily serving level for customers who want the formula anchored by a recognized NAD+ precursor."
+      "A serious daily serving level that leads the page with the ingredient most NAD+ shoppers already compare first."
   },
   {
     eyebrow: "Amplifier",
     title: "250mg Quercetin Phytosome",
     description:
-      "Included to strengthen the healthy-aging positioning and create a more complete stack in one bottle."
+      "Included to strengthen the healthy-aging position and make the formula feel more complete than a single-ingredient NR bottle."
   },
   {
     eyebrow: "Longevity Companion",
     title: "150mg Trans-Resveratrol + 100mg CoQ10",
     description:
-      "Resveratrol and CoQ10 round out the formula for customers looking beyond single-ingredient NR products."
+      "Two supporting ingredients that round out the daily-use story for customers who want a stronger all-in-one stack."
+  }
+];
+
+const flagshipChecklist = [
+  "Serving size: 2 veggie capsules",
+  "120 capsules per bottle / 60 servings",
+  "Quercetin Phytosome, Resveratrol, and CoQ10 included",
+  "Built for daily routine consistency, not supplement clutter",
+  "Designed as a one-bottle NAD+ support routine instead of a fragmented stack"
+];
+
+const flagshipFormulaFacts = [
+  {
+    value: "600mg",
+    label: "Nicotinamide Riboside Hydrogen Malate"
+  },
+  {
+    value: "250mg",
+    label: "Quercetin Phytosome"
+  },
+  {
+    value: "150mg",
+    label: "Trans-Resveratrol"
+  },
+  {
+    value: "100mg",
+    label: "Coenzyme Q10"
+  }
+];
+
+const flagshipBenefits = [
+  {
+    title: "Single-product focus",
+    description:
+      "The storefront is built around one flagship SKU, so the message stays clean and the buyer journey feels decisive."
+  },
+  {
+    title: "Premium formula logic",
+    description:
+      "The ingredient story leads with NR strength, then reinforces the formula with companion ingredients that feel deliberate."
+  },
+  {
+    title: "Designed to convert",
+    description:
+      "Price, reviews, formula details, and purchase action now sit together in one stronger flagship block."
   }
 ];
 
@@ -46,19 +96,19 @@ const routineSteps = [
     step: "01",
     title: "Take 2 capsules daily",
     description:
-      "The routine is simple by design so customers can stay consistent instead of managing a complicated stack."
+      "The dosage is easy to understand, which makes the formula feel more trustworthy and much easier to stick with."
   },
   {
     step: "02",
-    title: "Use it as the anchor product",
+    title: "Keep one bottle in rotation",
     description:
-      "ZenUP is built to cover the core ingredients most NAD+ shoppers already want in one place."
+      "ZenUP is positioned as the anchor of the routine so customers do not need to juggle multiple bottles to feel complete."
   },
   {
     step: "03",
-    title: "Stay with the routine",
+    title: "Stay consistent long term",
     description:
-      "This site is positioned around steady, professional daily use rather than short-term hype or cluttered messaging."
+      "The brand tone is built around steady daily use and healthy-aging support instead of hype-heavy short-term promises."
   }
 ];
 
@@ -83,10 +133,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: buildSiteImageUrl("home", "ZenUP Hero Main.png"),
+        url: buildSiteImageUrl("home", "1.png"),
         width: 768,
-        height: 768,
-        alt: "ZenUP NAD+ bottle"
+        height: 960,
+        alt: "ZenUP NAD+ supplement hero scene"
       }
     ]
   },
@@ -94,7 +144,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${homePageTitle} | ${siteConfig.title}`,
     description: homePageDescription,
-    images: [buildSiteImageUrl("home", "ZenUP Hero Main.png")]
+    images: [buildSiteImageUrl("home", "1.png")]
   }
 };
 
@@ -110,7 +160,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     searchParams
   ]);
 
-  const featuredProduct = products[0];
+  const featuredProduct = products[0] ?? null;
+  const productReviews = featuredProduct ? await getPublishedReviewsByProductId(featuredProduct.id) : [];
+  const reviewHighlights = productReviews.slice(0, 2);
+  const reviewCount = productReviews.length || featuredProduct?.reviewCount || 0;
+  const averageRating =
+    productReviews.length > 0
+      ? productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length
+      : featuredProduct?.averageRating ?? null;
+  const savingsCents =
+    featuredProduct ? getSavingsCents(featuredProduct.compareAtPriceCents, featuredProduct.priceCents) : 0;
   const contact = resolveStorefrontContact(settings);
   const emailDeliveryReady = hasConfiguredEmailDelivery(settings);
   const structuredData = {
@@ -125,7 +184,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         ...(contact.supportEmail ? { email: contact.supportEmail } : {}),
         ...(contact.phone ? { telephone: contact.phone } : {}),
         areaServed: "US",
-        image: `${siteConfig.url}${buildSiteImageUrl("home", "ZenUP Hero Main.png")}`
+        image: `${siteConfig.url}${buildSiteImageUrl("home", "1.png")}`
       },
       {
         "@type": "WebSite",
@@ -172,51 +231,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <section className="section">
         <div className="container">
-          <div className="brand-manifesto">
-            <div className="brand-manifesto__copy">
-              <p className="eyebrow">ZenUP Brand Positioning</p>
-              <h1 className="brand-manifesto__title">
-                One flagship NAD+ product. Clear formula logic. Professional presentation.
-              </h1>
-              <p className="brand-manifesto__lead">
-                ZenUP is built around a single hero product so the story stays focused: a premium
-                daily supplement for shoppers who care about NAD+ support, healthy aging, and a
-                cleaner long-term routine.
-              </p>
-              <div className="brand-manifesto__pills">
-                <span className="pill">120 veggie capsules</span>
-                <span className="pill">60 servings per bottle</span>
-                <span className="pill">United States shipping</span>
-              </div>
-              <p className="brand-manifesto__note">
-                The site has been restructured to sell one product well before expanding the
-                catalog, and the homepage image slots now double as direct prompt briefs so you
-                can generate custom ZenUP campaign assets without redesigning the layout.
-              </p>
-              <div className="hero-actions">
-                <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
-                  View product
-                </Link>
-                <Link href="/blog" className="button button--secondary">
-                  Explore the blog
-                </Link>
-              </div>
-            </div>
-
-            <ImagePromptPlaceholder
-              {...homeVisualPrompts.brandStory}
-              className="brand-manifesto__visual"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
           <SectionHeading
             eyebrow="Formula Breakdown"
             title="Built around the ingredients the NAD+ customer already knows to compare."
-            description="The homepage now leads with formula clarity so the product feels credible before the customer ever reaches the cart."
+            description="The homepage now leads with formula clarity, dosage transparency, and a cleaner premium presentation."
           />
           <div className="cards-3">
             {formulaCards.map((card) => (
@@ -233,13 +251,139 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {featuredProduct ? (
         <section className="section">
           <div className="container">
-            <SectionHeading
-              eyebrow="Flagship Product"
-              title="The storefront is now focused on a single high-priority landing product."
-              description="This keeps the catalog lean while you prepare more detailed assets and higher-converting landing page content."
-            />
-            <div className="product-grid product-grid--single">
-              <ProductCard product={featuredProduct} />
+            <div className="home-flagship">
+              <div className="home-flagship__main">
+                <div className="home-flagship__media">
+                  <div className="home-image home-image--portrait home-flagship__image">
+                    <Image
+                      src={buildSiteImageUrl("home", "3.png")}
+                      alt="ZenUP flagship NAD+ product in a premium campaign scene."
+                      fill
+                      sizes="(max-width: 720px) 100vw, (max-width: 1080px) 56vw, 34vw"
+                    />
+                  </div>
+
+                  <article className="panel home-flagship__formula">
+                    <p className="eyebrow">Flagship formula snapshot</p>
+                    <p className="home-flagship__formula-lead">
+                      A premium daily NR-centered formula built to feel complete on its own, with
+                      clear serving logic and supporting ingredients that strengthen the healthy-aging story.
+                    </p>
+                    <ul className="home-flagship__list">
+                      {flagshipChecklist.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                    <div className="home-flagship__fact-grid">
+                      {flagshipFormulaFacts.map((fact) => (
+                        <div key={fact.label} className="home-flagship__fact">
+                          <strong>{fact.value}</strong>
+                          <span>{fact.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="home-flagship__formula-note">
+                      The formula is positioned for customers who want one decisive NAD+ product page with
+                      transparent ingredient amounts, stronger perceived value, and less routine clutter.
+                    </p>
+                  </article>
+                </div>
+
+                <div className="home-flagship__content">
+                  <p className="eyebrow">Flagship Product</p>
+                  <h2>{featuredProduct.name}</h2>
+                  <p className="home-flagship__lead">{featuredProduct.description}</p>
+
+                  {typeof averageRating === "number" ? (
+                    <RatingStars
+                      rating={averageRating}
+                      reviewCount={reviewCount}
+                      size="md"
+                      showCount
+                    />
+                  ) : null}
+
+                  <div className="home-flagship__pricing">
+                    {typeof featuredProduct.compareAtPriceCents === "number" ? (
+                      <span className="home-flagship__compare">
+                        {formatCurrency(featuredProduct.compareAtPriceCents, featuredProduct.currency)}
+                      </span>
+                    ) : null}
+                    <div className="home-flagship__price-row">
+                      <strong>{formatCurrency(featuredProduct.priceCents, featuredProduct.currency)}</strong>
+                      {savingsCents > 0 ? (
+                        <span className="pill">
+                          Save {formatCurrency(savingsCents, featuredProduct.currency)}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="home-flagship__price-note">
+                      120 veggie capsules, 60 servings, and {featuredProduct.pointsReward} reward points
+                      on every bottle.
+                    </p>
+                  </div>
+
+                  <div className="cards-3 home-flagship__benefits">
+                    {flagshipBenefits.map((benefit) => (
+                      <article key={benefit.title} className="panel philosophy-card">
+                        <h3>{benefit.title}</h3>
+                        <p>{benefit.description}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="hero-actions">
+                    <Link href={`/shop/${featuredProduct.slug}`} className="button button--primary">
+                      Buy now
+                    </Link>
+                    <Link href={`/shop/${featuredProduct.slug}`} className="button button--secondary">
+                      View full product page
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="home-flagship__reviews">
+                <div className="home-flagship__reviews-intro">
+                  <div className="home-flagship__reviews-header">
+                    <p className="eyebrow">Customer feedback</p>
+                    <h3>Early reviews already reinforce the premium formula story.</h3>
+                  </div>
+                  <p className="home-flagship__reviews-copy">
+                    The review section now works like proof, not filler. It gives the customer a fast
+                    confidence signal around formula completeness, premium presentation, and day-to-day usability.
+                  </p>
+                  {typeof averageRating === "number" ? (
+                    <RatingStars
+                      rating={averageRating}
+                      reviewCount={reviewCount}
+                      size="md"
+                      showCount
+                    />
+                  ) : null}
+                </div>
+
+                <div className="home-flagship__review-grid">
+                  {reviewHighlights.length > 0 ? (
+                    reviewHighlights.map((review) => (
+                      <article key={review.id} className="home-flagship__review">
+                        <div className="home-flagship__review-meta">
+                          <RatingStars rating={review.rating} size="sm" showValue={false} />
+                          <span>{review.displayName}</span>
+                        </div>
+                        <h4>{review.title}</h4>
+                        <p>{review.content}</p>
+                      </article>
+                    ))
+                  ) : (
+                    <article className="home-flagship__review home-flagship__review--empty">
+                      <p>
+                        Customer review highlights will appear here as published feedback comes in.
+                      </p>
+                    </article>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -247,29 +391,42 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <section className="section">
         <div className="container">
-          <SectionHeading
-            eyebrow="Why This Setup Works"
-            title="The ingredient panel is now part of the hero story instead of hidden secondary content."
-            description="For a supplement brand, formula transparency and daily-use clarity need to show up earlier than generic brand lifestyle messaging."
-          />
           <SocialProofSlider />
         </div>
       </section>
 
       <section className="section">
         <div className="container">
-          <div className="ritual-spotlight">
-            <div className="ritual-spotlight__hero">
-              <div className="ritual-spotlight__content">
-                <SectionHeading
-                  eyebrow="Daily Use"
-                  title="A simple three-step message customers can understand in seconds."
-                  description="The product story now emphasizes dosage clarity, consistency, and a more professional healthy-aging routine."
+          <div className="home-routine">
+            <div className="home-routine__intro">
+              <SectionHeading
+                eyebrow="Daily Use"
+                title="A flagship product story that feels calm, premium, and easy to understand."
+                description="Because there is only one product, the homepage can focus on clear usage, stronger proof, and a more natural buying journey."
+              />
+              <div className="page-hero__stats">
+                <span className="pill">Straightforward daily serving</span>
+                <span className="pill">Professional premium presentation</span>
+                <span className="pill">Built for long-term routine use</span>
+              </div>
+            </div>
+
+            <div className="home-routine__media">
+              <div className="home-image home-image--landscape home-routine__image home-routine__image--primary">
+                <Image
+                  src={buildSiteImageUrl("home", "5.png")}
+                  alt="ZenUP supplement integrated into a refined daily wellness scene."
+                  fill
+                  sizes="(max-width: 720px) 100vw, (max-width: 1080px) 80vw, 42vw"
                 />
               </div>
-              <div className="ritual-spotlight__media">
-                <ImagePromptPlaceholder {...homeVisualPrompts.routineScene} className="ritual-prompt" />
-                <ImagePromptPlaceholder {...homeVisualPrompts.ingredientMacro} className="ritual-prompt" />
+              <div className="home-image home-image--square home-routine__image home-routine__image--secondary">
+                <Image
+                  src={buildSiteImageUrl("home", "6.png")}
+                  alt="Close-up campaign image for the ZenUP supplement routine."
+                  fill
+                  sizes="(max-width: 720px) 100vw, (max-width: 1080px) 60vw, 24vw"
+                />
               </div>
             </div>
 
@@ -303,13 +460,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <section className="section">
         <div className="container">
-          <div className="home-cta">
+          <div className="home-cta home-cta--image">
             <div className="home-cta__copy">
               <p className="eyebrow">Next Step</p>
-              <h2>ZenUP is ready to sell one product cleanly before you expand the catalog.</h2>
+              <h2>The homepage now reads like a premium one-product brand instead of a generic catalog.</h2>
               <p>
-                The homepage, product story, blog, and visual system now all reinforce the same
-                positioning: premium NAD+ supplementation with a focused, ingredient-led message.
+                ZenUP now has a clearer flagship story, stronger visual rhythm, and a more focused
+                path from brand introduction to product purchase.
               </p>
               <div className="hero-actions">
                 <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
@@ -321,7 +478,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </div>
             </div>
 
-            <ImagePromptPlaceholder {...homeVisualPrompts.ctaBanner} className="home-cta__visual" />
+            <div className="home-image home-image--portrait home-cta__visual-frame">
+              <Image
+                src={buildSiteImageUrl("home", "7.png")}
+                alt="Final premium campaign image for the ZenUP homepage call to action."
+                fill
+                sizes="(max-width: 720px) 100vw, (max-width: 1080px) 70vw, 32vw"
+              />
+            </div>
           </div>
         </div>
       </section>

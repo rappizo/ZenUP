@@ -1,5 +1,5 @@
-import { ImagePromptPlaceholder } from "@/components/ui/image-prompt-placeholder";
-import { homeVisualPrompts } from "@/lib/home-visual-prompts";
+import Image from "next/image";
+import { buildSiteImageUrl } from "@/lib/site-media";
 
 const pillars = [
   {
@@ -21,35 +21,35 @@ const pillars = [
 
 export function SocialProofSlider() {
   return (
-    <div className="social-proof social-proof--zenup">
-      <div className="social-proof__copy">
-        <p className="eyebrow">Formula architecture</p>
-        <h3>One flagship product, built around the ingredients serious shoppers actually look for.</h3>
-        <p>
-          ZenUP is positioned as a focused NAD+ brand, not a broad supplement catalog. The site is
-          designed to make the formula, dosage, and daily-use story easy to understand at a glance.
-        </p>
-        <div className="cards-3">
+    <div className="home-proof">
+      <div className="home-proof__hero">
+        <div className="home-proof__copy">
+          <p className="eyebrow">Formula architecture</p>
+          <h3>One flagship product, built around the ingredients serious shoppers actually look for.</h3>
+          <p>
+            ZenUP is positioned as a focused NAD+ brand, not a broad supplement catalog. The site is
+            designed to make the formula, dosage, and daily-use story easy to understand at a glance.
+          </p>
+        </div>
+
+        <div className="home-image home-image--square home-proof__image">
+          <Image
+            src={buildSiteImageUrl("home", "4.png")}
+            alt="ZenUP supplement and formula positioning scene."
+            fill
+            sizes="(max-width: 720px) 100vw, (max-width: 1080px) 70vw, 34vw"
+          />
+        </div>
+      </div>
+
+      <div className="home-proof__cards">
+        <div className="cards-3 home-proof__card-grid">
           {pillars.map((pillar) => (
-            <article key={pillar.title} className="panel philosophy-card">
+            <article key={pillar.title} className="panel philosophy-card home-proof__card">
               <h3>{pillar.title}</h3>
               <p>{pillar.body}</p>
             </article>
           ))}
-        </div>
-      </div>
-
-      <div className="social-proof__player">
-        <div className="social-proof__embed social-proof__embed--prompt">
-          <ImagePromptPlaceholder {...homeVisualPrompts.formulaBoard} className="social-proof__prompt" />
-        </div>
-        <div className="social-proof__meta">
-          <strong>Label transparency</strong>
-          <h4>600mg NR HM, 250mg Quercetin Phytosome, 150mg Resveratrol, 100mg CoQ10</h4>
-          <p>
-            The ingredient panel is part of the sales story, so we surface it early and treat it
-            like proof, not fine print.
-          </p>
         </div>
       </div>
     </div>

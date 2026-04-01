@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import type {
+  AiPostAutomationOverviewRecord,
   AdminOmbClaimPageRecord,
   AdminProductReviewPageRecord,
   AdminReviewProductSummary,
@@ -22,6 +23,7 @@ import type {
   StoreSettingsRecord
 } from "@/lib/types";
 import { unstable_cache } from "next/cache";
+import { getAiPostAutomationSettings } from "@/lib/ai-post-automation";
 import { EMAIL_AUDIENCE_OPTIONS, fetchBrevoLists, getBrevoSettings } from "@/lib/brevo";
 import { parseStoredCouponProductCodes } from "@/lib/coupons";
 import { hasValidPostgresDatabaseUrl } from "@/lib/database-config";
@@ -56,7 +58,7 @@ function parseGalleryImages(value: string | null | undefined) {
 
 function isTransientDatabaseError(error: unknown) {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return error.code === "P2024";
+    return error.code === "P2024" || error.code === "P1001" || error.code === "P1002";
   }
 
   if (error instanceof Prisma.PrismaClientInitializationError) {
@@ -184,6 +186,36 @@ function mapProduct(product: any): ProductRecord {
   return mapProductRecord(product, reviewCount, averageRating);
 }
 
+function parseStoredSecondaryKeywords(value: string | null | undefined) {
+  return (value ?? "")
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseStoredExternalLinks(value: string | null | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter(
+      (item): item is { label: string; url: string } =>
+        Boolean(item) &&
+        typeof item === "object" &&
+        typeof item.label === "string" &&
+        typeof item.url === "string"
+    );
+  } catch {
+    return [];
+  }
+}
+
 function mapPost(post: any): BeautyPostRecord {
   return {
     id: post.id,
@@ -192,16 +224,59 @@ function mapPost(post: any): BeautyPostRecord {
     excerpt: post.excerpt,
     category: post.category,
     readTime: post.readTime,
-    coverImageUrl: post.coverImageUrl,
+    coverImageUrl: post.coverImageData ? `/media/post/${post.id}?v=${new Date(post.updatedAt).getTime()}` : post.coverImageUrl,
+    coverImageAlt: post.coverImageAlt ?? null,
     content: post.content,
     seoTitle: post.seoTitle,
     seoDescription: post.seoDescription,
+    aiGenerated: Boolean(post.aiGenerated),
+    focusKeyword: post.focusKeyword ?? null,
+    secondaryKeywords: parseStoredSecondaryKeywords(post.secondaryKeywords),
+    imagePrompt: post.imagePrompt ?? null,
+    externalLinks: parseStoredExternalLinks(post.externalLinks),
+    generatedAt: post.generatedAt ? new Date(post.generatedAt) : null,
+    sourceProductId: post.sourceProductId ?? null,
+    sourceProductName: post.sourceProduct?.name ?? null,
+    sourceProductSlug: post.sourceProduct?.slug ?? null,
     published: post.published,
     publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
     createdAt: new Date(post.createdAt),
     updatedAt: new Date(post.updatedAt)
   };
 }
+
+const postSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  excerpt: true,
+  category: true,
+  readTime: true,
+  coverImageUrl: true,
+  coverImageAlt: true,
+  coverImageData: true,
+  content: true,
+  seoTitle: true,
+  seoDescription: true,
+  aiGenerated: true,
+  focusKeyword: true,
+  secondaryKeywords: true,
+  imagePrompt: true,
+  externalLinks: true,
+  generatedAt: true,
+  sourceProductId: true,
+  published: true,
+  publishedAt: true,
+  createdAt: true,
+  updatedAt: true,
+  sourceProduct: {
+    select: {
+      id: true,
+      name: true,
+      slug: true
+    }
+  }
+} as const;
 
 function mapCustomer(customer: any): CustomerRecord {
   return {
@@ -453,6 +528,7 @@ const getPublishedPostsFromDatabase = unstable_cache(
   async (limit?: number) =>
     (
       await prisma.post.findMany({
+        select: postSelect,
         where: { published: true },
         orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
         take: limit
@@ -465,7 +541,8 @@ const getPublishedPostsFromDatabase = unstable_cache(
 const getPostBySlugFromDatabase = unstable_cache(
   async (slug: string) => {
     const post = await prisma.post.findUnique({
-      where: { slug }
+      where: { slug },
+      select: postSelect
     });
 
     return post ? mapPost(post) : null;
@@ -563,6 +640,7 @@ export async function getAllPosts() {
     async () =>
       (
         await prisma.post.findMany({
+          select: postSelect,
           orderBy: [{ published: "desc" }, { updatedAt: "desc" }]
         })
       ).map(mapPost),
@@ -1341,6 +1419,105 @@ export async function getStoreSettings() {
       }, {});
     },
     fallbackSettings,
+    { allowFallbackOnDatabaseError: true }
+  );
+}
+
+export async function getAiPostAutomationOverview() {
+  const fallback = (() => {
+    const settings = getAiPostAutomationSettings(fallbackSettings);
+    const aiPosts = fallbackPosts.filter((post) => post.aiGenerated);
+    const nextProduct = fallbackProducts[0] ?? null;
+    const lastPost = settings.lastPostId ? fallbackPosts.find((post) => post.id === settings.lastPostId) : null;
+
+    return {
+      enabled: settings.enabled,
+      cadenceDays: settings.cadenceDays,
+      autoPublish: settings.autoPublish,
+      includeExternalLinks: settings.includeExternalLinks,
+      lastRunAt: settings.lastRunAt,
+      lastStatus: settings.lastStatus,
+      lastPostId: settings.lastPostId,
+      lastPostTitle: lastPost?.title ?? null,
+      rotationCursor: settings.rotationCursor,
+      nextProductId: nextProduct?.id ?? null,
+      nextProductName: nextProduct?.name ?? null,
+      nextProductCode: nextProduct?.productCode ?? null,
+      aiPostCount: aiPosts.length,
+      publishedAiPostCount: aiPosts.filter((post) => post.published).length,
+      draftAiPostCount: aiPosts.filter((post) => !post.published).length,
+      model: process.env.OPENAI_POST_MODEL || process.env.OPENAI_EMAIL_MODEL || "gpt-5.4-mini",
+      imageModel: process.env.OPENAI_POST_IMAGE_MODEL || "gpt-image-1"
+    } satisfies AiPostAutomationOverviewRecord;
+  })();
+
+  return withFallback<AiPostAutomationOverviewRecord>(
+    async () => {
+      const [settingsMap, products, postCounts] = await Promise.all([
+        getStoreSettings(),
+        prisma.product.findMany({
+          where: {
+            status: "ACTIVE"
+          },
+          select: {
+            id: true,
+            productCode: true,
+            name: true,
+            createdAt: true
+          },
+          orderBy: [{ productCode: "asc" }, { createdAt: "asc" }]
+        }),
+        prisma.post.groupBy({
+          by: ["published"],
+          where: {
+            aiGenerated: true
+          },
+          _count: {
+            id: true
+          }
+        })
+      ]);
+
+      const settings = getAiPostAutomationSettings(settingsMap);
+      const nextProduct =
+        products.length === 0
+          ? null
+          : !settings.rotationCursor
+            ? products[0]
+            : products[products.findIndex((product) => product.id === settings.rotationCursor) + 1] || products[0];
+      const publishedGroup = postCounts.find((item) => item.published);
+      const draftGroup = postCounts.find((item) => !item.published);
+      const lastPost =
+        settings.lastPostId
+          ? await prisma.post.findUnique({
+              where: { id: settings.lastPostId },
+              select: {
+                title: true
+              }
+            })
+          : null;
+
+      return {
+        enabled: settings.enabled,
+        cadenceDays: settings.cadenceDays,
+        autoPublish: settings.autoPublish,
+        includeExternalLinks: settings.includeExternalLinks,
+        lastRunAt: settings.lastRunAt,
+        lastStatus: settings.lastStatus,
+        lastPostId: settings.lastPostId,
+        lastPostTitle: lastPost?.title ?? null,
+        rotationCursor: settings.rotationCursor,
+        nextProductId: nextProduct?.id ?? null,
+        nextProductName: nextProduct?.name ?? null,
+        nextProductCode: nextProduct?.productCode ?? null,
+        aiPostCount: postCounts.reduce((sum, item) => sum + item._count.id, 0),
+        publishedAiPostCount: publishedGroup?._count.id ?? 0,
+        draftAiPostCount: draftGroup?._count.id ?? 0,
+        model: process.env.OPENAI_POST_MODEL || process.env.OPENAI_EMAIL_MODEL || "gpt-5.4-mini",
+        imageModel: process.env.OPENAI_POST_IMAGE_MODEL || "gpt-image-1"
+      } satisfies AiPostAutomationOverviewRecord;
+    },
+    fallback,
     { allowFallbackOnDatabaseError: true }
   );
 }

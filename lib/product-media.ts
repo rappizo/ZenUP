@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const PRODUCT_MEDIA_FOLDERS: Record<string, string> = {
@@ -52,4 +52,44 @@ export function getLocalProductGallery(slug: string) {
 
 export function getDefaultProductImageUrl(slug: string) {
   return getLocalProductGallery(slug)[0] ?? null;
+}
+
+function getMimeTypeForFileName(fileName: string) {
+  if (/\.png$/i.test(fileName)) {
+    return "image/png";
+  }
+
+  if (/\.webp$/i.test(fileName)) {
+    return "image/webp";
+  }
+
+  return "image/jpeg";
+}
+
+export function getDefaultProductImageReferenceAsset(slug: string) {
+  const folder = getProductMediaFolder(slug);
+
+  if (!folder) {
+    return null;
+  }
+
+  const directory = path.join(getProductImageRoot(), folder);
+
+  if (!existsSync(directory)) {
+    return null;
+  }
+
+  const fileName = sortProductMediaFileNames(
+    readdirSync(directory).filter((item) => /\.(png|jpe?g|webp)$/i.test(item))
+  )[0];
+
+  if (!fileName) {
+    return null;
+  }
+
+  return {
+    fileName,
+    mimeType: getMimeTypeForFileName(fileName),
+    data: readFileSync(path.join(directory, fileName))
+  };
 }
