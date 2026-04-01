@@ -30,19 +30,25 @@ const formulaCards = [
     eyebrow: "Core NAD+ Support",
     title: "600mg Nicotinamide Riboside Hydrogen Malate",
     description:
-      "A serious daily serving level that leads the page with the ingredient most NAD+ shoppers already compare first."
+      "A serious daily serving level that leads the page with the ingredient most NAD+ shoppers already compare first.",
+    detail:
+      "Instead of burying the lead, ZenUP makes the NR amount obvious so the customer immediately understands what anchors the formula and why the bottle belongs in a premium daily routine."
   },
   {
     eyebrow: "Amplifier",
     title: "250mg Quercetin Phytosome",
     description:
-      "Included to strengthen the healthy-aging position and make the formula feel more complete than a single-ingredient NR bottle."
+      "Included to strengthen the healthy-aging position and make the formula feel more complete than a single-ingredient NR bottle.",
+    detail:
+      "That supporting layer helps the product read like a deliberately structured stack rather than a minimal label that still requires the customer to add more capsules later."
   },
   {
     eyebrow: "Longevity Companion",
     title: "150mg Trans-Resveratrol + 100mg CoQ10",
     description:
-      "Two supporting ingredients that round out the daily-use story for customers who want a stronger all-in-one stack."
+      "Two supporting ingredients that round out the daily-use story for customers who want a stronger all-in-one stack.",
+    detail:
+      "Together they reinforce the feeling that ZenUP is built for consistency, perceived value, and a cleaner one-bottle experience instead of a pieced-together purchase."
   }
 ];
 
@@ -77,17 +83,30 @@ const flagshipBenefits = [
   {
     title: "Single-product focus",
     description:
-      "The storefront is built around one flagship SKU, so the message stays clean and the buyer journey feels decisive."
+      "The storefront is built around one flagship SKU, so the message stays clean, the comparison is faster, and the buyer journey feels decisive from the first scroll."
   },
   {
     title: "Premium formula logic",
     description:
-      "The ingredient story leads with NR strength, then reinforces the formula with companion ingredients that feel deliberate."
+      "The ingredient story leads with NR strength, then reinforces the formula with companion ingredients that feel deliberate, relevant, and easier to justify in one daily routine."
   },
   {
     title: "Designed to convert",
     description:
-      "Price, reviews, formula details, and purchase action now sit together in one stronger flagship block."
+      "Price, reviews, formula details, and purchase action now sit together in one stronger flagship block, so the customer does not have to hunt for the next step."
+  }
+];
+
+const flagshipStoryCards = [
+  {
+    title: "Built for decisive comparison",
+    description:
+      "The page puts formula strength, serving count, reviews, and price logic in one scan so serious shoppers can evaluate the bottle without jumping between sections."
+  },
+  {
+    title: "Made to replace routine clutter",
+    description:
+      "Because Quercetin Phytosome, Trans-Resveratrol, and CoQ10 are already included, the offer reads like one complete NAD+ routine instead of a bottle that still needs add-ons."
   }
 ];
 
@@ -242,6 +261,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <p className="eyebrow">{card.eyebrow}</p>
                 <h3>{card.title}</h3>
                 <p>{card.description}</p>
+                <p className="philosophy-card__detail">{card.detail}</p>
               </article>
             ))}
           </div>
@@ -293,6 +313,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   <p className="eyebrow">Flagship Product</p>
                   <h2>{featuredProduct.name}</h2>
                   <p className="home-flagship__lead">{featuredProduct.description}</p>
+                  <p className="home-flagship__story-copy">
+                    ZenUP is merchandised like a single flagship offer rather than a crowded supplement shelf.
+                    That lets the product story stay concentrated on what matters most: a professional NR-led
+                    formula, transparent serving logic, and a checkout path that feels immediate once the customer
+                    decides the formula fits.
+                  </p>
+
+                  <div className="home-flagship__story-grid">
+                    {flagshipStoryCards.map((card) => (
+                      <article key={card.title} className="home-flagship__story-card">
+                        <h3>{card.title}</h3>
+                        <p>{card.description}</p>
+                      </article>
+                    ))}
+                  </div>
 
                   {typeof averageRating === "number" ? (
                     <RatingStars
@@ -321,6 +356,19 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                       120 veggie capsules, 60 servings, and {featuredProduct.pointsReward} reward points
                       on every bottle.
                     </p>
+                    <p className="home-flagship__price-support">
+                      Keeping the main purchase action directly under the price makes the offer feel cleaner:
+                      the customer sees the value, confirms the serving logic, and can move to checkout without
+                      breaking their momentum.
+                    </p>
+                    <div className="home-flagship__pricing-actions">
+                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--primary">
+                        Buy now
+                      </Link>
+                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--secondary">
+                        View full product page
+                      </Link>
+                    </div>
                   </div>
 
                   <div className="cards-3 home-flagship__benefits">
@@ -330,15 +378,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         <p>{benefit.description}</p>
                       </article>
                     ))}
-                  </div>
-
-                  <div className="hero-actions">
-                    <Link href={`/shop/${featuredProduct.slug}`} className="button button--primary">
-                      Buy now
-                    </Link>
-                    <Link href={`/shop/${featuredProduct.slug}`} className="button button--secondary">
-                      View full product page
-                    </Link>
                   </div>
                 </div>
               </div>

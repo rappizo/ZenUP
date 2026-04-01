@@ -6,12 +6,12 @@ type RatingStarsProps = {
   showCount?: boolean;
 };
 
-function StarIcon({ filled }: { filled: boolean }) {
+function StarIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
         d="M12 2.25 14.983 8.294 21.652 9.263 16.826 13.967 17.965 20.609 12 17.473 6.035 20.609 7.174 13.967 2.348 9.263 9.017 8.294 12 2.25Z"
-        fill={filled ? "currentColor" : "none"}
+        fill="currentColor"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinejoin="round"
@@ -32,16 +32,20 @@ export function RatingStars({
   return (
     <div className={`rating-stars rating-stars--${size}`}>
       <div className="rating-stars__visual" aria-label={`${safeRating.toFixed(1)} out of 5 stars`}>
-        <div className="rating-stars__track">
-          {Array.from({ length: 5 }, (_, index) => (
-            <StarIcon key={`track-${index}`} filled={false} />
-          ))}
-        </div>
-        <div className="rating-stars__fill" style={{ width: `${(safeRating / 5) * 100}%` }}>
-          {Array.from({ length: 5 }, (_, index) => (
-            <StarIcon key={`fill-${index}`} filled />
-          ))}
-        </div>
+        {Array.from({ length: 5 }, (_, index) => {
+          const fillPercentage = Math.max(0, Math.min(1, safeRating - index)) * 100;
+
+          return (
+            <span key={`star-${index}`} className="rating-stars__star">
+              <span className="rating-stars__star-track">
+                <StarIcon />
+              </span>
+              <span className="rating-stars__star-fill" style={{ width: `${fillPercentage}%` }}>
+                <StarIcon />
+              </span>
+            </span>
+          );
+        })}
       </div>
       {showValue ? <span className="rating-stars__value">{safeRating.toFixed(1)}</span> : null}
       {showCount ? (

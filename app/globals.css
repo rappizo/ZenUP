@@ -769,6 +769,12 @@ main {
   line-height: 1.18;
 }
 
+.philosophy-card__detail {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
 .ritual-spotlight,
 .ingredient-story-grid,
 .home-cta {
@@ -1046,18 +1052,29 @@ main {
 }
 
 .rating-stars__visual {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   width: fit-content;
+  color: var(--brand);
+}
+
+.rating-stars__star {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.rating-stars__star-track,
+.rating-stars__star-fill {
+  display: block;
+}
+
+.rating-stars__star-track {
   color: rgba(15, 106, 53, 0.2);
 }
 
-.rating-stars__track,
-.rating-stars__fill {
-  display: flex;
-  gap: 4px;
-}
-
-.rating-stars__fill {
+.rating-stars__star-fill {
   position: absolute;
   inset: 0 auto 0 0;
   overflow: hidden;
@@ -3481,9 +3498,13 @@ body {
   color: #8f6c1e;
 }
 
-.rating-stars__fill,
-.rating-stars__visual {
+.rating-stars__visual,
+.rating-stars__star-fill {
   color: #c7a14a;
+}
+
+.rating-stars__star-track {
+  color: rgba(199, 161, 74, 0.24);
 }
 
 .notice {
@@ -3624,6 +3645,19 @@ body {
 .admin-review-group__stat,
 .image-prompt {
   border-radius: 4px !important;
+}
+
+.site-header__account-link {
+  min-height: 46px;
+  padding: 0 4px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.site-header__account-link:hover {
+  background: transparent !important;
 }
 
 .custom-slider-container--zenup {
@@ -3878,10 +3912,21 @@ body {
   font-size: clamp(2rem, 3.5vw, 3.3rem);
 }
 
+.home-flagship__content {
+  align-content: start;
+}
+
 .home-hero__content p:not(.eyebrow),
 .home-flagship__lead,
 .home-proof__copy > p:not(.eyebrow),
 .home-cta__copy p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.home-flagship__story-copy {
   margin: 0;
   color: var(--muted);
   font-size: 1rem;
@@ -3949,6 +3994,7 @@ body {
 .home-flagship__media {
   display: grid;
   gap: 16px;
+  align-content: start;
 }
 
 .home-flagship__formula {
@@ -3998,6 +4044,33 @@ body {
   line-height: 1.55;
 }
 
+.home-flagship__story-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-flagship__story-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(10, 76, 37, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.home-flagship__story-card h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.16rem;
+  line-height: 1;
+}
+
+.home-flagship__story-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
 .home-flagship__pricing {
   display: grid;
   gap: 10px;
@@ -4022,6 +4095,22 @@ body {
   margin: 0;
   color: var(--muted);
   line-height: 1.7;
+}
+
+.home-flagship__price-support {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
+.home-flagship__pricing-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.home-flagship__pricing-actions .button {
+  width: 100%;
 }
 
 .home-flagship__benefits {
@@ -4101,6 +4190,34 @@ body {
   align-items: start;
 }
 
+.home-proof__support-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-proof__support-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(10, 76, 37, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.home-proof__support-card h4 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.home-proof__support-card p,
+.home-proof__card-detail {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
 .home-proof__cards {
   display: grid;
 }
@@ -4112,7 +4229,8 @@ body {
 .home-proof__card {
   aspect-ratio: 1 / 1;
   padding: 22px;
-  justify-content: space-between;
+  justify-content: start;
+  gap: 14px;
 }
 
 .home-routine {
@@ -4154,7 +4272,9 @@ body {
   .home-hero__visuals,
   .home-flagship__review-grid,
   .home-hero__stats,
-  .home-flagship__fact-grid {
+  .home-flagship__fact-grid,
+  .home-flagship__story-grid,
+  .home-proof__support-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -4181,7 +4301,9 @@ body {
   .home-flagship__review-grid,
   .home-hero__stats,
   .home-proof__card-grid,
-  .home-flagship__fact-grid {
+  .home-flagship__fact-grid,
+  .home-flagship__story-grid,
+  .home-proof__support-grid {
     grid-template-columns: 1fr;
   }
 

@@ -36,7 +36,7 @@ export async function SiteHeader() {
             ))}
           </nav>
           <div className="site-header__actions">
-            <Link href={accountHref} className="site-header__text-link">
+            <Link href={accountHref} className="site-header__text-link site-header__account-link">
               My Account
             </Link>
             <ButtonLink href="/cart" variant="primary">
