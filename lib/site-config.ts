@@ -37,7 +37,7 @@ export const siteConfig = {
   googleTagId,
   nav: [
     { href: "/", label: "Home" },
-    { href: "/shop", label: "Shop" },
+    { href: "/shop", label: "Shop NAD+" },
     { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" }
   ],
@@ -57,10 +57,10 @@ export const siteConfig = {
   ],
   footerLinks: {
     shop: [
-      { href: "/shop", label: "All Products" },
+      { href: "/shop", label: "Shop NAD+" },
       {
         href: "/shop/zenup-nad-plus-nicotinamide-riboside",
-        label: "ZenUP NAD+"
+        label: "Formula Details"
       }
     ],
     discover: [

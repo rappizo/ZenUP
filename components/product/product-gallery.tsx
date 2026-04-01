@@ -63,14 +63,6 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       </div>
       {images.length > 1 ? (
         <div className="product-gallery-wrap">
-          <button
-            type="button"
-            className="product-gallery__nav product-gallery__nav--prev"
-            onClick={() => scrollGallery("prev")}
-            aria-label="Scroll product thumbnails left"
-          >
-            &#10094;
-          </button>
           <div className="product-gallery" ref={galleryRef}>
             {images.map((imagePath, index) => (
               <button
@@ -88,14 +80,24 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="product-gallery__nav product-gallery__nav--next"
-            onClick={() => scrollGallery("next")}
-            aria-label="Scroll product thumbnails right"
-          >
-            &#10095;
-          </button>
+          <div className="product-gallery__nav-row">
+            <button
+              type="button"
+              className="product-gallery__nav product-gallery__nav--prev"
+              onClick={() => scrollGallery("prev")}
+              aria-label="Scroll product thumbnails left"
+            >
+              &#10094;
+            </button>
+            <button
+              type="button"
+              className="product-gallery__nav product-gallery__nav--next"
+              onClick={() => scrollGallery("next")}
+              aria-label="Scroll product thumbnails right"
+            >
+              &#10095;
+            </button>
+          </div>
         </div>
       ) : null}
     </div>

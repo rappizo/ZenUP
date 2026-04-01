@@ -235,8 +235,8 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
             </ul>
 
             <div className="stack-row">
-              <ButtonLink href="/shop" variant="secondary">
-                Back to shop
+              <ButtonLink href="/" variant="secondary">
+                Back home
               </ButtonLink>
               <ButtonLink href="/cart" variant="ghost">
                 View cart
