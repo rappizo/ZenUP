@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 type ProductMediaFrameProps = {
   src: string;
   alt: string;
-  ratio?: "square" | "portrait" | "landscape" | "wide";
+  ratio?: "square" | "portrait" | "landscape" | "wide" | "four-three" | "two-three";
   sizes: string;
   priority?: boolean;
   className?: string;

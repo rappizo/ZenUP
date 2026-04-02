@@ -164,10 +164,10 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
         ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
         : null;
 
-  const ingredientImage = detailImages[0] ?? detailImages[2] ?? heroImage;
+  const ingredientImage = detailImages[2] ?? detailImages[0] ?? heroImage;
   const doctorProofImage = detailImages[1] ?? heroImage;
-  const formulaFeatureImage = detailImages[6] ?? detailImages[2] ?? heroImage;
-  const routineImage = detailImages[4] ?? detailImages[5] ?? heroImage;
+  const formulaFeatureImage = detailImages[0] ?? detailImages[6] ?? heroImage;
+  const routineImage = detailImages[5] ?? detailImages[4] ?? heroImage;
   const ritualImage = detailImages[7] ?? detailImages[5] ?? heroImage;
 
   const structuredData = {
@@ -342,7 +342,7 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
               <ProductMediaFrame
                 src={ingredientImage}
                 alt="NAD+ support supplement in premium packaging"
-                ratio="wide"
+                ratio="four-three"
                 priority
                 sizes="100vw"
               />
@@ -389,8 +389,8 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
               <div className="product-landing__formula-visuals">
                 <ProductMediaFrame
                   src={formulaFeatureImage}
-                  alt="NR supplement capsules for daily wellness"
-                  ratio="landscape"
+                  alt="Nicotinamide Riboside supplement bottle presented in premium packaging"
+                  ratio="two-three"
                   sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 34vw"
                 />
               </div>
@@ -434,7 +434,7 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
                 <ProductMediaFrame
                   src={routineImage}
                   alt="NR supplement in a premium lifestyle routine setting"
-                  ratio="landscape"
+                  ratio="two-three"
                   sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 32vw"
                 />
               </div>
@@ -443,31 +443,39 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
 
           <section className="product-landing__section">
             <div className="product-landing__lifestyle-layout">
-              <ProductMediaFrame
-                src={ritualImage}
-                alt="Nicotinamide Riboside supplement styled as part of a modern daily wellness routine"
-                ratio="landscape"
-                sizes="(max-width: 720px) 100vw, (max-width: 1180px) 48vw, 38vw"
-              />
+              <div className="product-landing__lifestyle-top">
+                <ProductMediaFrame
+                  src={ritualImage}
+                  alt="Nicotinamide Riboside supplement styled as part of a modern daily wellness routine"
+                  ratio="landscape"
+                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 48vw, 38vw"
+                />
 
-              <div className="product-landing__lifestyle-copy">
-                <div className="section-heading">
-                  <p className="section-heading__eyebrow">Daily Ritual Fit</p>
-                  <h2>Designed to belong in a premium everyday wellness routine.</h2>
-                  <p className="section-heading__description">
-                    Good supplement design is not only about ingredients. It is also about making the
-                    product feel easy to trust, pleasant to keep nearby, and simple to return to every day.
+                <div className="product-landing__lifestyle-copy">
+                  <div className="section-heading">
+                    <p className="section-heading__eyebrow">Daily Ritual Fit</p>
+                    <h2>Designed to belong in a premium everyday wellness routine.</h2>
+                    <p className="section-heading__description">
+                      Good supplement design is not only about ingredients. It is also about making the
+                      product feel easy to trust, pleasant to keep nearby, and simple to return to every day.
+                    </p>
+                  </div>
+
+                  <p className="product-landing__support-copy">
+                    D8 helps the section feel more lived-in and consumer-facing. It shows how the bottle
+                    can sit naturally alongside water, notes, and a steady daily rhythm instead of feeling
+                    like a technical product page detached from real routine use.
                   </p>
                 </div>
+              </div>
 
-                <div className="product-landing__lifestyle-grid">
-                  {ritualCards.map((card) => (
-                    <article key={card.title} className="panel product-landing__card">
-                      <h3>{card.title}</h3>
-                      <p>{card.body}</p>
-                    </article>
-                  ))}
-                </div>
+              <div className="product-landing__lifestyle-grid">
+                {ritualCards.map((card) => (
+                  <article key={card.title} className="panel product-landing__card">
+                    <h3>{card.title}</h3>
+                    <p>{card.body}</p>
+                  </article>
+                ))}
               </div>
             </div>
           </section>
