@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getCanonicalProductPath } from "@/lib/product-landing";
 import { siteConfig } from "@/lib/site-config";
 import { getActiveProducts, getPublishedPosts } from "@/lib/queries";
 
@@ -51,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...products.map((product) => ({
-      url: `${siteConfig.url}/shop/${product.slug}`,
+      url: `${siteConfig.url}${getCanonicalProductPath(product.slug)}`,
       lastModified: product.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.8

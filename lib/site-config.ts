@@ -1,4 +1,5 @@
 import type { StoreSettingsRecord } from "@/lib/types";
+import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 
 function normalizeOptionalValue(value: string | null | undefined) {
   return (value ?? "").trim();
@@ -59,7 +60,7 @@ export const siteConfig = {
     shop: [
       { href: "/shop", label: "Shop NAD+" },
       {
-        href: "/shop/zenup-nad-plus-nicotinamide-riboside",
+        href: CANONICAL_PRODUCT_PATH,
         label: "Formula Details"
       }
     ],

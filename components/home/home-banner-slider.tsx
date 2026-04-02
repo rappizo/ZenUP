@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 import { buildSiteImageUrl } from "@/lib/site-media";
 
 const heroStats = [
@@ -35,7 +36,7 @@ export function HomeBannerSlider() {
               <span className="pill">120 veggie capsules</span>
             </div>
             <div className="hero-actions">
-              <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
+              <Link href={CANONICAL_PRODUCT_PATH} className="button button--primary">
                 Shop ZenUP NAD+
               </Link>
               <Link href="/blog" className="button button--secondary">

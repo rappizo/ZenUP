@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductLandingPage } from "@/components/product/product-landing-page";
 import {
+  LEGACY_PRODUCT_SLUG,
   CANONICAL_PRODUCT_PATH,
   PRODUCT_LANDING_META_DESCRIPTION,
   PRODUCT_LANDING_PRIMARY_KEYWORD,
@@ -12,22 +13,13 @@ import { getProductBySlug, getPublishedReviewsByProductId } from "@/lib/queries"
 import { getDefaultProductImageUrl } from "@/lib/product-media";
 import { siteConfig } from "@/lib/site-config";
 
-type ProductPageProps = {
-  params: Promise<{ slug: string }>;
+type CanonicalProductPageProps = {
   searchParams: Promise<{ review?: string; error?: string }>;
 };
 
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const product = await getProductBySlug(slug);
-
-  if (!product) {
-    return {
-      title: "Product not found"
-    };
-  }
-
-  const imageUrl = getDefaultProductImageUrl(product.slug) ?? product.imageUrl;
+export async function generateMetadata(): Promise<Metadata> {
+  const product = await getProductBySlug(LEGACY_PRODUCT_SLUG);
+  const imageUrl = product ? getDefaultProductImageUrl(product.slug) ?? product.imageUrl : "/icon.svg";
 
   return {
     title: PRODUCT_LANDING_SEO_TITLE,
@@ -56,9 +48,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   };
 }
 
-export default async function ProductPage({ params, searchParams }: ProductPageProps) {
-  const [{ slug }, query] = await Promise.all([params, searchParams]);
-  const product = await getProductBySlug(slug);
+export default async function CanonicalProductPage({ searchParams }: CanonicalProductPageProps) {
+  const [product, query] = await Promise.all([getProductBySlug(LEGACY_PRODUCT_SLUG), searchParams]);
 
   if (!product) {
     notFound();

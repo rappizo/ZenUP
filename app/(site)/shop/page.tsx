@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
-import { getActiveProducts } from "@/lib/queries";
+import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 import { defaultOgImage } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 
@@ -31,12 +31,5 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopPage() {
-  const products = await getActiveProducts();
-  const flagshipProduct = products[0];
-
-  if (flagshipProduct) {
-    permanentRedirect(`/shop/${flagshipProduct.slug}`);
-  }
-
-  permanentRedirect("/");
+  permanentRedirect(CANONICAL_PRODUCT_PATH);
 }

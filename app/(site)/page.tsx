@@ -6,6 +6,7 @@ import { PostCard } from "@/components/ui/post-card";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { formatCurrency, getSavingsCents } from "@/lib/format";
+import { CANONICAL_PRODUCT_PATH, getCanonicalProductPath } from "@/lib/product-landing";
 import {
   getFeaturedProducts,
   getPublishedPosts,
@@ -196,7 +197,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               },
               offers: {
                 "@type": "Offer",
-                url: `${siteConfig.url}/shop/${featuredProduct.slug}`,
+                url: `${siteConfig.url}${getCanonicalProductPath(featuredProduct.slug)}`,
                 priceCurrency: featuredProduct.currency,
                 price: (featuredProduct.priceCents / 100).toFixed(2),
                 availability: "https://schema.org/InStock"
@@ -274,10 +275,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                       Trans-Resveratrol, and CoQ10 in a straightforward daily serving.
                     </p>
                     <div className="home-flagship__pricing-actions">
-                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--primary">
+                      <Link href={CANONICAL_PRODUCT_PATH} className="button button--primary">
                         Buy now
                       </Link>
-                      <Link href={`/shop/${featuredProduct.slug}`} className="button button--secondary">
+                      <Link href={CANONICAL_PRODUCT_PATH} className="button button--secondary">
                         View supplement details
                       </Link>
                     </div>
@@ -443,7 +444,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 presents a more complete NAD+ support option without unnecessary noise.
               </p>
               <div className="hero-actions">
-                <Link href="/shop/zenup-nad-plus-nicotinamide-riboside" className="button button--primary">
+                <Link href={CANONICAL_PRODUCT_PATH} className="button button--primary">
                   Shop ZenUP NAD+
                 </Link>
                 <Link href="/contact" className="button button--secondary">
