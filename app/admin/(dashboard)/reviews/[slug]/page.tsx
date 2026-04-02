@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReviewSelectAllCheckbox } from "@/components/admin/review-select-all-checkbox";
 import { RatingStars } from "@/components/ui/rating-stars";
 import {
   approveReviewAction,
@@ -289,7 +290,12 @@ export default async function AdminProductReviewsPage({
           <table>
             <thead>
               <tr>
-                <th>Select</th>
+                <th>
+                  <div className="admin-table__header-select">
+                    <span>Select</span>
+                    <ReviewSelectAllCheckbox formId={bulkModerationFormId} />
+                  </div>
+                </th>
                 <th>Review Date</th>
                 <th>Display Name</th>
                 <th>Rating</th>
