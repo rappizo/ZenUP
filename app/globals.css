@@ -4346,6 +4346,7 @@ body {
 
 .product-landing__hero-text,
 .product-landing__price-copy,
+.product-landing__support-copy,
 .product-landing__routine-note,
 .product-landing__final-copy p:not(.eyebrow) {
   margin: 0;
@@ -4419,6 +4420,19 @@ body {
   gap: 16px;
 }
 
+.product-landing__ingredient-showcase {
+  display: grid;
+  gap: 16px;
+}
+
+.product-landing__ingredient-showcase .product-landing__image-frame {
+  max-height: 520px;
+}
+
+.product-landing__reason-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .product-landing__card {
   display: grid;
   gap: 12px;
@@ -4445,6 +4459,7 @@ body {
 .product-landing__ingredient-layout,
 .product-landing__formula-layout,
 .product-landing__routine-layout,
+.product-landing__lifestyle-layout,
 .product-landing__final-cta {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.94fr);
@@ -4464,13 +4479,9 @@ body {
   margin-bottom: 0;
 }
 
-.product-landing__formula-secondary {
-  display: grid;
-  gap: 14px;
-}
-
 .product-landing__routine-points {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -4583,15 +4594,25 @@ body {
   box-shadow: none;
 }
 
+.product-landing__lifestyle-copy {
+  display: grid;
+  gap: 16px;
+}
+
+.product-landing__lifestyle-grid {
+  display: grid;
+  gap: 16px;
+}
+
 .product-landing__final-cta {
   padding: 24px;
 }
 
 @media (max-width: 1080px) {
   .product-landing__hero,
-  .product-landing__ingredient-layout,
   .product-landing__formula-layout,
   .product-landing__routine-layout,
+  .product-landing__lifestyle-layout,
   .product-landing__final-cta {
     grid-template-columns: 1fr;
   }
@@ -4600,6 +4621,11 @@ body {
   .product-landing__ingredient-grid,
   .product-landing__reason-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-landing__routine-points,
+  .product-landing__lifestyle-grid {
+    grid-template-columns: 1fr;
   }
 
   .product-landing__purchase-form {
@@ -4626,6 +4652,8 @@ body {
   .product-landing__benefit-grid,
   .product-landing__ingredient-grid,
   .product-landing__reason-grid,
+  .product-landing__routine-points,
+  .product-landing__lifestyle-grid,
   .product-landing__purchase-form {
     grid-template-columns: 1fr;
   }

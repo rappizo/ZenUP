@@ -14,8 +14,7 @@ import {
 import {
   getDefaultProductImageUrl,
   getLocalProductGallery,
-  getProductDetailImages,
-  getProductSupplementFactsImageUrl
+  getProductDetailImages
 } from "@/lib/product-media";
 import { siteConfig } from "@/lib/site-config";
 import type { ProductRecord, ProductReviewRecord } from "@/lib/types";
@@ -86,10 +85,28 @@ const formulaReasons = [
 ];
 
 const routinePoints = [
-  "Designed to fit easily into a consistent daily wellness routine.",
-  "Works best when used as part of a calm, repeatable everyday habit.",
-  "Review the product label and supplement facts for complete serving information before use.",
-  "A simple format and 120 veggie capsules make the formula easy to keep on hand."
+  "Designed to fit easily into a consistent daily wellness routine without adding clutter.",
+  "Built for customers who prefer one premium bottle instead of a more complicated stack.",
+  "Clear labeling and a familiar capsule format make the product feel straightforward to keep using.",
+  "Review the product label and supplement facts for complete serving information before use."
+];
+
+const ritualCards = [
+  {
+    title: "Clean counter presence",
+    body:
+      "The packaging feels polished enough to live on a kitchen counter, desk, or bedside table without looking clinical or overdesigned."
+  },
+  {
+    title: "Routine-friendly format",
+    body:
+      "A single bottle with 120 veggie capsules helps the product feel easy to keep in rotation as part of a calm daily wellness ritual."
+  },
+  {
+    title: "Premium everyday use",
+    body:
+      "From visual presentation to formula pairing, the product is designed to feel elevated, trustworthy, and practical for repeat use."
+  }
 ];
 
 const faqItems = [
@@ -137,7 +154,6 @@ type ProductLandingPageProps = {
 export function ProductLandingPage({ product, reviews, query }: ProductLandingPageProps) {
   const galleryImages = getLocalProductGallery(product.slug);
   const detailImages = getProductDetailImages(product.slug);
-  const supplementFactsImage = getProductSupplementFactsImageUrl(product.slug);
   const heroImage = getDefaultProductImageUrl(product.slug) ?? product.imageUrl;
   const displayGallery = galleryImages.length > 0 ? galleryImages : [heroImage];
   const savingsCents = getSavingsCents(product.compareAtPriceCents, product.priceCents);
@@ -148,11 +164,11 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
         ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
         : null;
 
-  const primaryPortrait = detailImages[0] ?? heroImage;
+  const ingredientImage = detailImages[0] ?? detailImages[2] ?? heroImage;
   const doctorProofImage = detailImages[1] ?? heroImage;
-  const ingredientScene = detailImages[2] ?? detailImages[3] ?? heroImage;
-  const formulaLifestyleImage = detailImages[4] ?? detailImages[5] ?? heroImage;
-  const routineImage = detailImages[5] ?? detailImages[6] ?? heroImage;
+  const formulaFeatureImage = detailImages[6] ?? detailImages[2] ?? heroImage;
+  const routineImage = detailImages[4] ?? detailImages[5] ?? heroImage;
+  const ritualImage = detailImages[7] ?? detailImages[5] ?? heroImage;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -322,7 +338,15 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
               </p>
             </div>
 
-            <div className="product-landing__ingredient-layout">
+            <div className="product-landing__ingredient-showcase">
+              <ProductMediaFrame
+                src={ingredientImage}
+                alt="NAD+ support supplement in premium packaging"
+                ratio="wide"
+                priority
+                sizes="100vw"
+              />
+
               <div className="product-landing__ingredient-grid">
                 {ingredientCards.map((ingredient) => (
                   <article key={ingredient.title} className="panel product-landing__card">
@@ -330,22 +354,6 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
                     <p>{ingredient.body}</p>
                   </article>
                 ))}
-              </div>
-
-              <div className="product-landing__ingredient-visuals">
-                <ProductMediaFrame
-                  src={primaryPortrait}
-                  alt="NAD+ support supplement in premium packaging"
-                  ratio="portrait"
-                  priority
-                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 46vw, 26vw"
-                />
-                <ProductMediaFrame
-                  src={ingredientScene}
-                  alt="NR supplement bottle in a premium editorial scene"
-                  ratio="landscape"
-                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 46vw, 26vw"
-                />
               </div>
             </div>
           </section>
@@ -362,6 +370,12 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
                   </p>
                 </div>
 
+                <p className="product-landing__support-copy">
+                  Instead of reading like a grab-bag of trendy ingredients, the formula feels edited,
+                  deliberate, and easy for a consumer to understand. NR leads the story, while CoQ10
+                  and Resveratrol help the bottle feel more complete for everyday wellness support.
+                </p>
+
                 <div className="product-landing__reason-grid">
                   {formulaReasons.map((reason) => (
                     <article key={reason.title} className="panel product-landing__card">
@@ -373,22 +387,12 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
               </div>
 
               <div className="product-landing__formula-visuals">
-                {supplementFactsImage ? (
-                  <ProductMediaFrame
-                    src={supplementFactsImage}
-                    alt="Supplement facts panel for Nicotinamide Riboside supplement with CoQ10 and Resveratrol"
-                    ratio="wide"
-                    sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 32vw"
-                  />
-                ) : null}
-                <div className="product-landing__formula-secondary">
-                  <ProductMediaFrame
-                    src={formulaLifestyleImage}
-                    alt="Nicotinamide Riboside supplement bottle presented in a premium lifestyle setting"
-                    ratio="landscape"
-                    sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 32vw"
-                  />
-                </div>
+                <ProductMediaFrame
+                  src={formulaFeatureImage}
+                  alt="NR supplement capsules for daily wellness"
+                  ratio="landscape"
+                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 34vw"
+                />
               </div>
             </div>
           </section>
@@ -404,6 +408,12 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
                     with a clean format that feels straightforward to keep on hand.
                   </p>
                 </div>
+
+                <p className="product-landing__support-copy">
+                  The product is positioned for consistency rather than complexity. That means the
+                  experience should feel simple to revisit each morning, easy to understand on a quick
+                  glance, and credible enough to keep using long term.
+                </p>
 
                 <div className="product-landing__routine-points">
                   {routinePoints.map((point, index) => (
@@ -423,16 +433,41 @@ export function ProductLandingPage({ product, reviews, query }: ProductLandingPa
               <div className="product-landing__routine-visuals">
                 <ProductMediaFrame
                   src={routineImage}
-                  alt="NR supplement capsules for daily wellness"
-                  ratio="portrait"
-                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 28vw"
+                  alt="NR supplement in a premium lifestyle routine setting"
+                  ratio="landscape"
+                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 44vw, 32vw"
                 />
-                <ProductMediaFrame
-                  src={heroImage}
-                  alt="NAD+ support supplement in premium packaging"
-                  ratio="square"
-                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 36vw, 18vw"
-                />
+              </div>
+            </div>
+          </section>
+
+          <section className="product-landing__section">
+            <div className="product-landing__lifestyle-layout">
+              <ProductMediaFrame
+                src={ritualImage}
+                alt="Nicotinamide Riboside supplement styled as part of a modern daily wellness routine"
+                ratio="landscape"
+                sizes="(max-width: 720px) 100vw, (max-width: 1180px) 48vw, 38vw"
+              />
+
+              <div className="product-landing__lifestyle-copy">
+                <div className="section-heading">
+                  <p className="section-heading__eyebrow">Daily Ritual Fit</p>
+                  <h2>Designed to belong in a premium everyday wellness routine.</h2>
+                  <p className="section-heading__description">
+                    Good supplement design is not only about ingredients. It is also about making the
+                    product feel easy to trust, pleasant to keep nearby, and simple to return to every day.
+                  </p>
+                </div>
+
+                <div className="product-landing__lifestyle-grid">
+                  {ritualCards.map((card) => (
+                    <article key={card.title} className="panel product-landing__card">
+                      <h3>{card.title}</h3>
+                      <p>{card.body}</p>
+                    </article>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
