@@ -5,6 +5,13 @@ import { redirect } from "next/navigation";
 const COOKIE_NAME = "zenup-admin-session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 12;
 
+type AdminConfigIssue =
+  | "ADMIN_USERNAME is missing."
+  | "ADMIN_PASSWORD is missing."
+  | "ADMIN_PASSWORD is still using the placeholder value."
+  | "ADMIN_SESSION_SECRET is missing."
+  | "ADMIN_SESSION_SECRET is still using the placeholder value.";
+
 function getEnvValue(name: "ADMIN_SESSION_SECRET" | "ADMIN_USERNAME" | "ADMIN_PASSWORD") {
   return (process.env[name] || "").trim();
 }
@@ -27,23 +34,37 @@ function getAdminSecret() {
   return secret;
 }
 
+export function getAdminConfigIssues(): AdminConfigIssue[] {
+  const username = getEnvValue("ADMIN_USERNAME");
+  const password = getEnvValue("ADMIN_PASSWORD");
+  const secret = getEnvValue("ADMIN_SESSION_SECRET");
+  const issues: AdminConfigIssue[] = [];
+
+  if (!username) {
+    issues.push("ADMIN_USERNAME is missing.");
+  }
+
+  if (!password) {
+    issues.push("ADMIN_PASSWORD is missing.");
+  } else if (password === "change-this-password") {
+    issues.push("ADMIN_PASSWORD is still using the placeholder value.");
+  }
+
+  if (!secret) {
+    issues.push("ADMIN_SESSION_SECRET is missing.");
+  } else if (secret === "change-me-in-env" || secret === "replace-with-a-long-random-secret") {
+    issues.push("ADMIN_SESSION_SECRET is still using the placeholder value.");
+  }
+
+  return issues;
+}
+
 function getSignature(payload: string) {
   return createHmac("sha256", getAdminSecret()).update(payload).digest("base64url");
 }
 
 export function isAdminConfigReady() {
-  const username = getEnvValue("ADMIN_USERNAME");
-  const password = getEnvValue("ADMIN_PASSWORD");
-  const secret = getEnvValue("ADMIN_SESSION_SECRET");
-
-  return Boolean(
-    username &&
-      password &&
-      password !== "change-this-password" &&
-      secret &&
-      secret !== "change-me-in-env" &&
-      secret !== "replace-with-a-long-random-secret"
-  );
+  return getAdminConfigIssues().length === 0;
 }
 
 export function validateAdminCredentials(username: string, password: string) {
