@@ -1251,8 +1251,35 @@ export async function getPublishedReviewsByProductId(productId: string) {
           orderBy: [{ reviewDate: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }]
         })
       ).map(mapReview),
+      fallbackReviews
+        .filter((review) => review.productId === productId && review.status === "PUBLISHED")
+        .sort((left, right) => right.reviewDate.getTime() - left.reviewDate.getTime()),
+      { allowFallbackOnDatabaseError: true }
+    );
+}
+
+export async function getPublishedReviewsByProductIds(productIds: string[]) {
+  const uniqueProductIds = Array.from(new Set(productIds.filter(Boolean)));
+
+  return withFallback(
+    async () =>
+      (
+        await prisma.productReview.findMany({
+          where: {
+            productId: {
+              in: uniqueProductIds
+            },
+            status: "PUBLISHED"
+          },
+          include: {
+            product: true,
+            customer: true
+          },
+          orderBy: [{ reviewDate: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }]
+        })
+      ).map(mapReview),
     fallbackReviews
-      .filter((review) => review.productId === productId && review.status === "PUBLISHED")
+      .filter((review) => uniqueProductIds.includes(review.productId) && review.status === "PUBLISHED")
       .sort((left, right) => right.reviewDate.getTime() - left.reviewDate.getTime()),
     { allowFallbackOnDatabaseError: true }
   );

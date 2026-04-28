@@ -1,3 +1,5 @@
+import { isNmnVariantSlug, NMN_CANONICAL_PRODUCT_PATH } from "@/lib/nmn-product";
+
 export const LEGACY_PRODUCT_SLUG = "zenup-nad-plus-nicotinamide-riboside";
 export const CANONICAL_PRODUCT_ALIAS_SLUG = "nicotinamide-riboside-supplement";
 export const CANONICAL_PRODUCT_PATH = `/products/${CANONICAL_PRODUCT_ALIAS_SLUG}`;
@@ -24,6 +26,10 @@ export const PRODUCT_LANDING_SECONDARY_KEYWORDS = [
 export function getCanonicalProductPath(slug: string) {
   if (slug === LEGACY_PRODUCT_SLUG) {
     return CANONICAL_PRODUCT_PATH;
+  }
+
+  if (isNmnVariantSlug(slug)) {
+    return NMN_CANONICAL_PRODUCT_PATH;
   }
 
   return `/shop/${slug}`;

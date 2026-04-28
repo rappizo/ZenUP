@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ProductLandingPage } from "@/components/product/product-landing-page";
+import {
+  getNmnSizeFromSlug,
+  isNmnVariantSlug,
+  NMN_CANONICAL_PRODUCT_PATH,
+  NMN_PRODUCT_META_DESCRIPTION,
+  NMN_PRODUCT_PRIMARY_KEYWORD,
+  NMN_PRODUCT_SECONDARY_KEYWORDS,
+  NMN_PRODUCT_SEO_TITLE
+} from "@/lib/nmn-product";
 import {
   CANONICAL_PRODUCT_PATH,
   PRODUCT_LANDING_META_DESCRIPTION,
@@ -19,6 +28,38 @@ type ProductPageProps = {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
+
+  if (isNmnVariantSlug(slug)) {
+    const product = await getProductBySlug(slug);
+    const imageUrl = product ? getDefaultProductImageUrl(product.slug) ?? product.imageUrl : "/icon.svg";
+
+    return {
+      title: NMN_PRODUCT_SEO_TITLE,
+      description: NMN_PRODUCT_META_DESCRIPTION,
+      keywords: [NMN_PRODUCT_PRIMARY_KEYWORD, ...NMN_PRODUCT_SECONDARY_KEYWORDS],
+      alternates: {
+        canonical: NMN_CANONICAL_PRODUCT_PATH
+      },
+      openGraph: {
+        title: `${NMN_PRODUCT_SEO_TITLE} | ${siteConfig.title}`,
+        description: NMN_PRODUCT_META_DESCRIPTION,
+        url: `${siteConfig.url}${NMN_CANONICAL_PRODUCT_PATH}`,
+        images: [
+          {
+            url: new URL(imageUrl, siteConfig.url).toString(),
+            alt: "ZenUP NMN supplement bottle in premium packaging"
+          }
+        ]
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${NMN_PRODUCT_SEO_TITLE} | ${siteConfig.title}`,
+        description: NMN_PRODUCT_META_DESCRIPTION,
+        images: [new URL(imageUrl, siteConfig.url).toString()]
+      }
+    };
+  }
+
   const product = await getProductBySlug(slug);
 
   if (!product) {
@@ -58,6 +99,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
+
+  if (isNmnVariantSlug(slug)) {
+    const selectedSize = getNmnSizeFromSlug(slug);
+    redirect(`${NMN_CANONICAL_PRODUCT_PATH}?size=${selectedSize || "120ct"}`);
+  }
+
   const product = await getProductBySlug(slug);
 
   if (!product) {

@@ -1,4 +1,5 @@
 import type { StoreSettingsRecord } from "@/lib/types";
+import { NMN_CANONICAL_PRODUCT_PATH } from "@/lib/nmn-product";
 import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 
 function normalizeOptionalValue(value: string | null | undefined) {
@@ -39,6 +40,7 @@ export const siteConfig = {
   nav: [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop NAD+" },
+    { href: NMN_CANONICAL_PRODUCT_PATH, label: "Shop NMN" },
     { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" }
   ],
@@ -59,6 +61,7 @@ export const siteConfig = {
   footerLinks: {
     shop: [
       { href: "/shop", label: "Shop NAD+" },
+      { href: NMN_CANONICAL_PRODUCT_PATH, label: "Shop NMN" },
       {
         href: CANONICAL_PRODUCT_PATH,
         label: "Formula Details"

@@ -15,6 +15,12 @@ const zenupGallery = getLocalProductGallery("zenup-nad-plus-nicotinamide-ribosid
 const zenupImage =
   getDefaultProductImageUrl("zenup-nad-plus-nicotinamide-riboside") ??
   buildSiteImageUrl("home", "1.png");
+const nmn60Gallery = getLocalProductGallery("zenup-nmn-supplement-60ct");
+const nmn60Image = getDefaultProductImageUrl("zenup-nmn-supplement-60ct") ?? "/icon.svg";
+const nmn90Gallery = getLocalProductGallery("zenup-nmn-supplement-90ct");
+const nmn90Image = getDefaultProductImageUrl("zenup-nmn-supplement-90ct") ?? "/icon.svg";
+const nmn120Gallery = getLocalProductGallery("zenup-nmn-supplement-120ct");
+const nmn120Image = getDefaultProductImageUrl("zenup-nmn-supplement-120ct") ?? "/icon.svg";
 
 const baseProduct: Omit<ProductRecord, "reviewCount" | "averageRating"> = {
   id: "prod_zenup_nad_plus",
@@ -46,7 +52,97 @@ const baseProduct: Omit<ProductRecord, "reviewCount" | "averageRating"> = {
   updatedAt: new Date("2026-03-30T09:00:00.000Z")
 };
 
-export const sampleReviews: ProductReviewRecord[] = [
+const nmnProducts: Array<Omit<ProductRecord, "reviewCount" | "averageRating">> = [
+  {
+    id: "prod_zenup_nmn_60ct",
+    productCode: "ZNUP-NMN-060",
+    productShortName: "NMN 60ct",
+    amazonAsin: null,
+    name: "ZenUP NMN Supplement 60ct",
+    slug: "zenup-nmn-supplement-60ct",
+    tagline:
+      "A premium NMN formula with Quercetin, Resveratrol, CoQ10, and Astaxanthin for a cleaner daily wellness routine.",
+    category: "NMN Supplement",
+    shortDescription:
+      "A 60-capsule NMN option designed for first orders, shorter routine windows, or lighter daily rotation.",
+    description:
+      "ZenUP NMN Supplement 60ct is the most compact format in the NMN range, designed for customers who want to experience the formula in a cleaner, lower-commitment bottle size. The formula pairs NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin to support a premium daily wellness story centered on consistency, cellular wellness, and modern healthy-aging routines.",
+    details:
+      "60 veggie capsules.\nFeatures NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin.\nDesigned for customers who want a premium daily wellness formula in a smaller bottle size.\nReview the label and supplement facts panel for complete ingredient and serving details before use.",
+    imageUrl: nmn60Image,
+    galleryImages: nmn60Gallery.length > 0 ? nmn60Gallery : [nmn60Image],
+    featured: false,
+    status: "ACTIVE",
+    inventory: 180,
+    priceCents: 1999,
+    compareAtPriceCents: null,
+    currency: "USD",
+    pointsReward: 20,
+    stripePriceId: null,
+    createdAt: new Date("2026-04-28T09:00:00.000Z"),
+    updatedAt: new Date("2026-04-28T09:00:00.000Z")
+  },
+  {
+    id: "prod_zenup_nmn_90ct",
+    productCode: "ZNUP-NMN-090",
+    productShortName: "NMN 90ct",
+    amazonAsin: null,
+    name: "ZenUP NMN Supplement 90ct",
+    slug: "zenup-nmn-supplement-90ct",
+    tagline:
+      "A premium NMN formula with Quercetin, Resveratrol, CoQ10, and Astaxanthin for a cleaner daily wellness routine.",
+    category: "NMN Supplement",
+    shortDescription:
+      "A balanced 90-capsule NMN option for shoppers who want more continuity without jumping straight to the largest bottle.",
+    description:
+      "ZenUP NMN Supplement 90ct gives the formula a middle format that works well for customers ready to move beyond a first trial bottle while keeping the routine approachable. The ingredient stack keeps the positioning premium and consumer-friendly, with NMN supported by Quercetin, Resveratrol, CoQ10, and Astaxanthin.",
+    details:
+      "90 veggie capsules.\nFeatures NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin.\nBuilt for customers who want a more established daily wellness routine with a moderate bottle count.\nReview the label and supplement facts panel for complete ingredient and serving details before use.",
+    imageUrl: nmn90Image,
+    galleryImages: nmn90Gallery.length > 0 ? nmn90Gallery : [nmn90Image],
+    featured: false,
+    status: "ACTIVE",
+    inventory: 180,
+    priceCents: 2799,
+    compareAtPriceCents: null,
+    currency: "USD",
+    pointsReward: 28,
+    stripePriceId: null,
+    createdAt: new Date("2026-04-28T09:00:00.000Z"),
+    updatedAt: new Date("2026-04-28T09:00:00.000Z")
+  },
+  {
+    id: "prod_zenup_nmn_120ct",
+    productCode: "ZNUP-NMN-120",
+    productShortName: "NMN 120ct",
+    amazonAsin: null,
+    name: "ZenUP NMN Supplement 120ct",
+    slug: "zenup-nmn-supplement-120ct",
+    tagline:
+      "A premium NMN formula with Quercetin, Resveratrol, CoQ10, and Astaxanthin for a cleaner daily wellness routine.",
+    category: "NMN Supplement",
+    shortDescription:
+      "The full 120-capsule NMN format for customers who want the strongest value and the longest routine runway.",
+    description:
+      "ZenUP NMN Supplement 120ct is the flagship size in the NMN line and the format best suited to long-term routine use. The bottle combines NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin in a warm premium presentation designed to feel credible, elevated, and easy to keep in rotation.",
+    details:
+      "120 veggie capsules.\nFeatures NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin.\nDesigned for customers who want a more complete premium bottle format for everyday wellness support.\nReview the label and supplement facts panel for complete ingredient and serving details before use.",
+    imageUrl: nmn120Image,
+    galleryImages: nmn120Gallery.length > 0 ? nmn120Gallery : [nmn120Image],
+    featured: false,
+    status: "ACTIVE",
+    inventory: 180,
+    priceCents: 3299,
+    compareAtPriceCents: null,
+    currency: "USD",
+    pointsReward: 33,
+    stripePriceId: null,
+    createdAt: new Date("2026-04-28T09:00:00.000Z"),
+    updatedAt: new Date("2026-04-28T09:00:00.000Z")
+  }
+];
+
+const sampleNadReviews: ProductReviewRecord[] = [
   {
     id: "rev_zenup_1",
     rating: 5,
@@ -181,12 +277,114 @@ export const sampleReviews: ProductReviewRecord[] = [
   }
 ];
 
+const sampleNmnReviews: ProductReviewRecord[] = [
+  {
+    id: "rev_zenup_nmn_1",
+    rating: 5,
+    title: "The 120ct size made the value story easy for me",
+    content:
+      "I wanted an NMN bottle that felt premium but still straightforward. The 120ct option gave me the best value and the formula looks much more complete than most single-ingredient pages.",
+    displayName: "Alicia M.",
+    reviewDate: new Date("2026-04-24T10:30:00.000Z"),
+    status: "PUBLISHED",
+    verifiedPurchase: true,
+    adminNotes: null,
+    source: "ADMIN_IMPORT",
+    productId: "prod_zenup_nmn_120ct",
+    productName: "ZenUP NMN Supplement 120ct",
+    productSlug: "zenup-nmn-supplement-120ct",
+    customerId: null,
+    customerEmail: null,
+    orderId: null,
+    publishedAt: new Date("2026-04-24T10:30:00.000Z"),
+    createdAt: new Date("2026-04-24T10:30:00.000Z"),
+    updatedAt: new Date("2026-04-24T10:30:00.000Z")
+  },
+  {
+    id: "rev_zenup_nmn_2",
+    rating: 5,
+    title: "Looks elevated and the count options are genuinely useful",
+    content:
+      "I started by comparing the 60ct and 90ct, then ended up going with the 120ct because the pricing and presentation felt the most polished. The page makes that comparison easy.",
+    displayName: "Jordan P.",
+    reviewDate: new Date("2026-04-22T14:20:00.000Z"),
+    status: "PUBLISHED",
+    verifiedPurchase: true,
+    adminNotes: null,
+    source: "ADMIN_IMPORT",
+    productId: "prod_zenup_nmn_90ct",
+    productName: "ZenUP NMN Supplement 90ct",
+    productSlug: "zenup-nmn-supplement-90ct",
+    customerId: null,
+    customerEmail: null,
+    orderId: null,
+    publishedAt: new Date("2026-04-22T14:20:00.000Z"),
+    createdAt: new Date("2026-04-22T14:20:00.000Z"),
+    updatedAt: new Date("2026-04-22T14:20:00.000Z")
+  },
+  {
+    id: "rev_zenup_nmn_3",
+    rating: 4,
+    title: "Good first-step bottle for trying the formula",
+    content:
+      "The 60ct size felt like a smart entry point for me. I like that the formula still feels premium and not stripped down just because the bottle count is smaller.",
+    displayName: "Rebecca T.",
+    reviewDate: new Date("2026-04-20T09:10:00.000Z"),
+    status: "PUBLISHED",
+    verifiedPurchase: true,
+    adminNotes: null,
+    source: "ADMIN_IMPORT",
+    productId: "prod_zenup_nmn_60ct",
+    productName: "ZenUP NMN Supplement 60ct",
+    productSlug: "zenup-nmn-supplement-60ct",
+    customerId: null,
+    customerEmail: null,
+    orderId: null,
+    publishedAt: new Date("2026-04-20T09:10:00.000Z"),
+    createdAt: new Date("2026-04-20T09:10:00.000Z"),
+    updatedAt: new Date("2026-04-20T09:10:00.000Z")
+  },
+  {
+    id: "rev_zenup_nmn_4",
+    rating: 5,
+    title: "More complete than the average NMN listing",
+    content:
+      "What sold me was the supporting stack. It does not feel like a bare NMN bottle with generic branding. The CoQ10, Astaxanthin, Quercetin, and Resveratrol make the page feel much more serious.",
+    displayName: "Samuel D.",
+    reviewDate: new Date("2026-04-18T15:40:00.000Z"),
+    status: "PUBLISHED",
+    verifiedPurchase: true,
+    adminNotes: null,
+    source: "ADMIN_IMPORT",
+    productId: "prod_zenup_nmn_120ct",
+    productName: "ZenUP NMN Supplement 120ct",
+    productSlug: "zenup-nmn-supplement-120ct",
+    customerId: null,
+    customerEmail: null,
+    orderId: null,
+    publishedAt: new Date("2026-04-18T15:40:00.000Z"),
+    createdAt: new Date("2026-04-18T15:40:00.000Z"),
+    updatedAt: new Date("2026-04-18T15:40:00.000Z")
+  }
+];
+
+export const sampleReviews: ProductReviewRecord[] = [...sampleNadReviews, ...sampleNmnReviews];
+
 export const sampleProducts: ProductRecord[] = [
   {
     ...baseProduct,
-    reviewCount: sampleReviews.length,
-    averageRating: average(sampleReviews.map((review) => review.rating))
-  }
+    reviewCount: sampleNadReviews.length,
+    averageRating: average(sampleNadReviews.map((review) => review.rating))
+  },
+  ...nmnProducts.map((product) => {
+    const reviews = sampleNmnReviews.filter((review) => review.productSlug === product.slug);
+
+    return {
+      ...product,
+      reviewCount: reviews.length,
+      averageRating: average(reviews.map((review) => review.rating))
+    };
+  })
 ];
 
 export const samplePosts: BeautyPostRecord[] = [

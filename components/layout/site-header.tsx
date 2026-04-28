@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NMN_CANONICAL_PRODUCT_PATH } from "@/lib/nmn-product";
 import { siteConfig } from "@/lib/site-config";
 import { getCartItems } from "@/lib/cart";
 import { getCurrentCustomer } from "@/lib/customer-auth";
@@ -15,7 +16,7 @@ export async function SiteHeader() {
       <div className="announcement-bar">
         <div className="container announcement-bar__inner">
           <div className="announcement-bar__copy">
-            <p>United States shipping only. Professional NAD+ nutrition for consistent daily use.</p>
+            <p>United States shipping only. Professional NAD+ and NMN nutrition for consistent daily use.</p>
             <Link href="/contact">Need help reviewing the formula?</Link>
           </div>
         </div>
@@ -29,7 +30,11 @@ export async function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={item.href === "/shop" ? "site-nav__link site-nav__link--featured" : "site-nav__link"}
+                className={
+                  item.href === "/shop" || item.href === NMN_CANONICAL_PRODUCT_PATH
+                    ? "site-nav__link site-nav__link--featured"
+                    : "site-nav__link"
+                }
               >
                 {item.label}
               </Link>

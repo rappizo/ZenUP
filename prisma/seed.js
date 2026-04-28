@@ -5,42 +5,159 @@ const defaultSupportEmail = (process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "").trim()
 const defaultSupportPhone = (process.env.NEXT_PUBLIC_SUPPORT_PHONE || "").trim();
 
 function buildProductMediaUrl(folder, fileName) {
-  return `/media/product/${encodeURIComponent(folder)}/${encodeURIComponent(fileName)}`;
+  const folderSegments = Array.isArray(folder)
+    ? folder
+    : String(folder || "")
+        .split("/")
+        .filter(Boolean);
+
+  return `/media/product/${[...folderSegments, fileName].map((segment) => encodeURIComponent(segment)).join("/")}`;
 }
 
 function buildSiteMediaUrl(folder, fileName) {
   return `/media/site/${encodeURIComponent(folder)}/${encodeURIComponent(fileName)}`;
 }
 
-const product = {
-  id: "prod_zenup_nad_plus",
-  productCode: "ZNUP-NAD-1100",
-  productShortName: "NAD+ 1100",
-  amazonAsin: null,
-  name: "ZenUP NAD+ Nicotinamide Riboside 1100mg",
-  slug: "zenup-nad-plus-nicotinamide-riboside",
-  tagline:
-    "A professional NAD+ daily formula with Nicotinamide Riboside, Quercetin Phytosome, Resveratrol, and CoQ10.",
-  category: "NAD+ Supplement",
-  shortDescription:
-    "Daily cellular-energy support in a clean 120-capsule formula built for healthy-aging routines.",
-  description:
-    "ZenUP NAD+ Nicotinamide Riboside 1100mg is a focused NAD+ nutrition formula designed for customers who want a serious daily supplement without unnecessary complexity. Each serving combines Nicotinamide Riboside Hydrogen Malate with Quercetin Phytosome, Trans-Resveratrol, and Coenzyme Q10 to support a modern healthy-aging routine built around cellular energy, metabolic resilience, and everyday consistency.",
-  details:
-    "Serving size: 2 veggie capsules.\nContains 600mg Nicotinamide Riboside Hydrogen Malate, 250mg Quercetin Phytosome, 150mg Trans-Resveratrol, and 100mg Coenzyme Q10 per serving.\n120 veggie capsules per bottle for 60 servings.\nOther ingredients: vegetable cellulose capsule, rice flour, magnesium stearate, and silicon dioxide.\nMade for adults building a consistent wellness and healthy-aging routine.",
-  imageUrl: buildProductMediaUrl("ZenUP NAD+ Supplement", "main3.png"),
-  galleryImages: [
-    buildProductMediaUrl("ZenUP NAD+ Supplement", "main3.png"),
-    buildProductMediaUrl("ZenUP NAD+ Supplement", "SF.jpg")
-  ].join("\n"),
-  featured: true,
-  status: "ACTIVE",
-  inventory: 240,
-  priceCents: 6900,
-  compareAtPriceCents: 8900,
-  currency: "USD",
-  pointsReward: 69
-};
+const products = [
+  {
+    id: "prod_zenup_nad_plus",
+    productCode: "ZNUP-NAD-1100",
+    productShortName: "NAD+ 1100",
+    amazonAsin: null,
+    name: "ZenUP NAD+ Nicotinamide Riboside 1100mg",
+    slug: "zenup-nad-plus-nicotinamide-riboside",
+    tagline:
+      "A professional NAD+ daily formula with Nicotinamide Riboside, Quercetin Phytosome, Resveratrol, and CoQ10.",
+    category: "NAD+ Supplement",
+    shortDescription:
+      "Daily cellular-energy support in a clean 120-capsule formula built for healthy-aging routines.",
+    description:
+      "ZenUP NAD+ Nicotinamide Riboside 1100mg is a focused NAD+ nutrition formula designed for customers who want a serious daily supplement without unnecessary complexity. Each serving combines Nicotinamide Riboside Hydrogen Malate with Quercetin Phytosome, Trans-Resveratrol, and Coenzyme Q10 to support a modern healthy-aging routine built around cellular energy, metabolic resilience, and everyday consistency.",
+    details:
+      "Serving size: 2 veggie capsules.\nContains 600mg Nicotinamide Riboside Hydrogen Malate, 250mg Quercetin Phytosome, 150mg Trans-Resveratrol, and 100mg Coenzyme Q10 per serving.\n120 veggie capsules per bottle for 60 servings.\nOther ingredients: vegetable cellulose capsule, rice flour, magnesium stearate, and silicon dioxide.\nMade for adults building a consistent wellness and healthy-aging routine.",
+    imageUrl: buildProductMediaUrl("ZenUP NAD+ Supplement", "main3.png"),
+    galleryImages: [
+      buildProductMediaUrl("ZenUP NAD+ Supplement", "main3.png"),
+      buildProductMediaUrl("ZenUP NAD+ Supplement", "SF.jpg")
+    ].join("\n"),
+    featured: true,
+    status: "ACTIVE",
+    inventory: 240,
+    priceCents: 6900,
+    compareAtPriceCents: 8900,
+    currency: "USD",
+    pointsReward: 69
+  },
+  {
+    id: "prod_zenup_nmn_60ct",
+    productCode: "ZNUP-NMN-060",
+    productShortName: "NMN 60ct",
+    amazonAsin: null,
+    name: "ZenUP NMN Supplement 60ct",
+    slug: "zenup-nmn-supplement-60ct",
+    tagline:
+      "A premium NMN formula with Quercetin, Resveratrol, CoQ10, and Astaxanthin for a cleaner daily wellness routine.",
+    category: "NMN Supplement",
+    shortDescription:
+      "A 60-capsule NMN option designed for first orders, shorter routine windows, or lighter daily rotation.",
+    description:
+      "ZenUP NMN Supplement 60ct is the most compact format in the NMN range, designed for customers who want to experience the formula in a cleaner, lower-commitment bottle size. The formula pairs NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin to support a premium daily wellness story centered on consistency, cellular wellness, and modern healthy-aging routines.",
+    details:
+      "60 veggie capsules.\nFeatures NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin.\nDesigned for customers who want a premium daily wellness formula in a smaller bottle size.\nReview the label and supplement facts panel for complete ingredient and serving details before use.",
+    imageUrl: buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "Main.png"),
+    galleryImages: [
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "Main.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "1.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "2.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "3.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "4.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "5.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "6.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "7.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "60ct"], "8.png")
+    ].join("\n"),
+    featured: false,
+    status: "ACTIVE",
+    inventory: 180,
+    priceCents: 1999,
+    compareAtPriceCents: null,
+    currency: "USD",
+    pointsReward: 20
+  },
+  {
+    id: "prod_zenup_nmn_90ct",
+    productCode: "ZNUP-NMN-090",
+    productShortName: "NMN 90ct",
+    amazonAsin: null,
+    name: "ZenUP NMN Supplement 90ct",
+    slug: "zenup-nmn-supplement-90ct",
+    tagline:
+      "A premium NMN formula with Quercetin, Resveratrol, CoQ10, and Astaxanthin for a cleaner daily wellness routine.",
+    category: "NMN Supplement",
+    shortDescription:
+      "A balanced 90-capsule NMN option for shoppers who want more continuity without jumping straight to the largest bottle.",
+    description:
+      "ZenUP NMN Supplement 90ct gives the formula a middle format that works well for customers ready to move beyond a first trial bottle while keeping the routine approachable. The ingredient stack keeps the positioning premium and consumer-friendly, with NMN supported by Quercetin, Resveratrol, CoQ10, and Astaxanthin.",
+    details:
+      "90 veggie capsules.\nFeatures NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin.\nBuilt for customers who want a more established daily wellness routine with a moderate bottle count.\nReview the label and supplement facts panel for complete ingredient and serving details before use.",
+    imageUrl: buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "Main.png"),
+    galleryImages: [
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "Main.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "1.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "2.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "3.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "4.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "5.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "6.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "7.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "90ct"], "8.png")
+    ].join("\n"),
+    featured: false,
+    status: "ACTIVE",
+    inventory: 180,
+    priceCents: 2799,
+    compareAtPriceCents: null,
+    currency: "USD",
+    pointsReward: 28
+  },
+  {
+    id: "prod_zenup_nmn_120ct",
+    productCode: "ZNUP-NMN-120",
+    productShortName: "NMN 120ct",
+    amazonAsin: null,
+    name: "ZenUP NMN Supplement 120ct",
+    slug: "zenup-nmn-supplement-120ct",
+    tagline:
+      "A premium NMN formula with Quercetin, Resveratrol, CoQ10, and Astaxanthin for a cleaner daily wellness routine.",
+    category: "NMN Supplement",
+    shortDescription:
+      "The full 120-capsule NMN format for customers who want the strongest value and the longest routine runway.",
+    description:
+      "ZenUP NMN Supplement 120ct is the flagship size in the NMN line and the format best suited to long-term routine use. The bottle combines NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin in a warm premium presentation designed to feel credible, elevated, and easy to keep in rotation.",
+    details:
+      "120 veggie capsules.\nFeatures NMN with Quercetin, Resveratrol, CoQ10, and Astaxanthin.\nDesigned for customers who want a more complete premium bottle format for everyday wellness support.\nReview the label and supplement facts panel for complete ingredient and serving details before use.",
+    imageUrl: buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "Main.png"),
+    galleryImages: [
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "Main.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "1.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "2.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "3.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "4.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "5.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "6.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "7.png"),
+      buildProductMediaUrl(["ZenUP NMN Supplement", "120ct"], "8.png")
+    ].join("\n"),
+    featured: false,
+    status: "ACTIVE",
+    inventory: 180,
+    priceCents: 3299,
+    compareAtPriceCents: null,
+    currency: "USD",
+    pointsReward: 33
+  }
+];
+const primaryProduct = products[0];
 
 const posts = [
   {
@@ -71,7 +188,7 @@ const posts = [
       }
     ],
     generatedAt: new Date("2026-04-01T09:00:00.000Z"),
-    sourceProductId: product.id,
+    sourceProductId: primaryProduct.id,
     published: true,
     publishedAt: new Date("2026-04-01T09:00:00.000Z")
   },
@@ -103,7 +220,7 @@ const posts = [
       }
     ],
     generatedAt: new Date("2026-04-01T09:20:00.000Z"),
-    sourceProductId: product.id,
+    sourceProductId: primaryProduct.id,
     published: true,
     publishedAt: new Date("2026-04-01T09:20:00.000Z")
   }
@@ -112,6 +229,7 @@ const posts = [
 const reviews = [
   {
     id: "rev_zenup_1",
+    productSlug: "zenup-nad-plus-nicotinamide-riboside",
     rating: 5,
     title: "Exactly the kind of NAD+ stack I wanted",
     content:
@@ -122,6 +240,7 @@ const reviews = [
   },
   {
     id: "rev_zenup_2",
+    productSlug: "zenup-nad-plus-nicotinamide-riboside",
     rating: 5,
     title: "Professional packaging and a serious formula",
     content:
@@ -132,6 +251,7 @@ const reviews = [
   },
   {
     id: "rev_zenup_3",
+    productSlug: "zenup-nad-plus-nicotinamide-riboside",
     rating: 4,
     title: "Easy to build into my morning routine",
     content:
@@ -142,6 +262,7 @@ const reviews = [
   },
   {
     id: "rev_zenup_4",
+    productSlug: "zenup-nad-plus-nicotinamide-riboside",
     rating: 5,
     title: "Great combination for an NAD+ focused stack",
     content:
@@ -152,6 +273,7 @@ const reviews = [
   },
   {
     id: "rev_zenup_5",
+    productSlug: "zenup-nad-plus-nicotinamide-riboside",
     rating: 5,
     title: "The formula looks much more complete than most NR products",
     content:
@@ -162,6 +284,7 @@ const reviews = [
   },
   {
     id: "rev_zenup_6",
+    productSlug: "zenup-nad-plus-nicotinamide-riboside",
     rating: 4,
     title: "Strong value for a 60-serving bottle",
     content:
@@ -169,34 +292,80 @@ const reviews = [
     displayName: "Laura M.",
     reviewDate: new Date("2026-03-24T09:40:00.000Z"),
     verifiedPurchase: true
+  },
+  {
+    id: "rev_zenup_nmn_1",
+    productSlug: "zenup-nmn-supplement-120ct",
+    rating: 5,
+    title: "The 120ct size made the value story easy for me",
+    content:
+      "I wanted an NMN bottle that felt premium but still straightforward. The 120ct option gave me the best value and the formula looks much more complete than most single-ingredient pages.",
+    displayName: "Alicia M.",
+    reviewDate: new Date("2026-04-24T10:30:00.000Z"),
+    verifiedPurchase: true
+  },
+  {
+    id: "rev_zenup_nmn_2",
+    productSlug: "zenup-nmn-supplement-90ct",
+    rating: 5,
+    title: "Looks elevated and the count options are genuinely useful",
+    content:
+      "I started by comparing the 60ct and 90ct, then ended up going with the 120ct because the pricing and presentation felt the most polished. The page makes that comparison easy.",
+    displayName: "Jordan P.",
+    reviewDate: new Date("2026-04-22T14:20:00.000Z"),
+    verifiedPurchase: true
+  },
+  {
+    id: "rev_zenup_nmn_3",
+    productSlug: "zenup-nmn-supplement-60ct",
+    rating: 4,
+    title: "Good first-step bottle for trying the formula",
+    content:
+      "The 60ct size felt like a smart entry point for me. I like that the formula still feels premium and not stripped down just because the bottle count is smaller.",
+    displayName: "Rebecca T.",
+    reviewDate: new Date("2026-04-20T09:10:00.000Z"),
+    verifiedPurchase: true
+  },
+  {
+    id: "rev_zenup_nmn_4",
+    productSlug: "zenup-nmn-supplement-120ct",
+    rating: 5,
+    title: "More complete than the average NMN listing",
+    content:
+      "What sold me was the supporting stack. It does not feel like a bare NMN bottle with generic branding. The CoQ10, Astaxanthin, Quercetin, and Resveratrol make the page feel much more serious.",
+    displayName: "Samuel D.",
+    reviewDate: new Date("2026-04-18T15:40:00.000Z"),
+    verifiedPurchase: true
   }
 ];
 
 async function main() {
-  await prisma.product.upsert({
-    where: { slug: product.slug },
-    update: {
-      productCode: product.productCode,
-      productShortName: product.productShortName,
-      amazonAsin: product.amazonAsin,
-      name: product.name,
-      tagline: product.tagline,
-      category: product.category,
-      shortDescription: product.shortDescription,
-      description: product.description,
-      details: product.details,
-      imageUrl: product.imageUrl,
-      galleryImages: product.galleryImages,
-      featured: product.featured,
-      status: product.status,
-      inventory: product.inventory,
-      priceCents: product.priceCents,
-      compareAtPriceCents: product.compareAtPriceCents,
-      currency: product.currency,
-      pointsReward: product.pointsReward
-    },
-    create: product
-  });
+  for (const product of products) {
+    await prisma.product.upsert({
+      where: { slug: product.slug },
+      update: {
+        productCode: product.productCode,
+        productShortName: product.productShortName,
+        amazonAsin: product.amazonAsin,
+        name: product.name,
+        tagline: product.tagline,
+        category: product.category,
+        shortDescription: product.shortDescription,
+        description: product.description,
+        details: product.details,
+        imageUrl: product.imageUrl,
+        galleryImages: product.galleryImages,
+        featured: product.featured,
+        status: product.status,
+        inventory: product.inventory,
+        priceCents: product.priceCents,
+        compareAtPriceCents: product.compareAtPriceCents,
+        currency: product.currency,
+        pointsReward: product.pointsReward
+      },
+      create: product
+    });
+  }
 
   for (const post of posts) {
     await prisma.post.upsert({
@@ -277,31 +446,57 @@ async function main() {
     });
   }
 
-  const storedProduct = await prisma.product.findUnique({
-    where: { slug: product.slug }
-  });
-
-  if (!storedProduct) {
-    throw new Error("Seed product could not be loaded after upsert.");
-  }
-
-  await prisma.productReview.deleteMany({
+  const storedProducts = await prisma.product.findMany({
     where: {
-      productId: storedProduct.id
+      slug: {
+        in: products.map((product) => product.slug)
+      }
+    },
+    select: {
+      id: true,
+      slug: true
     }
   });
+  const productIdBySlug = new Map(storedProducts.map((product) => [product.slug, product.id]));
 
-  await prisma.productReview.createMany({
-    data: reviews.map((review) => ({
-      ...review,
-      status: "PUBLISHED",
-      source: "ADMIN_IMPORT",
-      productId: storedProduct.id,
-      publishedAt: review.reviewDate,
-      createdAt: review.reviewDate,
-      updatedAt: review.reviewDate
-    }))
-  });
+  for (const review of reviews) {
+    const productId = productIdBySlug.get(review.productSlug);
+
+    if (!productId) {
+      continue;
+    }
+
+    await prisma.productReview.upsert({
+      where: { id: review.id },
+      update: {
+        rating: review.rating,
+        title: review.title,
+        content: review.content,
+        displayName: review.displayName,
+        status: "PUBLISHED",
+        verifiedPurchase: review.verifiedPurchase,
+        source: "ADMIN_IMPORT",
+        productId,
+        reviewDate: review.reviewDate,
+        publishedAt: review.reviewDate
+      },
+      create: {
+        id: review.id,
+        rating: review.rating,
+        title: review.title,
+        content: review.content,
+        displayName: review.displayName,
+        status: "PUBLISHED",
+        verifiedPurchase: review.verifiedPurchase,
+        source: "ADMIN_IMPORT",
+        productId,
+        reviewDate: review.reviewDate,
+        publishedAt: review.reviewDate,
+        createdAt: review.reviewDate,
+        updatedAt: review.reviewDate
+      }
+    });
+  }
 }
 
 main()
