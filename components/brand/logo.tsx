@@ -14,7 +14,7 @@ export function Logo({ href = "/", className }: LogoProps) {
       </span>
       <span className="brand-logo__text">
         <strong>ZenUP</strong>
-        <span>NAD+ Cellular Nutrition</span>
+        <span>NAD+ & NMN Nutrition</span>
       </span>
     </Link>
   );
