@@ -1,20 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
+import { NMN_CANONICAL_PRODUCT_PATH } from "@/lib/nmn-product";
 import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 import { buildSiteImageUrl } from "@/lib/site-media";
 
 const heroStats = [
   {
-    value: "1100mg",
-    label: "total active formula blend"
+    value: "NAD+",
+    label: "nicotinamide riboside formula"
   },
   {
-    value: "60",
-    label: "daily servings per bottle"
+    value: "NMN",
+    label: "premium daily wellness line"
   },
   {
-    value: "4-part",
-    label: "NAD+ support stack"
+    value: "Daily",
+    label: "clean supplement routines"
   }
 ];
 
@@ -24,23 +25,23 @@ export function HomeBannerSlider() {
       <div className="container">
         <div className="home-hero">
           <div className="home-hero__content">
-            <p className="eyebrow">Professional NAD+ Formula</p>
-            <h1>One premium NAD+ formula built for daily cellular energy support.</h1>
+            <p className="eyebrow">Premium Cellular Wellness</p>
+            <h1>NAD+ and NMN supplements built for disciplined daily routines.</h1>
             <p>
-              ZenUP centers on one flagship Nicotinamide Riboside formula with Quercetin, Resveratrol,
-              and CoQ10 already included, so shoppers can move quickly from learning to purchasing.
+              ZenUP brings together two focused supplement paths: Nicotinamide Riboside for daily NAD+
+              support and NMN formulas with premium supporting ingredients for cellular wellness routines.
             </p>
             <div className="home-hero__facts">
-              <span className="pill">600mg NR Hydrogen Malate</span>
-              <span className="pill">Quercetin + Resveratrol + CoQ10</span>
-              <span className="pill">120 veggie capsules</span>
+              <span className="pill">NAD+ support</span>
+              <span className="pill">NMN daily wellness</span>
+              <span className="pill">Premium veggie capsules</span>
             </div>
             <div className="hero-actions">
               <Link href={CANONICAL_PRODUCT_PATH} className="button button--primary">
-                Shop ZenUP NAD+
+                Shop NAD+
               </Link>
-              <Link href="/blog" className="button button--secondary">
-                Explore NAD+ Articles
+              <Link href={NMN_CANONICAL_PRODUCT_PATH} className="button button--secondary">
+                Shop NMN
               </Link>
             </div>
             <div className="home-hero__stats">
@@ -57,7 +58,7 @@ export function HomeBannerSlider() {
             <div className="home-image home-image--portrait home-hero__visual home-hero__visual--primary">
               <Image
                 src={buildSiteImageUrl("home", "1.png")}
-                alt="ZenUP NAD+ supplement presented in a premium editorial scene."
+                alt="ZenUP premium supplement presented in an editorial wellness scene."
                 fill
                 priority
                 sizes="(max-width: 720px) 100vw, (max-width: 1080px) 55vw, 36vw"
