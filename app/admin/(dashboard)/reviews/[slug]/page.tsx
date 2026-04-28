@@ -1,17 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { bulkImportReviewsAction, generateAiReviewsAction } from "@/app/admin/actions";
+import { PendingSubmitButton } from "@/components/admin/pending-submit-button";
+import { ReviewBulkActionButton } from "@/components/admin/review-bulk-action-button";
+import { ReviewInlineRow } from "@/components/admin/review-inline-row";
 import { ReviewSelectAllCheckbox } from "@/components/admin/review-select-all-checkbox";
 import { RatingStars } from "@/components/ui/rating-stars";
-import {
-  approveReviewAction,
-  bulkImportReviewsAction,
-  bulkModerateReviewsAction,
-  deleteReviewAction,
-  generateAiReviewsAction,
-  updateReviewAction
-} from "@/app/admin/actions";
-import { formatDate } from "@/lib/format";
 import { getOpenAiReviewSettings } from "@/lib/openai-reviews";
 import { getAdminReviewPageByProductSlug } from "@/lib/queries";
 
@@ -27,8 +22,12 @@ function buildPageHref(slug: string, page: number) {
   return `/admin/reviews/${slug}?page=${page}`;
 }
 
-function toDateInputValue(value: Date) {
-  return new Date(value).toISOString().slice(0, 10);
+function toDefaultAiStartDate() {
+  return new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function toDefaultAiEndDate() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export default async function AdminProductReviewsPage({
@@ -70,21 +69,29 @@ export default async function AdminProductReviewsPage({
       ? "Selected reviews were deleted."
       : query.status === "bulk-approved"
         ? "Selected reviews were approved."
-        : query.status === "approved"
-          ? "Review approved."
-          : query.status === "no-selection"
-            ? "Select at least one review before using a bulk action."
-            : query.status === "ai-generated"
-              ? "AI review drafts were generated and placed into the pending list."
-              : query.status === "ai-failed"
-                ? "AI review generation failed. Please try again in a moment."
-                : query.status === "missing-reference-file"
-                  ? "Choose a reference review file, or switch the generator to Direct generate."
-                  : query.status === "invalid-reference-file"
-                    ? "The uploaded reference file could not be read. Use a CSV, XLSX, or XLS file with title and body columns."
-                    : query.status === "ai-not-configured"
-                      ? "OpenAI is not configured for AI review generation."
-                      : null;
+        : query.status === "bulk-verified"
+          ? "Selected reviews were marked as verified."
+          : query.status === "bulk-unverified"
+            ? "Selected reviews were marked as not verified."
+            : query.status === "approved"
+              ? "Review approved."
+              : query.status === "rating-distribution-mismatch"
+                ? "The 5-star through 1-star counts must add up exactly to the total draft quantity."
+                : query.status === "invalid-date-range"
+                  ? "Choose a valid review date range with an end date on or after the start date."
+                  : query.status === "no-selection"
+                    ? "Select at least one review before using a bulk action."
+                    : query.status === "ai-generated"
+                      ? "AI review drafts were generated and placed into the pending list."
+                      : query.status === "ai-failed"
+                        ? "AI review generation failed. Please try again in a moment."
+                        : query.status === "missing-reference-file"
+                          ? "Choose a reference review file, or switch the generator to Direct generate."
+                          : query.status === "invalid-reference-file"
+                            ? "The uploaded reference file could not be read. Use a CSV, XLSX, or XLS file with title and body columns."
+                            : query.status === "ai-not-configured"
+                              ? "OpenAI is not configured for AI review generation."
+                              : null;
 
   return (
     <div className="admin-page">
@@ -92,8 +99,8 @@ export default async function AdminProductReviewsPage({
         <p className="eyebrow">Reviews / {product.name}</p>
         <h1>Edit reviews for {product.name}.</h1>
         <p>
-          Moderate reviews, update ratings, import CSVs, and generate AI draft reviews for this
-          product without loading the rest of the catalog.
+          Moderate reviews, update ratings, and import more comments for this product without
+          loading the rest of the catalog.
         </p>
       </div>
 
@@ -113,7 +120,13 @@ export default async function AdminProductReviewsPage({
       <section className="admin-review-detail admin-product-card">
         <div className="admin-review-detail__hero">
           <div className="admin-product-card__media">
-            <Image src={product.imageUrl} alt={product.name} width={420} height={420} />
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              width={420}
+              height={420}
+              unoptimized
+            />
           </div>
 
           <div className="admin-review-detail__content">
@@ -157,7 +170,7 @@ export default async function AdminProductReviewsPage({
               )}
             </div>
 
-            <div className="stack-row stack-row--wrap">
+            <div className="stack-row">
               <span className="pill">{openAiSettings.model}</span>
               <span className="pill">{aiGeneratedDraftCount} AI drafts on this page</span>
             </div>
@@ -167,14 +180,28 @@ export default async function AdminProductReviewsPage({
               <input type="hidden" name="redirectTo" value={redirectTo} />
               <div className="field">
                 <label htmlFor={`csvFile-${product.id}`}>Upload CSV for {product.name}</label>
-                <input id={`csvFile-${product.id}`} name="csvFile" type="file" accept=".csv,text/csv" />
+                <input
+                  id={`csvFile-${product.id}`}
+                  name="csvFile"
+                  type="file"
+                  accept=".csv,text/csv"
+                />
               </div>
               <p className="form-note">
-                CSV columns: <code>{csvColumns}</code>
+                CSV columns: <code>{csvColumns}</code>. Imported reviews default to verified unless
+                the file explicitly sets <code>verifiedPurchase</code> to a false-style value.
               </p>
-              <button type="submit" className="button button--primary">
-                Import CSV
-              </button>
+              <div className="stack-row">
+                <button type="submit" className="button button--primary">
+                  Import CSV
+                </button>
+                <Link
+                  href={`/api/admin/reviews/${product.slug}/export`}
+                  className="button button--secondary"
+                >
+                  Export CSV
+                </Link>
+              </div>
             </form>
           </div>
         </div>
@@ -186,11 +213,11 @@ export default async function AdminProductReviewsPage({
             <h2>AI review generator</h2>
             <p className="form-note">
               Create pending AI review drafts for this product, then approve them one by one or in
-              bulk. You can generate directly from product context or use an uploaded reference file
-              to steer tone and structure.
+              bulk. Choose whether the model should create varied reviews from scratch, or stay
+              closer to the tone and structure in your uploaded review examples.
             </p>
           </div>
-          <div className="stack-row stack-row--wrap">
+          <div className="stack-row">
             <span className="pill">Product fixed: {product.name}</span>
             <span className="pill">Model {openAiSettings.model}</span>
           </div>
@@ -228,19 +255,114 @@ export default async function AdminProductReviewsPage({
             </fieldset>
             <div className="field">
               <label htmlFor={`referenceFile-${product.id}`}>Reference review file</label>
-              <input id={`referenceFile-${product.id}`} name="referenceFile" type="file" accept=".csv,.xlsx,.xls" />
+              <input
+                id={`referenceFile-${product.id}`}
+                name="referenceFile"
+                type="file"
+                accept=".csv,.xlsx,.xls"
+              />
+            </div>
+          </div>
+
+          <div className="admin-form__grid">
+            <div className="field">
+              <label htmlFor={`ratingCount5-${product.id}`}>5-star count</label>
+              <input
+                id={`ratingCount5-${product.id}`}
+                name="ratingCount5"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue="0"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor={`ratingCount4-${product.id}`}>4-star count</label>
+              <input
+                id={`ratingCount4-${product.id}`}
+                name="ratingCount4"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue="0"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor={`ratingCount3-${product.id}`}>3-star count</label>
+              <input
+                id={`ratingCount3-${product.id}`}
+                name="ratingCount3"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue="0"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor={`ratingCount2-${product.id}`}>2-star count</label>
+              <input
+                id={`ratingCount2-${product.id}`}
+                name="ratingCount2"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue="0"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor={`ratingCount1-${product.id}`}>1-star count</label>
+              <input
+                id={`ratingCount1-${product.id}`}
+                name="ratingCount1"
+                type="number"
+                min="0"
+                max="100"
+                defaultValue="0"
+              />
+            </div>
+          </div>
+
+          <div className="admin-form__grid">
+            <div className="field">
+              <label htmlFor={`reviewDateStart-${product.id}`}>Review date start</label>
+              <input
+                id={`reviewDateStart-${product.id}`}
+                name="reviewDateStart"
+                type="date"
+                defaultValue={toDefaultAiStartDate()}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor={`reviewDateEnd-${product.id}`}>Review date end</label>
+              <input
+                id={`reviewDateEnd-${product.id}`}
+                name="reviewDateEnd"
+                type="date"
+                defaultValue={toDefaultAiEndDate()}
+              />
             </div>
           </div>
 
           <p className="form-note">
             Direct generate creates product-related reviews in a wide mix of styles with no file
             required. Reference review file uses your uploaded CSV, XLSX, or XLS examples as the
-            style source.
+            style source. Supported reference columns: review title, review body/content, rating,
+            and reviewer name. If you upload 20 examples and generate 40 drafts, the AI will keep
+            rotating through those examples as style references without copying wording, and
+            generated reviewer names will stay as full names instead of initials. AI-generated
+            drafts are added as pending and marked verified by default. If you fill any star-count
+            boxes, the total across 5-star to 1-star must exactly match the draft quantity. The
+            selected review date window is used to write stronger randomized review dates across the
+            full range rather than clustering them near one day.
           </p>
 
-          <button type="submit" className="button button--primary" disabled={!openAiSettings.ready}>
-            Generate AI review drafts
-          </button>
+          <PendingSubmitButton
+            idleLabel="Generate AI review drafts"
+            pendingLabel="Generating AI review drafts..."
+            modalTitle="Generating product review drafts"
+            modalDescription="New pending reviews are being created now. This can take a little while while the model builds multiple different voices and lengths."
+            disabled={!openAiSettings.ready}
+          />
         </form>
       </section>
 
@@ -253,17 +375,36 @@ export default async function AdminProductReviewsPage({
             </p>
           </div>
 
-          <div className="stack-row stack-row--wrap">
-            <form id={bulkModerationFormId} action={bulkModerateReviewsAction}>
-              <input type="hidden" name="productSlug" value={product.slug} />
-              <input type="hidden" name="redirectTo" value={redirectTo} />
-            </form>
-            <button type="submit" className="button button--secondary" form={bulkModerationFormId} name="intent" value="approve">
-              Approve selected
-            </button>
-            <button type="submit" className="button button--ghost" form={bulkModerationFormId} name="intent" value="delete">
-              Delete selected
-            </button>
+          <div className="stack-row">
+            <form id={bulkModerationFormId} />
+            <ReviewBulkActionButton
+              formId={bulkModerationFormId}
+              productSlug={product.slug}
+              intent="approve"
+              label="Approve selected"
+              className="button button--secondary"
+            />
+            <ReviewBulkActionButton
+              formId={bulkModerationFormId}
+              productSlug={product.slug}
+              intent="mark-verified"
+              label="Mark verified"
+              className="button button--secondary"
+            />
+            <ReviewBulkActionButton
+              formId={bulkModerationFormId}
+              productSlug={product.slug}
+              intent="mark-unverified"
+              label="Mark unverified"
+              className="button button--secondary"
+            />
+            <ReviewBulkActionButton
+              formId={bulkModerationFormId}
+              productSlug={product.slug}
+              intent="delete"
+              label="Delete selected"
+              className="button button--ghost"
+            />
             <Link
               href={currentPage > 1 ? buildPageHref(product.slug, currentPage - 1) : "#"}
               className={`button button--secondary${currentPage > 1 ? "" : " button--disabled"}`}
@@ -309,123 +450,21 @@ export default async function AdminProductReviewsPage({
               </tr>
             </thead>
             <tbody>
-              {reviews.map((review) => {
-                const updateFormId = `review-update-${review.id}`;
-                const deleteFormId = `review-delete-${review.id}`;
-
-                return (
-                  <tr key={review.id}>
-                    <td>
-                      <label className="admin-table__checkbox-label">
-                        <input type="checkbox" name="reviewIds" value={review.id} form={bulkModerationFormId} />
-                        <span>Select</span>
-                      </label>
-                    </td>
-                    <td>
-                      <div className="admin-table__cell-stack">
-                        <strong>{formatDate(review.reviewDate)}</strong>
-                        <span className="form-note">{review.customerEmail || "No customer record"}</span>
-                        <input
-                          className="admin-table__input"
-                          name="reviewDate"
-                          type="date"
-                          defaultValue={toDateInputValue(review.reviewDate)}
-                          form={updateFormId}
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <input className="admin-table__input" name="displayName" defaultValue={review.displayName} form={updateFormId} />
-                    </td>
-                    <td>
-                      <div className="admin-table__rating-cell">
-                        <input
-                          className="admin-table__input admin-table__input--xs"
-                          name="rating"
-                          type="number"
-                          min="1"
-                          max="5"
-                          defaultValue={review.rating}
-                          form={updateFormId}
-                        />
-                        <RatingStars rating={review.rating} size="sm" />
-                      </div>
-                    </td>
-                    <td>
-                      <select className="admin-table__select" name="status" defaultValue={review.status} form={updateFormId}>
-                        <option value="PENDING">PENDING</option>
-                        <option value="PUBLISHED">PUBLISHED</option>
-                        <option value="HIDDEN">HIDDEN</option>
-                      </select>
-                    </td>
-                    <td>
-                      <span className="pill">{review.source}</span>
-                    </td>
-                    <td>
-                      <label className="admin-table__checkbox-label">
-                        <input
-                          type="checkbox"
-                          name="verifiedPurchase"
-                          defaultChecked={review.verifiedPurchase}
-                          form={updateFormId}
-                        />
-                        <span>Verified</span>
-                      </label>
-                    </td>
-                    <td>
-                      <input className="admin-table__input" name="title" defaultValue={review.title} form={updateFormId} />
-                    </td>
-                    <td>
-                      <textarea className="admin-table__textarea" name="content" defaultValue={review.content} form={updateFormId} />
-                    </td>
-                    <td>
-                      <textarea
-                        className="admin-table__textarea"
-                        name="adminNotes"
-                        defaultValue={review.adminNotes ?? ""}
-                        form={updateFormId}
-                      />
-                    </td>
-                    <td className="admin-table__actions">
-                      <form id={updateFormId} action={updateReviewAction}>
-                        <input type="hidden" name="id" value={review.id} />
-                        <input type="hidden" name="productSlug" value={product.slug} />
-                        <input type="hidden" name="redirectTo" value={redirectTo} />
-                      </form>
-                      <button type="submit" className="button button--primary" form={updateFormId}>
-                        Save
-                      </button>
-
-                      {review.status !== "PUBLISHED" ? (
-                        <form action={approveReviewAction}>
-                          <input type="hidden" name="id" value={review.id} />
-                          <input type="hidden" name="productSlug" value={product.slug} />
-                          <input type="hidden" name="redirectTo" value={redirectTo} />
-                          <button type="submit" className="button button--secondary">
-                            Approve
-                          </button>
-                        </form>
-                      ) : null}
-
-                      <form id={deleteFormId} action={deleteReviewAction}>
-                        <input type="hidden" name="id" value={review.id} />
-                        <input type="hidden" name="productSlug" value={product.slug} />
-                        <input type="hidden" name="redirectTo" value={redirectTo} />
-                      </form>
-                      <button type="submit" className="button button--ghost" form={deleteFormId}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {reviews.map((review) => (
+                <ReviewInlineRow
+                  key={review.id}
+                  review={review}
+                  productSlug={product.slug}
+                  bulkFormId={bulkModerationFormId}
+                />
+              ))}
             </tbody>
           </table>
         </section>
       ) : (
         <section className="admin-form admin-review-item">
           <h3>No reviews yet</h3>
-          <p>Upload a CSV for {product.name}, generate AI drafts, or wait for customer reviews to appear here.</p>
+          <p>Upload a CSV for {product.name} or wait for customer reviews to appear here.</p>
         </section>
       )}
     </div>

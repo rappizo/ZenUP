@@ -8,13 +8,13 @@
     "vercel-build": "node scripts/vercel-build.js",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "prisma db push",
-    "db:generate": "prisma generate",
+    "db:push": "node scripts/prisma-cli.js db push",
+    "db:generate": "node scripts/prisma-cli.js generate",
     "db:seed": "node prisma/seed.js",
     "db:reviews:reset": "node prisma/reset-reviews.js",
     "db:studio": "prisma studio",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
-    "postinstall": "prisma generate"
+    "postinstall": "node scripts/prisma-cli.js generate"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",

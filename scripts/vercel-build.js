@@ -1,10 +1,7 @@
 const { spawnSync } = require("node:child_process");
+const { normalizeDatabaseEnv } = require("./database-env");
 
-const env = { ...process.env };
-
-if (!env.DIRECT_URL && env.DATABASE_URL) {
-  env.DIRECT_URL = env.DATABASE_URL;
-}
+const env = normalizeDatabaseEnv(process.env);
 
 const commandSets =
   process.platform === "win32"

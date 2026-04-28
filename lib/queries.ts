@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import type {
   AiPostAutomationOverviewRecord,
+  AdminOrderPageRecord,
   AdminOmbClaimPageRecord,
   AdminProductReviewPageRecord,
   AdminReviewProductSummary,
@@ -16,6 +17,7 @@ import type {
   FormSubmissionRecord,
   FormSubmissionSummaryRecord,
   OmbClaimRecord,
+  OrderActivityLogRecord,
   OrderRecord,
   ProductRecord,
   ProductReviewRecord,
@@ -73,6 +75,27 @@ function isTransientDatabaseError(error: unknown) {
     message.includes("MaxClientsInSessionMode") ||
     message.includes("max clients reached")
   );
+}
+
+function isMissingOrderActivityLogSchemaError(error: unknown) {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false;
+  }
+
+  const target = `${String(error.meta?.modelName || "")} ${String(error.meta?.table || "")} ${error.message}`;
+  return (
+    error.code === "P2021" &&
+    (target.includes("OrderActivityLog") || target.includes("orderActivityLogs"))
+  );
+}
+
+function isMissingOmbReviewStepColumnError(error: unknown) {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false;
+  }
+
+  const target = `${String(error.meta?.column || "")} ${error.message}`;
+  return error.code === "P2022" && target.includes("reviewStepSubmittedAt");
 }
 
 async function withFallback<T>(
@@ -341,6 +364,13 @@ function mapOrder(order: any): OrderRecord {
       unitPriceCents: item.unitPriceCents,
       lineTotalCents: item.lineTotalCents,
       imageUrl: item.imageUrl
+    })),
+    activityLogs: (order.activityLogs ?? []).map((log: any): OrderActivityLogRecord => ({
+      id: log.id,
+      eventType: log.eventType,
+      summary: log.summary,
+      detail: log.detail ?? null,
+      createdAt: new Date(log.createdAt)
     }))
   };
 }
@@ -442,12 +472,39 @@ function mapOmbClaim(claim: any): OmbClaimRecord {
     extraBottleAddress: claim.extraBottleAddress ?? null,
     giftSent: claim.giftSent,
     giftSentAt: claim.giftSentAt ? new Date(claim.giftSentAt) : null,
+    reviewStepSubmittedAt: claim.reviewStepSubmittedAt
+      ? new Date(claim.reviewStepSubmittedAt)
+      : null,
     adminNote: claim.adminNote ?? null,
     completedAt: claim.completedAt ? new Date(claim.completedAt) : null,
     createdAt: new Date(claim.createdAt),
     updatedAt: new Date(claim.updatedAt)
   };
 }
+
+const legacyOmbClaimSelect = {
+  id: true,
+  platformKey: true,
+  platformLabel: true,
+  orderId: true,
+  name: true,
+  email: true,
+  phone: true,
+  purchasedProduct: true,
+  reviewRating: true,
+  commentText: true,
+  reviewDestinationUrl: true,
+  screenshotName: true,
+  screenshotMimeType: true,
+  screenshotBytes: true,
+  extraBottleAddress: true,
+  giftSent: true,
+  giftSentAt: true,
+  adminNote: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true
+} as const;
 
 function mapEmailCampaign(campaign: any): EmailCampaignRecord {
   return {
@@ -676,18 +733,64 @@ export async function getCustomers() {
   );
 }
 
-export async function getOrders() {
-  return withFallback(
-    async () =>
-      (
-        await prisma.order.findMany({
+export async function getOrders(page = 1, pageSize = 50) {
+  const fallbackTotalPages = Math.max(1, Math.ceil(fallbackOrders.length / pageSize));
+  const fallbackCurrentPage = Math.min(Math.max(1, page), fallbackTotalPages);
+  const fallback: AdminOrderPageRecord = {
+    orders: fallbackOrders.slice(
+      (fallbackCurrentPage - 1) * pageSize,
+      fallbackCurrentPage * pageSize
+    ),
+    totalCount: fallbackOrders.length,
+    currentPage: fallbackCurrentPage,
+    totalPages: fallbackTotalPages,
+    pageSize
+  };
+
+  return withFallback<AdminOrderPageRecord>(
+    async () => {
+      const totalCount = await prisma.order.count();
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+      let rows;
+
+      try {
+        rows = await prisma.order.findMany({
+          include: {
+            items: true,
+            activityLogs: {
+              orderBy: [{ createdAt: "desc" }],
+              take: 8
+            }
+          },
+          orderBy: [{ createdAt: "desc" }],
+          skip: (currentPage - 1) * pageSize,
+          take: pageSize
+        });
+      } catch (error) {
+        if (!isMissingOrderActivityLogSchemaError(error)) {
+          throw error;
+        }
+
+        rows = await prisma.order.findMany({
           include: {
             items: true
           },
-          orderBy: [{ createdAt: "desc" }]
-        })
-      ).map(mapOrder),
-    fallbackOrders
+          orderBy: [{ createdAt: "desc" }],
+          skip: (currentPage - 1) * pageSize,
+          take: pageSize
+        });
+      }
+
+      return {
+        orders: rows.map(mapOrder),
+        totalCount,
+        currentPage,
+        totalPages,
+        pageSize
+      };
+    },
+    fallback
   );
 }
 
@@ -898,6 +1001,7 @@ export async function getOmbClaims(searchEmail = "") {
     async () =>
       (
         await prisma.ombClaim.findMany({
+          select: legacyOmbClaimSelect,
           where: normalizedSearchEmail
             ? {
                 email: {
@@ -966,57 +1070,73 @@ export async function getOmbClaimPage(
           : {})
       };
 
-      const [totalCount, claims, completedClaims, platformRows, productRows, productShortNames] = await prisma.$transaction([
-        prisma.ombClaim.count({ where }),
-        prisma.ombClaim.findMany({
-          where,
-          orderBy: [{ createdAt: "desc" }],
-          skip: Math.max(0, page - 1) * pageSize,
-          take: pageSize
-        }),
-        prisma.ombClaim.findMany({
-          where: {
-            completedAt: {
-              not: null
+      const loadClaimPage = async (useLegacySelect = false) =>
+        prisma.$transaction([
+          prisma.ombClaim.count({ where }),
+          prisma.ombClaim.findMany({
+            ...(useLegacySelect ? { select: legacyOmbClaimSelect } : {}),
+            where,
+            orderBy: [{ createdAt: "desc" }],
+            skip: Math.max(0, page - 1) * pageSize,
+            take: pageSize
+          }),
+          prisma.ombClaim.findMany({
+            where: {
+              completedAt: {
+                not: null
+              }
+            },
+            select: {
+              completedAt: true
             }
-          },
-          select: {
-            completedAt: true
-          }
-        }),
-        prisma.ombClaim.findMany({
-          select: {
-            platformKey: true,
-            platformLabel: true
-          },
-          distinct: ["platformKey"],
-          orderBy: [{ platformLabel: "asc" }]
-        }),
-        prisma.ombClaim.findMany({
-          where: {
-            purchasedProduct: {
-              not: null
-            }
-          },
-          select: {
-            purchasedProduct: true
-          },
-          distinct: ["purchasedProduct"],
-          orderBy: [{ purchasedProduct: "asc" }]
-        }),
-        prisma.product.findMany({
-          where: {
-            productShortName: {
-              not: null
-            }
-          },
-          select: {
-            productShortName: true
-          },
-          distinct: ["productShortName"],
-          orderBy: [{ productShortName: "asc" }]
-        })
-      ]);
+          }),
+          prisma.ombClaim.findMany({
+            select: {
+              platformKey: true,
+              platformLabel: true
+            },
+            distinct: ["platformKey"],
+            orderBy: [{ platformLabel: "asc" }]
+          }),
+          prisma.ombClaim.findMany({
+            where: {
+              purchasedProduct: {
+                not: null
+              }
+            },
+            select: {
+              purchasedProduct: true
+            },
+            distinct: ["purchasedProduct"],
+            orderBy: [{ purchasedProduct: "asc" }]
+          }),
+          prisma.product.findMany({
+            where: {
+              productShortName: {
+                not: null
+              }
+            },
+            select: {
+              productShortName: true
+            },
+            distinct: ["productShortName"],
+            orderBy: [{ productShortName: "asc" }]
+          })
+        ]);
+
+      let pageData;
+
+      try {
+        pageData = await loadClaimPage();
+      } catch (error) {
+        if (!isMissingOmbReviewStepColumnError(error)) {
+          throw error;
+        }
+
+        pageData = await loadClaimPage(true);
+      }
+
+      const [totalCount, claims, completedClaims, platformRows, productRows, productShortNames] = pageData;
 
       const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
       const currentPage = Math.min(Math.max(1, page), totalPages);
@@ -1028,12 +1148,28 @@ export async function getOmbClaimPage(
       const pagedClaims =
         currentPage === page
           ? claims
-          : await prisma.ombClaim.findMany({
-              where,
-              orderBy: [{ createdAt: "desc" }],
-              skip: (currentPage - 1) * pageSize,
-              take: pageSize
-            });
+          : await (async () => {
+              try {
+                return await prisma.ombClaim.findMany({
+                  where,
+                  orderBy: [{ createdAt: "desc" }],
+                  skip: (currentPage - 1) * pageSize,
+                  take: pageSize
+                });
+              } catch (error) {
+                if (!isMissingOmbReviewStepColumnError(error)) {
+                  throw error;
+                }
+
+                return prisma.ombClaim.findMany({
+                  select: legacyOmbClaimSelect,
+                  where,
+                  orderBy: [{ createdAt: "desc" }],
+                  skip: (currentPage - 1) * pageSize,
+                  take: pageSize
+                });
+              }
+            })();
 
       const platformOptions = platformRows
         .filter((platform) => platform.platformKey && platform.platformLabel)
@@ -1119,6 +1255,26 @@ export async function getPublishedReviewsByProductId(productId: string) {
       .filter((review) => review.productId === productId && review.status === "PUBLISHED")
       .sort((left, right) => right.reviewDate.getTime() - left.reviewDate.getTime()),
     { allowFallbackOnDatabaseError: true }
+  );
+}
+
+export async function getPublishedReviewById(id: string) {
+  return withFallback<ProductReviewRecord | null>(
+    async () => {
+      const review = await prisma.productReview.findFirst({
+        where: {
+          id,
+          status: "PUBLISHED"
+        },
+        include: {
+          product: true,
+          customer: true
+        }
+      });
+
+      return review ? mapReview(review) : null;
+    },
+    fallbackReviews.find((review) => review.id === id && review.status === "PUBLISHED") ?? null
   );
 }
 

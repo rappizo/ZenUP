@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = env("SUPABASE_POOLER_6543_URL")
+  directUrl = env("SUPABASE_POOLER_5432_URL")
 }
 
 enum ProductStatus {
@@ -184,10 +184,28 @@ model Order {
   customer              Customer?         @relation(fields: [customerId], references: [id])
   coupon                Coupon?           @relation(fields: [couponId], references: [id], onDelete: SetNull)
   items                 OrderItem[]
+  activityLogs          OrderActivityLog[]
   rewards               RewardEntry[]
   reviews               ProductReview[]
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([customerId, createdAt])
+}
+
+model OrderActivityLog {
+  id        String   @id @default(cuid())
+  eventType String
+  summary   String
+  detail    String?
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([eventType, createdAt])
 }
 
 model OrderItem {
@@ -246,6 +264,11 @@ model ProductReview {
   order            Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+
+  @@index([productId, reviewDate])
+  @@index([productId, status, reviewDate])
+  @@index([customerId, reviewDate])
+  @@index([status, reviewDate])
 }
 
 model StoreSetting {
@@ -350,13 +373,15 @@ model OmbClaim {
   extraBottleAddress   String?
   giftSent             Boolean  @default(false)
   giftSentAt           DateTime?
+  reviewStepSubmittedAt DateTime?
   adminNote            String?
   completedAt          DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   @@index([platformKey, createdAt])
-  @@index([email])
+  @@index([email, createdAt])
+  @@index([platformKey, purchasedProduct, createdAt])
   @@index([giftSent])
-  @@index([completedAt])
+  @@index([completedAt, createdAt])
 }

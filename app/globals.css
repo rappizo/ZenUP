@@ -2741,9 +2741,67 @@ main {
   color: #9a6b0f;
 }
 
+.admin-table__status-badge--danger {
+  background: rgba(186, 61, 61, 0.12);
+  color: #a33030;
+}
+
 .admin-table__actions .button {
   min-height: 38px;
   padding: 0 14px;
+}
+
+.admin-order-row__actions {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-order-row__details {
+  display: grid;
+  gap: 18px;
+  padding: 12px 0 6px;
+}
+
+.admin-order-row__detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-order-log-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-order-log-list__item {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid rgba(46, 40, 37, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.admin-processing-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(20, 26, 18, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.admin-processing-overlay__card {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid rgba(15, 106, 53, 0.16);
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 24px 60px rgba(16, 28, 18, 0.16);
 }
 
 .admin-inline-grid {
@@ -2773,6 +2831,67 @@ main {
   gap: 22px;
 }
 
+.review-detail-shell {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+}
+
+.review-detail-breadcrumb a {
+  font-size: 0.9rem;
+  color: var(--brand-deep);
+}
+
+.review-detail-card {
+  display: grid;
+  gap: 20px;
+  padding: clamp(24px, 4vw, 36px);
+}
+
+.review-detail-card__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.6fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.review-detail-card__copy {
+  display: grid;
+  gap: 10px;
+}
+
+.review-detail-card__copy h1,
+.review-detail-card__copy p,
+.review-detail-card__body p {
+  margin: 0;
+}
+
+.review-detail-card__rating {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+  text-align: right;
+}
+
+.review-detail-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.review-detail-card__body {
+  display: grid;
+  gap: 12px;
+}
+
+.review-detail-card__body p {
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
 @media (max-width: 1080px) {
   .hero__grid,
   .product-detail,
@@ -2790,7 +2909,9 @@ main {
   .ritual-spotlight__hero,
   .ingredient-story-grid,
   .home-cta,
-  .subscribe-panel {
+  .subscribe-panel,
+  .review-detail-card__hero,
+  .admin-order-row__detail-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2872,6 +2993,11 @@ main {
   .omb-claim-filters__actions {
     grid-column: 1 / -1;
     justify-content: flex-start;
+  }
+
+  .review-detail-card__rating {
+    justify-items: start;
+    text-align: left;
   }
 }
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { updateOmbClaimAction } from "@/app/admin/actions";
+import { OmbClaimInlineEditor } from "@/components/admin/omb-claim-inline-editor";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { formatDate, formatNumber, formatTime, LOS_ANGELES_TIME_ZONE } from "@/lib/format";
 import { getOmbClaimPage } from "@/lib/queries";
@@ -16,7 +16,9 @@ type AdminOmbClaimsPageProps = {
   }>;
 };
 
-export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaimsPageProps) {
+export default async function AdminOmbClaimsPage({
+  searchParams
+}: AdminOmbClaimsPageProps) {
   const params = await searchParams;
   const requestedPage = Number.parseInt(params.page || "1", 10);
   const claimPage = await getOmbClaimPage(
@@ -71,9 +73,9 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
         <p className="eyebrow">OMB Claim</p>
         <h1>Review every OMB claim from order verification through screenshot and gift handling.</h1>
         <p>
-          This workspace combines the `/om`, `/om2`, and `/om3` steps into one operations view so
-          the team can check platform, rating, address, screenshot, gift status, and internal notes
-          in a single place.
+          This workspace combines the `/omb`, `/omb2`, and `/omb3` steps into one operations view
+          so the team can check platform, rating, address, screenshot, gift status, and internal
+          notes in a single place.
         </p>
       </div>
 
@@ -110,16 +112,16 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
             </select>
           </div>
           <div className="field">
-              <label htmlFor="product">Product</label>
-              <select id="product" name="product" defaultValue={searchProduct}>
-                <option value="">All products</option>
-                {productOptions.map((product) => (
-                  <option key={product} value={product}>
-                    {getProductFilterLabel(product)}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <label htmlFor="product">Product</label>
+            <select id="product" name="product" defaultValue={searchProduct}>
+              <option value="">All products</option>
+              {productOptions.map((product) => (
+                <option key={product} value={product}>
+                  {getProductFilterLabel(product)}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="omb-claim-filters__actions">
             <button type="submit" className="button button--primary">
               Apply filters
@@ -135,10 +137,13 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
           </span>
           {searchPlatform ? (
             <span className="pill">
-              Platform: {platformOptions.find((item) => item.value === searchPlatform)?.label || searchPlatform}
+              Platform:{" "}
+              {platformOptions.find((item) => item.value === searchPlatform)?.label || searchPlatform}
             </span>
           ) : null}
-          {searchProduct ? <span className="pill">Product: {getProductFilterLabel(searchProduct)}</span> : null}
+          {searchProduct ? (
+            <span className="pill">Product: {getProductFilterLabel(searchProduct)}</span>
+          ) : null}
           <span className="pill">Submitted times shown in Los Angeles time</span>
           <span className="pill">50 per page</span>
         </div>
@@ -164,8 +169,6 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
             </thead>
             <tbody>
               {claims.map((claim) => {
-                const redirectTo = buildPageHref(currentPage);
-                const formId = `claim-form-${claim.id}`;
                 const progressLabel = claim.completedAt
                   ? "Completed"
                   : claim.reviewRating && claim.reviewRating >= 4
@@ -174,7 +177,8 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
                 const progressClassName = claim.completedAt
                   ? "admin-table__status-badge admin-table__status-badge--success"
                   : "admin-table__status-badge admin-table__status-badge--warning";
-                const submittedAt = claim.completedAt ?? claim.createdAt;
+                const submittedAt =
+                  claim.completedAt ?? claim.reviewStepSubmittedAt ?? claim.createdAt;
 
                 return (
                   <tr key={claim.id}>
@@ -242,32 +246,25 @@ export default async function AdminOmbClaimsPage({ searchParams }: AdminOmbClaim
                       )}
                     </td>
                     <td>
-                      <label className="admin-table__checkbox-label">
-                        <input
-                          type="checkbox"
-                          name="giftSent"
-                          defaultChecked={claim.giftSent}
-                          form={formId}
-                        />
-                        <span>{claim.giftSent ? "Sent" : "Pending"}</span>
-                      </label>
+                      <span className={claim.giftSent ? "pill" : "admin-table__empty"}>
+                        {claim.giftSent ? "Gift sent" : "Gift pending"}
+                      </span>
                     </td>
                     <td>
-                      <textarea
-                        className="admin-table__textarea"
-                        name="adminNote"
-                        defaultValue={claim.adminNote || ""}
-                        form={formId}
-                      />
+                      <div className="admin-table__clip">
+                        {claim.adminNote ? (
+                          claim.adminNote
+                        ) : (
+                          <span className="admin-table__empty">No note</span>
+                        )}
+                      </div>
                     </td>
                     <td className="admin-table__actions">
-                      <form id={formId} action={updateOmbClaimAction}>
-                        <input type="hidden" name="id" value={claim.id} />
-                        <input type="hidden" name="redirectTo" value={redirectTo} />
-                      </form>
-                      <button type="submit" className="button button--primary" form={formId}>
-                        Save
-                      </button>
+                      <OmbClaimInlineEditor
+                        claimId={claim.id}
+                        initialGiftSent={claim.giftSent}
+                        initialAdminNote={claim.adminNote || ""}
+                      />
                     </td>
                   </tr>
                 );

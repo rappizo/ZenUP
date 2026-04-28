@@ -9,8 +9,8 @@ type OrderMatchStepThreePageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Order Match Last Step",
-  description: "Finish the last OMB claim step with review proof and shipping details."
+  title: "OMB Claim Final Step",
+  description: "Finish your ZenUP OMB claim with review proof and shipping details."
 };
 
 export default async function OrderMatchStepThreePage({
@@ -65,6 +65,7 @@ export default async function OrderMatchStepThreePage({
             commentText={claim.commentText}
             destinationUrl={claim.reviewDestinationUrl}
             outboundButtonLabel={platform.outboundButtonLabel}
+            submitAction="/api/om3"
           />
         </div>
       </div>

@@ -7,8 +7,8 @@ type OrderMatchPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Order Match",
-  description: "Verify Amazon, TikTok, and Walmart order IDs before continuing to the next step."
+  title: "OMB Claim",
+  description: "Verify Amazon, TikTok Shop, or Walmart order details before continuing your ZenUP OMB claim."
 };
 
 export default async function OrderMatchPage({ searchParams }: OrderMatchPageProps) {
@@ -22,7 +22,7 @@ export default async function OrderMatchPage({ searchParams }: OrderMatchPagePro
         {errorMessage ? <p className="notice">{errorMessage}</p> : null}
 
         <div className="section om-section">
-          <OrderMatchPanel initialPlatform={activePlatform.key} />
+          <OrderMatchPanel initialPlatform={activePlatform.key} submitAction="/api/om" />
         </div>
       </div>
     </section>

@@ -12,10 +12,10 @@ export default function OmbClaimThankYouPage() {
       <div className="container">
         <div className="page-hero om-thank-you">
           <p className="eyebrow">Thank you</p>
-          <h1>Your Extra Bottle Will Be Sent in 24 Hour After We Confirm the Order.</h1>
+          <h1>Your OMB claim has been submitted and is ready for review.</h1>
           <p>
-            Your OMB claim has been submitted successfully. Our team will review the order and the
-            platform details, then continue with the extra bottle process.
+            Our team will review the order, review proof, and shipping details before moving the
+            extra bottle request forward.
           </p>
           <div className="stack-row">
             <ButtonLink href="/" variant="primary">

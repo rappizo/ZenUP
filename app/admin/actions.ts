@@ -1,9 +1,11 @@
 "use server";
 
+import { randomInt } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { runAiPostAutomation } from "@/lib/ai-post-automation";
+import { updateOrderWithReconciliation } from "@/lib/admin-order-updates";
 import { normalizeArticleContent } from "@/lib/article-format";
 import { prisma } from "@/lib/db";
 import {
@@ -24,6 +26,7 @@ import {
 } from "@/lib/admin-auth";
 import { normalizeCouponCode, parseCouponScopeInput, serializeCouponScope } from "@/lib/coupons";
 import { generateAiReviewDrafts, getOpenAiReviewSettings } from "@/lib/openai-reviews";
+import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 import { ensureProductCodes, getNextProductCode } from "@/lib/product-codes";
 import { parseReviewReferenceFile } from "@/lib/review-reference-file";
 import type {
@@ -50,6 +53,7 @@ function buildPublishedDate(formData: FormData, published: boolean) {
 function refreshStorefront(productSlugs: string[] = []) {
   revalidatePath("/");
   revalidatePath("/shop");
+  revalidatePath(CANONICAL_PRODUCT_PATH);
   revalidatePath("/blog");
 
   for (const slug of productSlugs) {
@@ -399,6 +403,85 @@ function parseReviewDateInput(value: string | undefined | null) {
 
 function parseAiReviewQuantity(value: FormDataEntryValue | null) {
   return Math.max(1, Math.min(100, toInt(value, 10)));
+}
+
+function parseAiReviewStarCount(value: FormDataEntryValue | null) {
+  return Math.max(0, Math.min(100, toInt(value, 0)));
+}
+
+function shuffleNumbers(values: number[]) {
+  const copy = [...values];
+
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomInt(index + 1);
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+  }
+
+  return copy;
+}
+
+function buildAiReviewRatingPlan(formData: FormData, quantity: number) {
+  const distribution = [
+    { rating: 5, count: parseAiReviewStarCount(formData.get("ratingCount5")) },
+    { rating: 4, count: parseAiReviewStarCount(formData.get("ratingCount4")) },
+    { rating: 3, count: parseAiReviewStarCount(formData.get("ratingCount3")) },
+    { rating: 2, count: parseAiReviewStarCount(formData.get("ratingCount2")) },
+    { rating: 1, count: parseAiReviewStarCount(formData.get("ratingCount1")) }
+  ];
+
+  const explicitTotal = distribution.reduce((sum, item) => sum + item.count, 0);
+
+  if (explicitTotal === 0) {
+    return null;
+  }
+
+  if (explicitTotal !== quantity) {
+    return { error: "mismatch", ratings: [] as number[] };
+  }
+
+  const ratings = distribution.flatMap((item) =>
+    Array.from({ length: item.count }, () => item.rating)
+  );
+  return { error: null, ratings: shuffleNumbers(ratings) };
+}
+
+function parseAiReviewDateRange(formData: FormData) {
+  const today = new Date();
+  const defaultEnd = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 23, 59, 59, 999)
+  );
+  const defaultStart = new Date(defaultEnd.getTime() - 180 * 24 * 60 * 60 * 1000);
+  const rawStart = toPlainString(formData.get("reviewDateStart"));
+  const rawEnd = toPlainString(formData.get("reviewDateEnd"));
+  const start = rawStart ? new Date(`${rawStart}T00:00:00.000Z`) : defaultStart;
+  const end = rawEnd ? new Date(`${rawEnd}T23:59:59.999Z`) : defaultEnd;
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return null;
+  }
+
+  if (end.getTime() < start.getTime()) {
+    return null;
+  }
+
+  return { start, end };
+}
+
+function createRandomReviewDates(quantity: number, start: Date, end: Date) {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+  const span = Math.max(1, endTime - startTime + 1);
+  const timestamps = new Set<number>();
+
+  while (timestamps.size < quantity) {
+    const offset = randomInt(span);
+    timestamps.add(startTime + offset);
+  }
+
+  return shuffleNumbers(Array.from(timestamps)).map((timestamp, index) => {
+    const base = new Date(timestamp);
+    return new Date(base.getTime() + index);
+  });
 }
 
 export async function loginAction(formData: FormData) {
@@ -775,18 +858,18 @@ export async function updateOrderAction(formData: FormData) {
 
   const id = toPlainString(formData.get("id"));
 
-  await prisma.order.update({
-    where: { id },
-    data: {
-      status: (toPlainString(formData.get("status")) || "PENDING") as OrderStatus,
-      fulfillmentStatus: (toPlainString(formData.get("fulfillmentStatus")) ||
-        "UNFULFILLED") as FulfillmentStatus,
-      notes: toPlainString(formData.get("notes")) || null
-    }
+  await updateOrderWithReconciliation({
+    id,
+    status: (toPlainString(formData.get("status")) || "PENDING") as OrderStatus,
+    fulfillmentStatus: (toPlainString(formData.get("fulfillmentStatus")) ||
+      "UNFULFILLED") as FulfillmentStatus,
+    notes: toPlainString(formData.get("notes")) || null
   });
 
   revalidatePath("/admin");
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/customers");
+  revalidatePath("/admin/rewards");
   redirect("/admin/orders?status=updated");
 }
 
@@ -965,6 +1048,28 @@ export async function bulkModerateReviewsAction(formData: FormData) {
         publishedAt: new Date()
       }
     });
+  } else if (intent === "mark-verified") {
+    await prisma.productReview.updateMany({
+      where: {
+        id: {
+          in: reviewIds
+        }
+      },
+      data: {
+        verifiedPurchase: true
+      }
+    });
+  } else if (intent === "mark-unverified") {
+    await prisma.productReview.updateMany({
+      where: {
+        id: {
+          in: reviewIds
+        }
+      },
+      data: {
+        verifiedPurchase: false
+      }
+    });
   } else {
     await prisma.productReview.deleteMany({
       where: {
@@ -980,7 +1085,19 @@ export async function bulkModerateReviewsAction(formData: FormData) {
     revalidatePath(`/admin/reviews/${productSlug}`);
   }
   refreshStorefront(productSlug ? [productSlug] : []);
-  redirect(buildReviewRedirect(intent === "approve" ? "bulk-approved" : "bulk-deleted", redirectTo, productSlug));
+  redirect(
+    buildReviewRedirect(
+      intent === "approve"
+        ? "bulk-approved"
+        : intent === "mark-verified"
+          ? "bulk-verified"
+          : intent === "mark-unverified"
+            ? "bulk-unverified"
+            : "bulk-deleted",
+      redirectTo,
+      productSlug
+    )
+  );
 }
 
 export async function bulkImportReviewsAction(formData: FormData) {
@@ -1065,9 +1182,10 @@ export async function bulkImportReviewsAction(formData: FormData) {
         title: row[titleIndex] || "",
         content: row[contentIndex] || "",
         displayName: row[displayNameIndex] || customer?.email || "Verified customer",
-        verifiedPurchase: parseCsvBoolean(
-          verifiedPurchaseIndex !== undefined ? row[verifiedPurchaseIndex] : undefined
-        ),
+        verifiedPurchase:
+          verifiedPurchaseIndex !== undefined
+            ? parseCsvBoolean(row[verifiedPurchaseIndex])
+            : true,
         reviewDate: parsedReviewDate ?? new Date(),
         status: nextStatus,
         publishedAt: nextStatus === "PUBLISHED" ? parsedReviewDate ?? new Date() : null,
@@ -1090,9 +1208,19 @@ export async function generateAiReviewsAction(formData: FormData) {
   const productSlug = toPlainString(formData.get("productSlug"));
   const redirectTo = toPlainString(formData.get("redirectTo"));
   const quantity = parseAiReviewQuantity(formData.get("quantity"));
+  const ratingPlanResult = buildAiReviewRatingPlan(formData, quantity);
+  const reviewDateRange = parseAiReviewDateRange(formData);
   const generationMode = toPlainString(formData.get("generationMode")) === "reference" ? "reference" : "direct";
   const referenceFile = formData.get("referenceFile");
   const openAiSettings = getOpenAiReviewSettings();
+
+  if (ratingPlanResult?.error === "mismatch") {
+    redirect(buildReviewRedirect("rating-distribution-mismatch", redirectTo, productSlug));
+  }
+
+  if (!reviewDateRange) {
+    redirect(buildReviewRedirect("invalid-date-range", redirectTo, productSlug));
+  }
 
   if (!openAiSettings.ready) {
     redirect(buildReviewRedirect("ai-not-configured", redirectTo, productSlug));
@@ -1152,14 +1280,14 @@ export async function generateAiReviewsAction(formData: FormData) {
       product,
       quantity,
       existingReviews,
-      referenceReviews
+      referenceReviews,
+      requiredRatings: ratingPlanResult?.ratings || undefined
     });
 
-    const now = new Date();
-    let createIndex = 0;
+    const reviewDates = createRandomReviewDates(quantity, reviewDateRange.start, reviewDateRange.end);
 
-    for (const draft of drafts) {
-      const createdAt = new Date(now.getTime() + createIndex * 1000);
+    for (const [index, draft] of drafts.entries()) {
+      const createdAt = reviewDates[index] || new Date();
       await prisma.productReview.create({
         data: {
           productId: product.id,
@@ -1169,7 +1297,7 @@ export async function generateAiReviewsAction(formData: FormData) {
           displayName: draft.displayName,
           reviewDate: createdAt,
           status: "PENDING",
-          verifiedPurchase: false,
+          verifiedPurchase: true,
           adminNotes: referenceReviews.length
             ? `AI generated with ${referenceReviews.length} uploaded reference reviews.`
             : "AI generated directly from product context, with no reference file.",
@@ -1177,7 +1305,6 @@ export async function generateAiReviewsAction(formData: FormData) {
           createdAt
         }
       });
-      createIndex += 1;
     }
   } catch {
     redirect(buildReviewRedirect("ai-failed", redirectTo, product.slug));

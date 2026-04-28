@@ -115,6 +115,14 @@ export type OrderItemRecord = {
   imageUrl: string;
 };
 
+export type OrderActivityLogRecord = {
+  id: string;
+  eventType: string;
+  summary: string;
+  detail: string | null;
+  createdAt: Date;
+};
+
 export type OrderRecord = {
   id: string;
   orderNumber: string;
@@ -151,6 +159,15 @@ export type OrderRecord = {
   createdAt: Date;
   updatedAt: Date;
   items: OrderItemRecord[];
+  activityLogs?: OrderActivityLogRecord[];
+};
+
+export type AdminOrderPageRecord = {
+  orders: OrderRecord[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
 };
 
 export type CouponRecord = {
@@ -312,6 +329,7 @@ export type OmbClaimRecord = {
   extraBottleAddress: string | null;
   giftSent: boolean;
   giftSentAt: Date | null;
+  reviewStepSubmittedAt: Date | null;
   adminNote: string | null;
   completedAt: Date | null;
   createdAt: Date;

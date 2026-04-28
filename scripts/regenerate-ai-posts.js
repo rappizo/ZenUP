@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { PrismaClient } = require("@prisma/client");
+const { normalizeDatabaseEnv } = require("./database-env");
 
 function loadDotEnv() {
   const envPath = path.join(process.cwd(), ".env");
@@ -41,19 +42,21 @@ function loadDotEnv() {
 
 loadDotEnv();
 
-const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL || "https://api.openai.com/v1";
+const env = normalizeDatabaseEnv(process.env);
+
+const OPENAI_API_BASE_URL = env.OPENAI_API_BASE_URL || "https://api.openai.com/v1";
 const OPENAI_POST_MODEL =
-  process.env.OPENAI_POST_MODEL || process.env.OPENAI_EMAIL_MODEL || "gpt-5.4-mini";
-const OPENAI_POST_IMAGE_MODEL = process.env.OPENAI_POST_IMAGE_MODEL || "gpt-image-1";
+  env.OPENAI_POST_MODEL || env.OPENAI_EMAIL_MODEL || "gpt-5.4-mini";
+const OPENAI_POST_IMAGE_MODEL = env.OPENAI_POST_IMAGE_MODEL || "gpt-image-1";
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.VERCEL_URL ||
+  env.NEXT_PUBLIC_SITE_URL ||
+  env.VERCEL_URL ||
   "http://localhost:3000";
-const DATABASE_URL = (!process.env.VERCEL && process.env.DIRECT_URL) || process.env.DATABASE_URL;
-const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
+const DATABASE_URL = env.SUPABASE_POOLER_6543_URL || env.SUPABASE_POOLER_5432_URL;
+const OPENAI_API_KEY = (env.OPENAI_API_KEY || "").trim();
 
 if (!DATABASE_URL) {
-  throw new Error("DATABASE_URL or DIRECT_URL is required.");
+  throw new Error("SUPABASE_POOLER_6543_URL or SUPABASE_POOLER_5432_URL is required.");
 }
 
 if (!OPENAI_API_KEY) {

@@ -23,7 +23,7 @@ Focused ZenUP brand website for a professional NAD+ supplement storefront, built
 npm install
 ```
 
-4. Point `DATABASE_URL` and `DIRECT_URL` to your Postgres database, then generate the schema and starter data:
+4. Point `SUPABASE_POOLER_6543_URL` and `SUPABASE_POOLER_5432_URL` to your Postgres database, then generate the schema and starter data:
 
 ```bash
 npm run db:push
@@ -45,7 +45,7 @@ npm run dev
 
 ## Vercel deployment
 
-1. Add `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SITE_URL`, Stripe variables, and admin credentials to your deployment environment.
+1. Add `SUPABASE_POOLER_6543_URL`, `SUPABASE_POOLER_5432_URL`, `NEXT_PUBLIC_SITE_URL`, Stripe variables, and admin credentials to your deployment environment.
 2. Deploy the repository.
 
 The repo includes [`vercel.json`](./vercel.json), so Vercel will automatically run:

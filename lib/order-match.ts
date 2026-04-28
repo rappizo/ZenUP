@@ -76,7 +76,10 @@ export function validateOrderId(platform: OrderMatchPlatform, rawOrderId: string
   }
 }
 
-export function getOrderMatchErrorMessage(error: string | null | undefined) {
+export function getOrderMatchErrorMessage(
+  error: string | null | undefined,
+  processLabel = "OMB claim"
+) {
   if (error === "missing") {
     return "Please complete Order ID, Name, and Email before continuing.";
   }
@@ -94,11 +97,11 @@ export function getOrderMatchErrorMessage(error: string | null | undefined) {
   }
 
   if (error === "duplicate-order") {
-    return "We already have a completed OMB claim for this order ID. If you have any questions, please contact us.";
+    return `We already have a completed ${processLabel} for this order ID. If you have any questions, please contact us.`;
   }
 
   if (error === "duplicate-email") {
-    return "We already have a completed OMB claim for this email. If you have any questions, please contact us.";
+    return `We already have a completed ${processLabel} for this email. If you have any questions, please contact us.`;
   }
 
   return null;

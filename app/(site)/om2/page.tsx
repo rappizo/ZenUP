@@ -10,8 +10,8 @@ type OrderMatchStepTwoPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Order Match Step 2",
-  description: "Verified order details and ready for the next order-match step."
+  title: "OMB Claim Step 2",
+  description: "Choose your purchased ZenUP product and share your review details for the OMB claim."
 };
 
 export default async function OrderMatchStepTwoPage({
@@ -52,6 +52,7 @@ export default async function OrderMatchStepTwoPage({
             name={claim.name}
             email={claim.email}
             phone={claim.phone}
+            submitAction="/api/om2"
             productOptions={productOptions.map((product) => ({
               id: product.id,
               name: product.name,
