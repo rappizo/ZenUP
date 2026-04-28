@@ -36,15 +36,95 @@ function shouldAutoSyncAudience(audienceType: EmailAudienceType, settings: Retur
   }
 }
 
+function resolveForcedFallbackListIds(
+  audienceType: EmailAudienceType,
+  settings: ReturnType<typeof getBrevoSettings>
+) {
+  const configuredListIds = Array.from(
+    new Set(
+      [settings.contactListId, settings.customersListId, settings.subscribersListId].filter(
+        (value): value is number => typeof value === "number"
+      )
+    )
+  );
+
+  if (configuredListIds.length === 0) {
+    return [];
+  }
+
+  switch (audienceType) {
+    case "LEADS":
+      return [settings.contactListId, settings.customersListId, settings.subscribersListId].filter(
+        (value): value is number => typeof value === "number"
+      );
+    case "CUSTOMERS":
+      return [settings.customersListId, settings.subscribersListId, settings.contactListId].filter(
+        (value): value is number => typeof value === "number"
+      );
+    case "NEWSLETTER":
+      return [settings.subscribersListId, settings.customersListId, settings.contactListId].filter(
+        (value): value is number => typeof value === "number"
+      );
+    case "ALL_MARKETING":
+    case "CUSTOM":
+    default:
+      return configuredListIds;
+  }
+}
+
+function splitNameParts(input: {
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
+}) {
+  const firstName = (input.firstName || "").trim();
+  const lastName = (input.lastName || "").trim();
+
+  if (firstName || lastName) {
+    return {
+      firstName: firstName || null,
+      lastName: lastName || null
+    };
+  }
+
+  const fullName = (input.fullName || "").trim();
+
+  if (!fullName) {
+    return {
+      firstName: null,
+      lastName: null
+    };
+  }
+
+  const parts = fullName.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return {
+      firstName: parts[0] || null,
+      lastName: null
+    };
+  }
+
+  return {
+    firstName: parts[0] || null,
+    lastName: parts.slice(1).join(" ") || null
+  };
+}
+
 export async function syncEmailMarketingContact(input: {
   email: string;
   audienceType: EmailAudienceType;
   customListIds?: string | null;
+  force?: boolean;
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
+  source?: string | null;
 }) {
   const settingsMap = await loadStoreSettingsMap();
   const brevoSettings = getBrevoSettings(settingsMap);
 
-  if (!shouldAutoSyncAudience(input.audienceType, brevoSettings)) {
+  if (!(input.force && brevoSettings.apiKeyConfigured) && !shouldAutoSyncAudience(input.audienceType, brevoSettings)) {
     return {
       synced: false,
       skipped: true
@@ -52,17 +132,30 @@ export async function syncEmailMarketingContact(input: {
   }
 
   const listIds = resolveAudienceListIds(input.audienceType, brevoSettings, input.customListIds);
+  const fallbackListIds = input.force ? resolveForcedFallbackListIds(input.audienceType, brevoSettings) : [];
+  const targetListIds = listIds.length > 0 ? listIds : fallbackListIds;
 
-  if (listIds.length === 0) {
+  if (targetListIds.length === 0) {
     return {
       synced: false,
       skipped: true
     };
   }
 
+  if (input.force && listIds.length === 0 && fallbackListIds.length > 0) {
+    console.warn("Brevo audience-specific list missing. Using fallback list ids instead.", {
+      audienceType: input.audienceType,
+      fallbackListIds
+    });
+  }
+
+  const nameParts = splitNameParts(input);
+
   return upsertBrevoContact({
     settings: brevoSettings,
-    email: input.email,
-    listIds
+    email: input.email.trim().toLowerCase(),
+    listIds: targetListIds,
+    firstName: nameParts.firstName,
+    lastName: nameParts.lastName
   });
 }

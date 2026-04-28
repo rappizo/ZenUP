@@ -1,4 +1,5 @@
 import { saveEmailSettingsAction } from "@/app/admin/actions";
+import { getBrevoSettings } from "@/lib/brevo";
 import { getStoreSettings } from "@/lib/queries";
 
 type AdminEmailPageProps = {
@@ -7,22 +8,53 @@ type AdminEmailPageProps = {
 
 export default async function AdminEmailPage({ searchParams }: AdminEmailPageProps) {
   const [settings, params] = await Promise.all([getStoreSettings(), searchParams]);
+  const brevoSettings = getBrevoSettings(settings);
+  const emailEnabled = (settings.email_enabled || "false") === "true";
+  const smtpReady = Boolean(
+    settings.smtp_host &&
+      settings.smtp_port &&
+      settings.smtp_user &&
+      settings.smtp_pass &&
+      settings.email_from_address
+  );
+  const activeDeliveryProvider =
+    !emailEnabled
+      ? "Email disabled"
+      : brevoSettings.apiKeyConfigured && brevoSettings.senderEmail
+        ? "Brevo transactional"
+        : smtpReady
+          ? "Fallback SMTP"
+          : "Not configured";
 
   return (
     <div className="admin-page">
       <div className="admin-page__header">
         <p className="eyebrow">Email</p>
-        <h1>Configure SMTP email delivery for contact forms and customer account messages.</h1>
+        <h1>Configure ZenUP email delivery with Brevo first and SMTP only as a fallback.</h1>
         <p>
-          Once configured, the site can send contact notifications, auto-replies, and account
-          emails such as checkout-created login credentials.
+          Transactional emails now prioritize Brevo whenever a sender and API key are available.
+          SMTP settings remain here as a backup path for contact, subscription, and account emails.
         </p>
+        <div className="stack-row">
+          <span className="pill">Active delivery: {activeDeliveryProvider}</span>
+          <span className="pill">
+            Brevo sender: {brevoSettings.senderEmail || "Not configured"}
+          </span>
+          <span className="pill">
+            SMTP fallback: {smtpReady ? "Ready" : "Not ready"}
+          </span>
+        </div>
       </div>
 
       {params.status === "saved" ? <p className="notice">Email settings were saved.</p> : null}
 
       <section className="admin-form">
         <h2>Email delivery settings</h2>
+        <p className="form-note">
+          Brevo sender details are managed on the Email Marketing page. The values saved here still
+          provide the default from address and the SMTP fallback path if Brevo transactional delivery
+          is unavailable.
+        </p>
         <form action={saveEmailSettingsAction}>
           <div className="admin-form__grid">
             <label className="field field--checkbox">

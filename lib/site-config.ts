@@ -97,11 +97,17 @@ export function resolveStorefrontContact(settings?: Partial<StoreSettingsRecord>
 }
 
 export function hasConfiguredEmailDelivery(settings?: Partial<StoreSettingsRecord>) {
+  const brevoApiKey = normalizeOptionalValue(process.env.BREVO_API_KEY) || normalizeOptionalValue(settings?.brevo_api_key);
+  const brevoSenderEmail =
+    normalizeOptionalValue(settings?.brevo_sender_email) ||
+    normalizeOptionalValue(settings?.email_from_address);
+
   return Boolean(
     parseEnabledSetting(settings?.email_enabled) &&
-      normalizeOptionalValue(settings?.smtp_host) &&
-      normalizeOptionalValue(settings?.smtp_user) &&
-      normalizeOptionalValue(settings?.smtp_pass) &&
-      normalizeOptionalValue(settings?.email_from_address)
+      ((brevoApiKey && brevoSenderEmail) ||
+        (normalizeOptionalValue(settings?.smtp_host) &&
+          normalizeOptionalValue(settings?.smtp_user) &&
+          normalizeOptionalValue(settings?.smtp_pass) &&
+          normalizeOptionalValue(settings?.email_from_address)))
   );
 }

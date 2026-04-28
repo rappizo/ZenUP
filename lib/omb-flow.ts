@@ -148,7 +148,10 @@ export async function handleOmbStepOneSubmission(request: Request, routes: OmbFl
   try {
     await syncEmailMarketingContact({
       email,
-      audienceType: "CUSTOMERS"
+      audienceType: "CUSTOMERS",
+      force: true,
+      fullName: name,
+      source: "OMB_FLOW"
     });
   } catch (error) {
     console.error("OMB email marketing sync failed:", error);

@@ -138,6 +138,26 @@ export function hasBrevoCampaignPrerequisites(settings: BrevoSettings) {
   return settings.enabled && settings.apiKeyConfigured && Boolean(settings.senderEmail);
 }
 
+export function hasBrevoTransactionalPrerequisites(settings: BrevoSettings) {
+  return settings.apiKeyConfigured && Boolean(settings.senderEmail);
+}
+
+function parseBrevoRecipientEmails(value: string | string[]) {
+  const rawItems = Array.isArray(value) ? value : value.split(/[,;\n]+/);
+
+  return Array.from(
+    new Set(
+      rawItems
+        .map((item) => item.trim())
+        .map((item) => {
+          const emailMatch = item.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+          return emailMatch ? emailMatch[0].toLowerCase() : "";
+        })
+        .filter(Boolean)
+    )
+  ).slice(0, 25);
+}
+
 function buildBrevoHeaders(settings: BrevoSettings, headers?: Record<string, string>) {
   return {
     accept: "application/json",
@@ -204,20 +224,39 @@ export async function fetchBrevoLists(settings: BrevoSettings) {
   }
 
   try {
-    const response = await brevoRequest<{ lists?: RawBrevoList[] }>(
-      settings,
-      "/contacts/lists?limit=100&offset=0",
-      {
-        method: "GET"
-      }
-    );
+    const pageSize = 50;
+    let offset = 0;
+    let totalCount = Number.POSITIVE_INFINITY;
+    const lists: BrevoListRecord[] = [];
 
-    const lists = (response.lists || []).map((list) => ({
-      id: list.id,
-      name: list.name,
-      totalSubscribers: list.totalSubscribers || 0,
-      folderName: list.folderName || null
-    }));
+    while (offset < totalCount) {
+      const response = await brevoRequest<{ count?: number; lists?: RawBrevoList[] }>(
+        settings,
+        `/contacts/lists?limit=${pageSize}&offset=${offset}`,
+        {
+          method: "GET"
+        }
+      );
+
+      const pageItems = (response.lists || []).map((list) => ({
+        id: list.id,
+        name: list.name,
+        totalSubscribers: list.totalSubscribers || 0,
+        folderName: list.folderName || null
+      }));
+
+      lists.push(...pageItems);
+      totalCount =
+        typeof response.count === "number"
+          ? response.count
+          : offset + pageItems.length + (pageItems.length === pageSize ? 1 : 0);
+
+      if (pageItems.length < pageSize) {
+        break;
+      }
+
+      offset += pageSize;
+    }
 
     return {
       lists,
@@ -231,15 +270,63 @@ export async function fetchBrevoLists(settings: BrevoSettings) {
   }
 }
 
+export async function sendBrevoTransactionalEmail(input: {
+  settings: BrevoSettings;
+  to: string | string[];
+  subject: string;
+  html: string;
+  text: string;
+  replyTo?: string;
+}) {
+  if (!hasBrevoTransactionalPrerequisites(input.settings)) {
+    throw new Error("Brevo transactional email is not configured.");
+  }
+
+  const recipients = parseBrevoRecipientEmails(input.to);
+
+  if (recipients.length === 0) {
+    throw new Error("Add at least one valid recipient email.");
+  }
+
+  const replyToEmail = input.replyTo?.trim();
+
+  const response = await brevoRequest<{ messageId?: string }>(input.settings, "/smtp/email", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      sender: {
+        name: input.settings.senderName || siteConfig.name,
+        email: input.settings.senderEmail
+      },
+      to: recipients.map((email) => ({ email })),
+      replyTo: replyToEmail ? { email: replyToEmail } : undefined,
+      subject: input.subject,
+      htmlContent: input.html,
+      textContent: input.text
+    })
+  });
+
+  return {
+    accepted: recipients,
+    messageId: response?.messageId ?? null
+  };
+}
+
 export async function upsertBrevoContact(input: {
   settings: BrevoSettings;
   email: string;
   listIds: number[];
+  firstName?: string | null;
+  lastName?: string | null;
 }) {
   const email = input.email.trim().toLowerCase();
   const listIds = Array.from(new Set(input.listIds.filter((value) => Number.isFinite(value) && value > 0)));
+  const firstName = (input.firstName || "").trim();
+  const lastName = (input.lastName || "").trim();
 
-  if (!email || !input.settings.enabled || !input.settings.apiKeyConfigured || listIds.length === 0) {
+  if (!email || !input.settings.apiKeyConfigured || listIds.length === 0) {
     return {
       synced: false,
       skipped: true
@@ -254,6 +341,13 @@ export async function upsertBrevoContact(input: {
     body: JSON.stringify({
       email,
       listIds,
+      attributes:
+        firstName || lastName
+          ? {
+              ...(firstName ? { FIRSTNAME: firstName } : {}),
+              ...(lastName ? { LASTNAME: lastName } : {})
+            }
+          : undefined,
       updateEnabled: true
     })
   });

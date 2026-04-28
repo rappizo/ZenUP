@@ -64,7 +64,7 @@ export default async function AdminEmailMarketingPage({
           <strong>{formatNumber(overview.campaignCount)}</strong>
           <span>Campaign drafts</span>
           <span>
-            Synced {formatNumber(overview.syncedCampaignCount)} · Scheduled {formatNumber(overview.scheduledCampaignCount)} · Sent{" "}
+            Synced {formatNumber(overview.syncedCampaignCount)} | Scheduled {formatNumber(overview.scheduledCampaignCount)} | Sent{" "}
             {formatNumber(overview.sentCampaignCount)}
           </span>
         </div>
@@ -75,12 +75,13 @@ export default async function AdminEmailMarketingPage({
           <div>
             <h2>Brevo connection</h2>
             <p className="form-note">
-              Keep transactional SMTP on the separate Email page. This section controls marketing
-              audiences and campaign delivery through Brevo.
+              Brevo now covers campaign delivery and is also preferred for transactional email.
+              The toggle below controls audience sync. The separate Email page keeps the SMTP fallback
+              configuration available if needed.
             </p>
           </div>
           <div className="stack-row">
-            <span className="pill">{brevoSettings.enabled ? "Brevo enabled" : "Brevo disabled"}</span>
+            <span className="pill">{brevoSettings.enabled ? "Audience sync enabled" : "Audience sync disabled"}</span>
             <span className="pill">
               API key: {brevoSettings.apiKeyConfigured ? `configured via ${brevoSettings.apiKeySource}` : "missing"}
             </span>

@@ -56,7 +56,10 @@ export async function registerCustomerAction(formData: FormData) {
     try {
       await syncEmailMarketingContact({
         email,
-        audienceType: "CUSTOMERS"
+        audienceType: "CUSTOMERS",
+        firstName,
+        lastName,
+        source: "ACCOUNT_REGISTER"
       });
     } catch (error) {
       console.error("Brevo customer sync failed:", error);
