@@ -19,7 +19,7 @@ type CanonicalProductPageProps = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const product = await getProductBySlug(LEGACY_PRODUCT_SLUG);
-  const imageUrl = product ? getDefaultProductImageUrl(product.slug) ?? product.imageUrl : "/icon.svg";
+  const imageUrl = product ? product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg" : "/icon.svg";
 
   return {
     title: PRODUCT_LANDING_SEO_TITLE,

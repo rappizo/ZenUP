@@ -14,7 +14,8 @@ import {
 import {
   getDefaultProductImageUrl,
   getLocalProductGallery,
-  getProductDetailImages
+  getProductDetailImages,
+  mergeProductImageUrls
 } from "@/lib/product-media";
 import { siteConfig } from "@/lib/site-config";
 import type { ProductRecord, ProductReviewRecord } from "@/lib/types";
@@ -154,8 +155,8 @@ type ProductLandingPageProps = {
 export function ProductLandingPage({ product, reviews, query }: ProductLandingPageProps) {
   const galleryImages = getLocalProductGallery(product.slug);
   const detailImages = getProductDetailImages(product.slug);
-  const heroImage = getDefaultProductImageUrl(product.slug) ?? product.imageUrl;
-  const displayGallery = galleryImages.length > 0 ? galleryImages : [heroImage];
+  const heroImage = product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg";
+  const displayGallery = mergeProductImageUrls(heroImage, product.galleryImages, galleryImages);
   const savingsCents = getSavingsCents(product.compareAtPriceCents, product.priceCents);
   const averageRating =
     typeof product.averageRating === "number"

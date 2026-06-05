@@ -15,7 +15,8 @@ import {
 import {
   getDefaultProductImageUrl,
   getLocalProductGallery,
-  getProductDetailImages
+  getProductDetailImages,
+  mergeProductImageUrls
 } from "@/lib/product-media";
 import { siteConfig } from "@/lib/site-config";
 import type { ProductRecord, ProductReviewRecord } from "@/lib/types";
@@ -160,8 +161,8 @@ export function NmnLandingPage({
   const product = productsBySize[selectedSize];
   const galleryImages = getLocalProductGallery(product.slug);
   const detailImages = getProductDetailImages(product.slug);
-  const heroImage = getDefaultProductImageUrl(product.slug) ?? product.imageUrl;
-  const displayGallery = galleryImages.length > 0 ? galleryImages : [heroImage];
+  const heroImage = product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg";
+  const displayGallery = mergeProductImageUrls(heroImage, product.galleryImages, galleryImages);
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length

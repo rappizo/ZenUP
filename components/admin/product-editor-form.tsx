@@ -59,8 +59,10 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
         ) : null}
       </div>
 
-      <form action={action}>
+      <form action={action} encType="multipart/form-data">
         {product ? <input type="hidden" name="id" value={product.id} /> : null}
+        <input type="hidden" name="imageUrl" value={product?.imageUrl ?? ""} />
+        <input type="hidden" name="galleryImages" value={product?.galleryImages.join("\n") ?? ""} />
 
         <div className="admin-form__grid">
           <div className="field">
@@ -150,14 +152,18 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
             />
           </div>
           <div className="field">
-            <label htmlFor="imageUrl">Main image URL</label>
+            <label htmlFor="productImages">Product images</label>
             <input
-              id="imageUrl"
-              name="imageUrl"
-              defaultValue={product?.imageUrl ?? ""}
-              placeholder="/media/product/folder/0.png"
-              required
+              id="productImages"
+              name="productImages"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif"
+              multiple
+              required={mode === "create"}
             />
+            <p className="form-note">
+              Select one or more local images. The first selected image becomes the main image.
+            </p>
           </div>
           <div className="field">
             <label htmlFor="stripePriceId">Stripe price ID</label>
@@ -200,17 +206,6 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
         <div className="field">
           <label htmlFor="details">Detail bullets</label>
           <textarea id="details" name="details" defaultValue={product?.details ?? ""} required />
-        </div>
-
-        <div className="field">
-          <label htmlFor="galleryImages">Gallery image URLs</label>
-          <textarea
-            id="galleryImages"
-            name="galleryImages"
-            defaultValue={product?.galleryImages.join("\n") ?? ""}
-            placeholder={"/media/product/folder/0.png\n/media/product/folder/1.png"}
-          />
-          <p className="form-note">Add one image URL per line. The first line can match the main image.</p>
         </div>
 
         <div className="stack-row">

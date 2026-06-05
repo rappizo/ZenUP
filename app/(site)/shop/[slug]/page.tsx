@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   if (isNmnVariantSlug(slug)) {
     const product = await getProductBySlug(slug);
-    const imageUrl = product ? getDefaultProductImageUrl(product.slug) ?? product.imageUrl : "/icon.svg";
+    const imageUrl = product ? product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg" : "/icon.svg";
 
     return {
       title: NMN_PRODUCT_SEO_TITLE,
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
-  const imageUrl = getDefaultProductImageUrl(product.slug) ?? product.imageUrl;
+  const imageUrl = product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg";
 
   return {
     title: PRODUCT_LANDING_SEO_TITLE,

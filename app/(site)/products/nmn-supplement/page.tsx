@@ -39,7 +39,7 @@ async function loadNmnProducts() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const product = await getProductBySlug(NMN_PRIMARY_PRODUCT_SLUG);
-  const imageUrl = product ? getDefaultProductImageUrl(product.slug) ?? product.imageUrl : "/icon.svg";
+  const imageUrl = product ? product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg" : "/icon.svg";
 
   return {
     title: NMN_PRODUCT_SEO_TITLE,

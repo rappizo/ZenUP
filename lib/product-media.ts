@@ -45,6 +45,16 @@ const PRODUCT_MEDIA_PRESETS: Record<
   }
 };
 
+function normalizeProductMediaSlug(slug: string) {
+  return String(slug || "")
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+}
+
 export function getProductImageRoot() {
   const singular = path.join(process.cwd(), "images", "product image");
   const plural = path.join(process.cwd(), "images", "product images");
@@ -66,7 +76,26 @@ export function buildProductMediaUrl(folderPath: string | string[], fileName: st
 }
 
 export function getProductMediaFolder(slug: string) {
-  return PRODUCT_MEDIA_FOLDERS[slug] ?? null;
+  const fallbackFolder = normalizeProductMediaSlug(slug);
+  return PRODUCT_MEDIA_FOLDERS[slug] ?? (fallbackFolder ? [fallbackFolder] : null);
+}
+
+export function mergeProductImageUrls(primaryImage: string, ...imageGroups: string[][]) {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+
+  for (const imageUrl of [primaryImage, ...imageGroups.flat()]) {
+    const normalizedImageUrl = imageUrl.trim();
+
+    if (!normalizedImageUrl || seen.has(normalizedImageUrl)) {
+      continue;
+    }
+
+    seen.add(normalizedImageUrl);
+    merged.push(normalizedImageUrl);
+  }
+
+  return merged;
 }
 
 function getExistingProductMediaFileNames(slug: string, fileNames: string[]) {
@@ -165,6 +194,10 @@ export function getProductSupplementFactsImageUrl(slug: string) {
 function getMimeTypeForFileName(fileName: string) {
   if (/\.png$/i.test(fileName)) {
     return "image/png";
+  }
+
+  if (/\.avif$/i.test(fileName)) {
+    return "image/avif";
   }
 
   if (/\.webp$/i.test(fileName)) {

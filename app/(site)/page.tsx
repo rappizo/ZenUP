@@ -129,7 +129,7 @@ type HomePageProps = {
 };
 
 function getProductImage(product: ProductRecord) {
-  return getDefaultProductImageUrl(product.slug) ?? product.imageUrl;
+  return product.imageUrl || getDefaultProductImageUrl(product.slug) || "/icon.svg";
 }
 
 function getReviewsForProduct(reviews: ProductReviewRecord[], productId: string) {

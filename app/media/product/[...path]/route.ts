@@ -8,6 +8,7 @@ const contentTypes: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+  ".avif": "image/avif",
   ".svg": "image/svg+xml"
 };
 
@@ -25,12 +26,12 @@ export async function GET(_: Request, { params }: ProductMediaRouteProps) {
     return new NextResponse("Invalid path.", { status: 400 });
   }
 
-  const root = getProductImageRoot();
+  const root = path.resolve(getProductImageRoot());
   const folderSegments = segments.slice(0, -1);
   const fileName = segments[segments.length - 1];
-  const targetPath = path.normalize(path.join(root, ...folderSegments, fileName));
+  const targetPath = path.resolve(root, ...folderSegments, fileName);
 
-  if (!targetPath.startsWith(root)) {
+  if (targetPath !== root && !targetPath.startsWith(`${root}${path.sep}`)) {
     return new NextResponse("Invalid path.", { status: 400 });
   }
 

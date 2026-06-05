@@ -1,6 +1,8 @@
 "use server";
 
-import { randomInt } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -26,6 +28,11 @@ import {
 } from "@/lib/admin-auth";
 import { normalizeCouponCode, parseCouponScopeInput, serializeCouponScope } from "@/lib/coupons";
 import { generateAiReviewDrafts, getOpenAiReviewSettings } from "@/lib/openai-reviews";
+import {
+  buildProductMediaUrl,
+  getProductImageRoot,
+  getProductMediaFolder
+} from "@/lib/product-media";
 import { CANONICAL_PRODUCT_PATH } from "@/lib/product-landing";
 import { ensureProductCodes, getNextProductCode } from "@/lib/product-codes";
 import { parseReviewReferenceFile } from "@/lib/review-reference-file";
@@ -68,6 +75,131 @@ function buildProductPriceData(formData: FormData) {
   return {
     priceCents,
     compareAtPriceCents: compareAtPriceCents > priceCents ? compareAtPriceCents : null
+  };
+}
+
+const productImageUploadField = "productImages";
+const allowedProductImageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif"]);
+const productImageExtensionsByType: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/avif": ".avif"
+};
+
+function isUploadedProductImage(value: FormDataEntryValue): value is File {
+  return (
+    typeof value !== "string" &&
+    typeof value.name === "string" &&
+    value.name.trim().length > 0 &&
+    value.size > 0 &&
+    typeof value.arrayBuffer === "function"
+  );
+}
+
+function parseImageUrlList(value: FormDataEntryValue | string | null | undefined) {
+  return normalizeMultilineValue(typeof value === "undefined" ? null : value)
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function mergeImageUrls(...groups: Array<string | string[] | null | undefined>) {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+
+  for (const group of groups) {
+    const values = Array.isArray(group) ? group : group ? [group] : [];
+
+    for (const value of values) {
+      const imageUrl = value.trim();
+
+      if (!imageUrl || seen.has(imageUrl)) {
+        continue;
+      }
+
+      seen.add(imageUrl);
+      merged.push(imageUrl);
+    }
+  }
+
+  return merged;
+}
+
+function getProductImageExtension(file: File) {
+  const originalExtension = path.extname(file.name).toLowerCase();
+
+  if (allowedProductImageExtensions.has(originalExtension)) {
+    return originalExtension === ".jpeg" ? ".jpg" : originalExtension;
+  }
+
+  return productImageExtensionsByType[file.type.toLowerCase()] ?? null;
+}
+
+function getProductUploadFolder(slug: string) {
+  const normalizedSlug = slugify(slug) || "product";
+  return getProductMediaFolder(normalizedSlug) ?? [normalizedSlug];
+}
+
+async function saveUploadedProductImages(formData: FormData, slug: string) {
+  const files = formData.getAll(productImageUploadField).filter(isUploadedProductImage);
+
+  if (files.length === 0) {
+    return [];
+  }
+
+  const folderPath = getProductUploadFolder(slug);
+  const root = path.resolve(getProductImageRoot());
+  const targetDirectory = path.resolve(root, ...folderPath);
+
+  if (targetDirectory !== root && !targetDirectory.startsWith(`${root}${path.sep}`)) {
+    throw new Error("Invalid product image upload path.");
+  }
+
+  await mkdir(targetDirectory, { recursive: true });
+
+  const uploadStamp = Date.now().toString(36);
+  const uploadedUrls: string[] = [];
+
+  for (const [index, file] of files.entries()) {
+    const extension = getProductImageExtension(file);
+
+    if (!extension) {
+      continue;
+    }
+
+    const originalName = slugify(path.basename(file.name, path.extname(file.name))) || "image";
+    const fileName = `${String(index + 1).padStart(2, "0")}-${originalName}-${uploadStamp}-${randomUUID().slice(0, 8)}${extension}`;
+    const filePath = path.join(targetDirectory, fileName);
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    await writeFile(filePath, buffer);
+    uploadedUrls.push(buildProductMediaUrl(folderPath, fileName));
+  }
+
+  return uploadedUrls;
+}
+
+async function buildProductImageData(
+  formData: FormData,
+  fallback?: {
+    imageUrl: string;
+    galleryImages: string | null;
+  } | null
+) {
+  const slug = toPlainString(formData.get("slug")) || slugify(toPlainString(formData.get("name")));
+  const uploadedUrls = await saveUploadedProductImages(formData, slug);
+  const existingImageUrl = toPlainString(formData.get("imageUrl")) || fallback?.imageUrl || "";
+  const existingGalleryImages = parseImageUrlList(formData.get("galleryImages"));
+  const fallbackGalleryImages = existingGalleryImages.length > 0
+    ? existingGalleryImages
+    : parseImageUrlList(fallback?.galleryImages);
+  const imageUrl = uploadedUrls[0] || existingImageUrl || fallbackGalleryImages[0] || "/icon.svg";
+  const galleryImages = mergeImageUrls(imageUrl, uploadedUrls, fallbackGalleryImages);
+
+  return {
+    imageUrl,
+    galleryImages: galleryImages.length > 0 ? galleryImages.join("\n") : null
   };
 }
 
@@ -511,6 +643,7 @@ export async function createProductAction(formData: FormData) {
   await ensureProductCodes();
   const prices = buildProductPriceData(formData);
   const productCode = await getNextProductCode();
+  const images = await buildProductImageData(formData);
 
   const product = await prisma.product.create({
     data: {
@@ -524,8 +657,8 @@ export async function createProductAction(formData: FormData) {
       shortDescription: toPlainString(formData.get("shortDescription")),
       description: toPlainString(formData.get("description")),
       details: toPlainString(formData.get("details")),
-      imageUrl: toPlainString(formData.get("imageUrl")),
-      galleryImages: normalizeMultilineValue(formData.get("galleryImages")) || null,
+      imageUrl: images.imageUrl,
+      galleryImages: images.galleryImages,
       featured: toBool(formData.get("featured")),
       status: (toPlainString(formData.get("status")) || "DRAFT") as ProductStatus,
       inventory: toInt(formData.get("inventory")),
@@ -549,10 +682,13 @@ export async function updateProductAction(formData: FormData) {
   const existingProduct = await prisma.product.findUnique({
     where: { id },
     select: {
-      slug: true
+      slug: true,
+      imageUrl: true,
+      galleryImages: true
     }
   });
   const prices = buildProductPriceData(formData);
+  const images = await buildProductImageData(formData, existingProduct);
 
   const product = await prisma.product.update({
     where: { id },
@@ -566,8 +702,8 @@ export async function updateProductAction(formData: FormData) {
       shortDescription: toPlainString(formData.get("shortDescription")),
       description: toPlainString(formData.get("description")),
       details: toPlainString(formData.get("details")),
-      imageUrl: toPlainString(formData.get("imageUrl")),
-      galleryImages: normalizeMultilineValue(formData.get("galleryImages")) || null,
+      imageUrl: images.imageUrl,
+      galleryImages: images.galleryImages,
       featured: toBool(formData.get("featured")),
       status: (toPlainString(formData.get("status")) || "DRAFT") as ProductStatus,
       inventory: toInt(formData.get("inventory")),
