@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PendingSubmitButton } from "@/components/admin/pending-submit-button";
 import type { ProductRecord } from "@/lib/types";
 import { formatCurrency, formatCurrencyInput, getSavingsCents } from "@/lib/format";
 
@@ -59,7 +60,7 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
         ) : null}
       </div>
 
-      <form action={action} encType="multipart/form-data">
+      <form action={action}>
         {product ? <input type="hidden" name="id" value={product.id} /> : null}
         <input type="hidden" name="imageUrl" value={product?.imageUrl ?? ""} />
         <input type="hidden" name="galleryImages" value={product?.galleryImages.join("\n") ?? ""} />
@@ -159,10 +160,9 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
               type="file"
               accept="image/png,image/jpeg,image/webp,image/avif"
               multiple
-              required={mode === "create"}
             />
             <p className="form-note">
-              Select one or more local images. The first selected image becomes the main image.
+              Select one or more local images when ready. The first selected image becomes the main image.
             </p>
           </div>
           <div className="field">
@@ -209,9 +209,12 @@ export function ProductEditorForm({ action, mode, product }: ProductEditorFormPr
         </div>
 
         <div className="stack-row">
-          <button type="submit" className="button button--primary">
-            {mode === "create" ? "Create product" : "Save product"}
-          </button>
+          <PendingSubmitButton
+            idleLabel={mode === "create" ? "Create product" : "Save product"}
+            pendingLabel={mode === "create" ? "Creating..." : "Saving..."}
+            modalTitle={mode === "create" ? "Creating product" : "Saving product"}
+            modalDescription="Uploading local images and saving the product details."
+          />
         </div>
       </form>
 
